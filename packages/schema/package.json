@@ -1,0 +1,37 @@
+{
+  "name": "@post-embed/schema",
+  "type": "module",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Standard Schema validation and repair for embedded posts",
+  "license": "MIT",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "test": "pnpm run test:runtime && pnpm run test:types",
+    "test:runtime": "vitest run --bail 1",
+    "test:types": "vitest run --typecheck.only --bail 1"
+  },
+  "dependencies": {
+    "@post-embed/types": "workspace:*",
+    "@standard-schema/spec": "1.1.0",
+    "valibot": "1.4.2"
+  },
+  "devDependencies": {
+    "tsdown": "^0.23.0",
+    "typescript": "^6.0.3",
+    "vitest": "^5.0.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "types": "./dist/index.d.ts",
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    }
+  }
+}

@@ -30,6 +30,9 @@ jobs:
       - name: Typecheck
         run: pnpm run typecheck
 
+      - name: Validate tweet schemas
+        run: pnpm --filter @post-embed/schema test
+
       - name: Check upstream tweet types
         run: pnpm --filter @post-embed/types test
 
