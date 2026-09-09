@@ -1,0 +1,10 @@
+packages:
+  - website
+  - examples/*
+  - packages/*
+  - apps/*
+
+linkWorkspacePackages: deep
+ignoreWorkspaceRootCheck: true
+allowBuilds:
+  esbuild: false

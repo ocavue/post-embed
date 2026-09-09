@@ -1,0 +1,20 @@
+{
+  "name": "@starter-monorepo/docs",
+  "type": "module",
+  "version": "0.0.1",
+  "private": true,
+  "description": "A docs site",
+  "scripts": {
+    "dev": "astro dev --port 3002",
+    "build": "astro build",
+    "preview": "astro preview --port 3002",
+    "astro": "astro",
+    "postinstall": "astro sync"
+  },
+  "dependencies": {
+    "@astrojs/starlight": "^0.42.0",
+    "astro": "^7.3.1",
+    "sharp": "^0.35.0",
+    "starlight-theme-nova": "^0.12.3"
+  }
+}

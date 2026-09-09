@@ -1,0 +1,21 @@
+{
+  "name": "@starter-monorepo/api",
+  "type": "module",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Backend tRPC API implementation",
+  "main": "index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {},
+  "dependencies": {
+    "@starter-monorepo/utils": "workspace:*",
+    "@trpc/server": "^11.18.0",
+    "uuid": "^14.0.0",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.3"
+  }
+}
