@@ -1,6 +1,3 @@
-// Source: https://github.com/vercel/react-tweet/blob/react-tweet@3.3.1/packages/react-tweet/src/api/types/entities.ts
-// Source: https://github.com/vercel/react-tweet/blob/react-tweet@3.3.1/packages/react-tweet/src/utils.ts
-
 import * as v from 'valibot'
 
 import { PairSchema, StringSchema, object } from './primitives.js'

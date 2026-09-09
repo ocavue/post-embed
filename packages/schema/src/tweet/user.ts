@@ -1,5 +1,3 @@
-// Source: https://github.com/vercel/react-tweet/blob/react-tweet@3.3.1/packages/react-tweet/src/api/types/user.ts
-
 import * as v from 'valibot'
 
 import { BooleanSchema, StringSchema, object } from './primitives.js'

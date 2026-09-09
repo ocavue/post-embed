@@ -48,4 +48,4 @@ pnpm --filter @post-embed/schema test
 pnpm --filter @post-embed/schema build
 ```
 
-Runtime tests cover defaults, union selection, optional fields, and input/output independence. Type tests compare naturally inferred schema outputs with the independent `@post-embed/types` declarations. Source comments identify the upstream definitions by Git tag.
+Runtime tests cover defaults, union selection, optional fields, and input/output independence. Type tests compare naturally inferred schema outputs with the independent `@post-embed/types` declarations. The schemas are based on the types in `@post-embed/types`.

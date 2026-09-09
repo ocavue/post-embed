@@ -1,7 +1,3 @@
-// Source: https://github.com/vercel/react-tweet/blob/react-tweet@3.3.1/packages/react-tweet/src/api/types/tweet.ts
-// Source: https://github.com/vercel/react-tweet/blob/react-tweet@3.3.1/packages/react-tweet/src/api/types/edit.ts
-// Source: https://github.com/vercel/react-tweet/blob/react-tweet@3.3.1/packages/react-tweet/src/utils.ts
-
 import * as v from 'valibot'
 
 import { EntitySchema, TweetEntitiesSchema } from './entities.js'

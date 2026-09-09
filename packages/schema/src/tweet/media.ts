@@ -1,7 +1,3 @@
-// Source: https://github.com/vercel/react-tweet/blob/react-tweet@3.3.1/packages/react-tweet/src/api/types/media.ts
-// Source: https://github.com/vercel/react-tweet/blob/react-tweet@3.3.1/packages/react-tweet/src/api/types/photo.ts
-// Source: https://github.com/vercel/react-tweet/blob/react-tweet@3.3.1/packages/react-tweet/src/api/types/video.ts
-
 import * as v from 'valibot'
 
 import { NumberSchema, PairSchema, StringSchema, object } from './primitives.js'
