@@ -1,7 +1,7 @@
 import type { StandardSchemaV1 } from '@standard-schema/spec'
 import { describe, expect, test } from 'vitest'
 
-import { enrichedTweetSchema, tweetSchema } from '../src/index.js'
+import { enrichedTweetSchema, tweetSchema } from '../index.js'
 
 import { enriched, raw } from './fixtures.js'
 

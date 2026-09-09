@@ -10,9 +10,7 @@
   },
   "scripts": {
     "build": "tsdown",
-    "test": "pnpm run test:runtime && pnpm run test:types",
-    "test:runtime": "vitest run --bail 1",
-    "test:types": "vitest run --typecheck.only --bail 1"
+    "test": "vitest run --typecheck --bail 1"
   },
   "dependencies": {
     "@post-embed/types": "workspace:*",

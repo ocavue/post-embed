@@ -3,8 +3,9 @@ import type { StandardSchemaV1 } from '@standard-schema/spec'
 import type * as v from 'valibot'
 import { expectTypeOf, test } from 'vitest'
 
-import type { enrichedTweetSchema, tweetSchema } from '../src/index.js'
-import type { EnrichedTweetSchema, TweetSchema } from '../src/tweet/tweet.js'
+import type { EnrichedTweetSchema, TweetSchema } from './tweet/tweet.js'
+
+import type { enrichedTweetSchema, tweetSchema } from './index.js'
 
 test('schemas match the independent upstream types', () => {
   expectTypeOf<v.InferOutput<typeof TweetSchema>>().toEqualTypeOf<Tweet>()
