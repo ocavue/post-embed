@@ -1,12 +1,12 @@
 import type * as v from 'valibot'
 import { expectTypeOf, test } from 'vitest'
 
-import type { TweetEditControl} from '../../../types/src/tweet/edit.js'
+import type { TweetEditControl } from '@post-embed/types/internal/tweet/edit'
 
-import type { TweetEditControlSchema } from './edit.js'
+import type { TweetEditControlSchema } from './edit.ts' // FIXME: use ./edit.ts instead of ./edit.js
 
 test('TweetEditControlSchema', () => {
-  expectTypeOf<
-    v.InferOutput<typeof TweetEditControlSchema>
-  >().toEqualTypeOf<TweetEditControl>()
+  expectTypeOf<v.InferOutput<typeof TweetEditControlSchema>>().toEqualTypeOf<TweetEditControl>()
 })
+
+// FIXME: use this pattern to rewite all *.test-d.ts files under schema/src/tweet/. we want the test to be super close to the schema file, and the test file should be 1-to-1 with the schema file.
