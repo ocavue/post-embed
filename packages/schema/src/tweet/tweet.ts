@@ -1,85 +1,55 @@
 import * as v from 'valibot'
 
-import { EntitySchema, TweetEntitiesSchema } from './entities.js'
-import {
-  MediaDetailsSchema,
-  TweetPhotoSchema,
-  TweetVideoSchema,
-} from './media.js'
-import {
-  BooleanSchema,
-  NumberSchema,
-  PairSchema,
-  StringSchema,
-} from './primitives.js'
+import { TweetEditControlSchema } from './edit.js'
+import { IndicesSchema, TweetEntitiesSchema } from './entities.js'
+import { MediaDetailsSchema } from './media.js'
+import { TweetPhotoSchema } from './photo.js'
 import { TweetUserSchema } from './user.js'
+import { TweetVideoSchema } from './video.js'
 
-const TweetBaseEntries = {
-  lang: StringSchema,
-  created_at: StringSchema,
-  display_text_range: PairSchema,
+export const TweetBaseSchema = v.object({
+  lang: v.fallback(v.string(), ''),
+  created_at: v.fallback(v.string(), ''),
+  display_text_range: IndicesSchema,
   entities: v.optional(TweetEntitiesSchema),
-  id_str: StringSchema,
-  text: StringSchema,
+  id_str: v.fallback(v.string(), ''),
+  text: v.fallback(v.string(), ''),
   user: TweetUserSchema,
-  edit_control: v.object({
-    edit_tweet_ids: v.fallback(v.array(StringSchema), () => []),
-    editable_until_msecs: StringSchema,
-    is_edit_eligible: BooleanSchema,
-    edits_remaining: StringSchema,
-  }),
-  isEdited: BooleanSchema,
-  isStaleEdit: BooleanSchema,
-  note_tweet: v.optional(v.object({ id: StringSchema })),
-}
-const QuotedTweetEntries = {
-  ...TweetBaseEntries,
-  reply_count: NumberSchema,
-  retweet_count: NumberSchema,
-  favorite_count: NumberSchema,
-  mediaDetails: v.optional(v.fallback(v.array(MediaDetailsSchema), () => [])),
-  self_thread: v.object({ id_str: StringSchema }),
-}
-const QuotedTweetSchema = v.object(QuotedTweetEntries)
-const TweetParentSchema = v.object({
-  ...TweetBaseEntries,
-  reply_count: NumberSchema,
-  retweet_count: NumberSchema,
-  favorite_count: NumberSchema,
+  edit_control: TweetEditControlSchema,
+  isEdited: v.fallback(v.boolean(), false),
+  isStaleEdit: v.fallback(v.boolean(), false),
+  note_tweet: v.optional(v.object({ id: v.fallback(v.string(), '') })),
 })
-const TweetEntries = {
-  ...TweetBaseEntries,
+
+export const TweetParentSchema = v.object({
+  ...TweetBaseSchema.entries,
+  reply_count: v.fallback(v.pipe(v.number(), v.finite()), 0),
+  retweet_count: v.fallback(v.pipe(v.number(), v.finite()), 0),
+  favorite_count: v.fallback(v.pipe(v.number(), v.finite()), 0),
+})
+
+export const QuotedTweetSchema = v.object({
+  ...TweetBaseSchema.entries,
+  reply_count: v.fallback(v.pipe(v.number(), v.finite()), 0),
+  retweet_count: v.fallback(v.pipe(v.number(), v.finite()), 0),
+  favorite_count: v.fallback(v.pipe(v.number(), v.finite()), 0),
+  mediaDetails: v.optional(v.fallback(v.array(MediaDetailsSchema), () => [])),
+  self_thread: v.object({ id_str: v.fallback(v.string(), '') }),
+})
+
+export const TweetSchema = v.object({
+  ...TweetBaseSchema.entries,
   __typename: v.fallback(v.literal('Tweet'), 'Tweet'),
-  favorite_count: NumberSchema,
+  favorite_count: v.fallback(v.pipe(v.number(), v.finite()), 0),
   mediaDetails: v.optional(v.fallback(v.array(MediaDetailsSchema), () => [])),
   photos: v.optional(v.fallback(v.array(TweetPhotoSchema), () => [])),
   video: v.optional(TweetVideoSchema),
-  conversation_count: NumberSchema,
+  conversation_count: v.fallback(v.pipe(v.number(), v.finite()), 0),
   news_action_type: v.fallback(v.literal('conversation'), 'conversation'),
   quoted_tweet: v.optional(QuotedTweetSchema),
-  in_reply_to_screen_name: v.optional(StringSchema),
-  in_reply_to_status_id_str: v.optional(StringSchema),
-  in_reply_to_user_id_str: v.optional(StringSchema),
+  in_reply_to_screen_name: v.optional(v.fallback(v.string(), '')),
+  in_reply_to_status_id_str: v.optional(v.fallback(v.string(), '')),
+  in_reply_to_user_id_str: v.optional(v.fallback(v.string(), '')),
   parent: v.optional(TweetParentSchema),
-  possibly_sensitive: v.optional(BooleanSchema),
-}
-export const TweetSchema = v.object(TweetEntries)
-const EnrichedQuotedTweetSchema = v.intersect([
-  v.omit(v.object(QuotedTweetEntries), ['entities']),
-  v.object({
-    url: StringSchema,
-    entities: v.fallback(v.array(EntitySchema), () => []),
-  }),
-])
-export const EnrichedTweetSchema = v.intersect([
-  v.omit(v.object(TweetEntries), ['entities', 'quoted_tweet']),
-  v.object({
-    url: StringSchema,
-    user: v.object({ url: StringSchema, follow_url: StringSchema }),
-    like_url: StringSchema,
-    reply_url: StringSchema,
-    in_reply_to_url: v.optional(StringSchema),
-    entities: v.fallback(v.array(EntitySchema), () => []),
-    quoted_tweet: v.optional(EnrichedQuotedTweetSchema),
-  }),
-])
+  possibly_sensitive: v.optional(v.fallback(v.boolean(), false)),
+})

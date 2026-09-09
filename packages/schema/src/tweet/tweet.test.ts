@@ -1,4 +1,7 @@
+import { readFileSync, readdirSync } from 'node:fs'
+
 import type { StandardSchemaV1 } from '@standard-schema/spec'
+import * as ts from 'typescript'
 import { describe, expect, test } from 'vitest'
 
 import { enrichedTweetSchema, tweetSchema } from '../index.js'
@@ -487,5 +490,65 @@ test('exposes native Standard Schema results', async () => {
     const result = await schema['~standard'].validate(minimal)
     expect(result).toHaveProperty('value')
     expect(result.issues).toBeUndefined()
+  }
+})
+
+test('schema definition files and names mirror the type declarations', () => {
+  const typesRoot = new URL('../../../types/src/', import.meta.url)
+  const schemasRoot = new URL('../', import.meta.url)
+  function definitionFiles(root: URL) {
+    return readdirSync(root, { recursive: true, encoding: 'utf8' })
+      .filter((path) => {
+        return (
+          path.endsWith('.ts') &&
+          !/\.test(?:-d)?\.ts$/.test(path) &&
+          !path.endsWith('/fixtures.ts')
+        )
+      })
+      .sort()
+  }
+  const files = definitionFiles(typesRoot)
+  expect(definitionFiles(schemasRoot)).toEqual(files)
+  for (const file of files) {
+    const typesFile = ts.createSourceFile(
+      file,
+      readFileSync(new URL(file, typesRoot), 'utf8'),
+      ts.ScriptTarget.Latest,
+    )
+    const declarations = typesFile.statements.filter((statement) => {
+      return (
+        ts.isTypeAliasDeclaration(statement) ||
+        ts.isInterfaceDeclaration(statement)
+      )
+    })
+    if (declarations.length === 0) continue
+    const schemasFile = ts.createSourceFile(
+      file,
+      readFileSync(new URL(file, schemasRoot), 'utf8'),
+      ts.ScriptTarget.Latest,
+    )
+    const actual = schemasFile.statements.flatMap((statement) => {
+      if (!ts.isVariableStatement(statement)) return []
+      return statement.declarationList.declarations.map((declaration) => ({
+        name: declaration.name.getText(schemasFile),
+        exported:
+          statement.modifiers?.some(
+            (modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword,
+          ) ?? false,
+      }))
+    })
+    const expected = declarations.map((declaration) => ({
+      name: `${declaration.name.text}Schema`,
+      exported:
+        declaration.modifiers?.some(
+          (modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword,
+        ) ?? false,
+    }))
+    expect(
+      actual.sort((left, right) => left.name.localeCompare(right.name)),
+      file,
+    ).toEqual(
+      expected.sort((left, right) => left.name.localeCompare(right.name)),
+    )
   }
 })

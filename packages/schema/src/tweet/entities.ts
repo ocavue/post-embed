@@ -1,28 +1,48 @@
 import * as v from 'valibot'
 
-import { PairSchema, StringSchema } from './primitives.js'
+export const IndicesSchema = v.fallback(
+  v.pipe(
+    v.array(v.unknown()),
+    v.length(2),
+    v.strictTuple([
+      v.fallback(v.pipe(v.number(), v.finite()), 0),
+      v.fallback(v.pipe(v.number(), v.finite()), 0),
+    ]),
+  ),
+  () => [0, 0],
+)
 
 export const HashtagEntitySchema = v.object({
-  indices: PairSchema,
-  text: StringSchema,
+  indices: IndicesSchema,
+  text: v.fallback(v.string(), ''),
 })
-export const SymbolEntitySchema = v.object({
-  indices: PairSchema,
-  text: StringSchema,
-})
-export const UrlEntitySchema = v.object({
-  display_url: StringSchema,
-  expanded_url: StringSchema,
-  indices: PairSchema,
-  url: StringSchema,
-})
-export const MediaEntitySchema = UrlEntitySchema
+
 export const UserMentionEntitySchema = v.object({
-  id_str: StringSchema,
-  indices: PairSchema,
-  name: StringSchema,
-  screen_name: StringSchema,
+  id_str: v.fallback(v.string(), ''),
+  indices: IndicesSchema,
+  name: v.fallback(v.string(), ''),
+  screen_name: v.fallback(v.string(), ''),
 })
+
+export const MediaEntitySchema = v.object({
+  display_url: v.fallback(v.string(), ''),
+  expanded_url: v.fallback(v.string(), ''),
+  indices: IndicesSchema,
+  url: v.fallback(v.string(), ''),
+})
+
+export const UrlEntitySchema = v.object({
+  display_url: v.fallback(v.string(), ''),
+  expanded_url: v.fallback(v.string(), ''),
+  indices: IndicesSchema,
+  url: v.fallback(v.string(), ''),
+})
+
+export const SymbolEntitySchema = v.object({
+  indices: IndicesSchema,
+  text: v.fallback(v.string(), ''),
+})
+
 export const TweetEntitiesSchema = v.object({
   hashtags: v.fallback(v.array(HashtagEntitySchema), () => []),
   urls: v.fallback(v.array(UrlEntitySchema), () => []),
@@ -30,30 +50,3 @@ export const TweetEntitiesSchema = v.object({
   symbols: v.fallback(v.array(SymbolEntitySchema), () => []),
   media: v.optional(v.fallback(v.array(MediaEntitySchema), () => [])),
 })
-
-export const EntitySchema = v.intersect([
-  v.object({ text: StringSchema }),
-  v.union([
-    v.object({ type: v.literal('text'), indices: PairSchema }),
-    v.intersect([
-      HashtagEntitySchema,
-      v.object({ type: v.literal('hashtag'), href: StringSchema }),
-    ]),
-    v.intersect([
-      UserMentionEntitySchema,
-      v.object({ type: v.literal('mention'), href: StringSchema }),
-    ]),
-    v.intersect([
-      UrlEntitySchema,
-      v.object({ type: v.literal('url'), href: StringSchema }),
-    ]),
-    v.intersect([
-      MediaEntitySchema,
-      v.object({ type: v.literal('media'), href: StringSchema }),
-    ]),
-    v.intersect([
-      SymbolEntitySchema,
-      v.object({ type: v.literal('symbol'), href: StringSchema }),
-    ]),
-  ]),
-])

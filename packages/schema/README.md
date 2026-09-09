@@ -41,6 +41,12 @@ Required objects such as `user` and `edit_control` must be present. `{}` and `nu
 
 Inputs are JSON-shaped data. Parsing does not mutate them, default arrays are fresh per call, and parsing the output again preserves it. Standard issues retain Valibot's native messages and paths.
 
+## Type correspondence
+
+Definition files under `src/` mirror `packages/types/src/`. Each named type `X` has an `XSchema` in the same relative file, with matching module export visibility. For example, `IndicesSchema` lives in `tweet/entities.ts`, `TweetEditControlSchema` in `tweet/edit.ts`, and enriched schemas in `tweet/enriched-tweet.ts`. Anonymous nested types have inline schemas.
+
+Tests check file/name correspondence and exact inferred output types for every exported type. Runtime tests and their fixtures remain under `src/`; they are test support, not mirrored type definitions.
+
 ## Development
 
 ```sh
