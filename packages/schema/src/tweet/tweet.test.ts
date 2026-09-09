@@ -75,10 +75,11 @@ describe('type defaults', () => {
         })
         expect(
           result.issues?.some((issue) => {
-            return issue.path?.some((segment) => { return typeof segment === 'object'
+            return issue.path?.some((segment) => {
+              return typeof segment === 'object'
                 ? segment.key === key
-                : segment === key },
-            )
+                : segment === key
+            })
           }),
         ).toBe(true)
       }
