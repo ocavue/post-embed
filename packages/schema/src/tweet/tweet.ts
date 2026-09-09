@@ -1,11 +1,11 @@
 import * as v from 'valibot'
 
-import { TweetEditControlSchema } from './edit.js'
-import { IndicesSchema, TweetEntitiesSchema } from './entities.js'
-import { MediaDetailsSchema } from './media.js'
-import { TweetPhotoSchema } from './photo.js'
-import { TweetUserSchema } from './user.js'
-import { TweetVideoSchema } from './video.js'
+import { TweetEditControlSchema } from './edit.ts'
+import { IndicesSchema, TweetEntitiesSchema } from './entities.ts'
+import { MediaDetailsSchema } from './media.ts'
+import { TweetPhotoSchema } from './photo.ts'
+import { TweetUserSchema } from './user.ts'
+import { TweetVideoSchema } from './video.ts'
 
 export const TweetBaseSchema = v.object({
   lang: v.fallback(v.string(), ''),

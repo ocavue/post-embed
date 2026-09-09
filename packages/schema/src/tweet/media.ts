@@ -1,6 +1,6 @@
 import * as v from 'valibot'
 
-import { IndicesSchema } from './entities.js'
+import { IndicesSchema } from './entities.ts'
 
 export const RGBSchema = v.object({
   red: v.fallback(v.pipe(v.number(), v.finite()), 0),

@@ -4,9 +4,9 @@ import type { StandardSchemaV1 } from '@standard-schema/spec'
 import * as ts from 'typescript'
 import { describe, expect, test } from 'vitest'
 
-import { enrichedTweetSchema, tweetSchema } from '../index.js'
+import { enrichedTweetSchema, tweetSchema } from '../index.ts'
 
-import { enriched, raw } from './fixtures.js'
+import { enriched, raw } from './fixtures.ts'
 
 const minimal = { user: {}, edit_control: {} }
 const mediaObjects = {
@@ -510,6 +510,13 @@ test('schema definition files and names mirror the type declarations', () => {
   const files = definitionFiles(typesRoot)
   expect(definitionFiles(schemasRoot)).toEqual(files)
   for (const file of files) {
+    expect(
+      readFileSync(
+        new URL(file.replace(/\.ts$/, '.test-d.ts'), schemasRoot),
+        'utf8',
+      ),
+      file,
+    ).toContain('expectTypeOf')
     const typesFile = ts.createSourceFile(
       file,
       readFileSync(new URL(file, typesRoot), 'utf8'),

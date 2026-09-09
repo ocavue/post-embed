@@ -1,2 +1,2 @@
-export { TweetSchema } from './tweet.js'
-export { EnrichedTweetSchema } from './enriched-tweet.js'
+export { TweetSchema } from './tweet.ts'
+export { EnrichedTweetSchema } from './enriched-tweet.ts'

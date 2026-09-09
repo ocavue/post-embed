@@ -7,8 +7,8 @@ import {
   SymbolEntitySchema,
   UrlEntitySchema,
   UserMentionEntitySchema,
-} from './entities.js'
-import { QuotedTweetSchema, TweetSchema } from './tweet.js'
+} from './entities.ts'
+import { QuotedTweetSchema, TweetSchema } from './tweet.ts'
 
 const TextEntitySchema = v.object({
   indices: IndicesSchema,

@@ -45,7 +45,7 @@ Inputs are JSON-shaped data. Parsing does not mutate them, default arrays are fr
 
 Definition files under `src/` mirror `packages/types/src/`. Each named type `X` has an `XSchema` in the same relative file, with matching module export visibility. For example, `IndicesSchema` lives in `tweet/entities.ts`, `TweetEditControlSchema` in `tweet/edit.ts`, and enriched schemas in `tweet/enriched-tweet.ts`. Anonymous nested types have inline schemas.
 
-Tests check file/name correspondence and exact inferred output types for every exported type. Runtime tests and their fixtures remain under `src/`; they are test support, not mirrored type definitions.
+Each definition file has a neighboring `*.test-d.ts` file, with an individual output-type check for every exported schema. Type tests import their counterparts through `@post-embed/types/internal/...`; relative imports under `src/` use `.ts` extensions. Tests also check file/name correspondence. Runtime tests and their fixtures remain under `src/`; they are test support, not mirrored type definitions.
 
 ## Development
 

@@ -1,6 +1,6 @@
 import * as v from 'valibot'
 
-import { RectSchema, RGBSchema } from './media.js'
+import { RectSchema, RGBSchema } from './media.ts'
 
 export const TweetPhotoSchema = v.object({
   backgroundColor: RGBSchema,
