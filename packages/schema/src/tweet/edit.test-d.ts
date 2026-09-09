@@ -9,4 +9,4 @@ test('TweetEditControlSchema', () => {
   expectTypeOf<v.InferOutput<typeof TweetEditControlSchema>>().toEqualTypeOf<TweetEditControl>()
 })
 
-// FIXME: use this pattern to rewite all *.test-d.ts files under schema/src/tweet/. we want the test to be super close to the schema file, and the test file should be 1-to-1 with the schema file.
+// FIXME: use this pattern to rewite all *.test-d.ts files under schema/src/tweet/. we want the test to be super close to the schema file, and the test file should be 1-to-1 with the schema file. Apply this test for all exported schemas/types in all files.
