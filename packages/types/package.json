@@ -6,7 +6,8 @@
   "description": "Shared post embed types",
   "license": "MIT",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./internal/*": "./src/*"
   },
   "scripts": {
     "build": "tsdown",
@@ -22,10 +23,8 @@
     "access": "public",
     "types": "./dist/index.d.ts",
     "exports": {
-      ".": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.js"
-      }
+      ".": "./dist/index.js",
+      "./internal/*": "./dist/*"
     }
   }
 }
