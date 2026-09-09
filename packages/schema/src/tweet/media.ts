@@ -4,77 +4,74 @@
 
 import * as v from 'valibot'
 
-import {
-  CountSchema,
-  DimensionSchema,
-  IndicesSchema,
-  NonNegativeSchema,
-  NumberSchema,
-  RatioSchema,
-} from './primitives.js'
+import { NumberSchema, PairSchema, StringSchema, object } from './primitives.js'
 
-const ColorChannelSchema = v.pipe(CountSchema, v.maxValue(255))
-export const RGBSchema = v.object({
-  red: ColorChannelSchema,
-  green: ColorChannelSchema,
-  blue: ColorChannelSchema,
+export const RGBSchema = object({
+  red: NumberSchema,
+  green: NumberSchema,
+  blue: NumberSchema,
 })
-export const RectSchema = v.object({
+export const RectSchema = object({
   x: NumberSchema,
   y: NumberSchema,
-  w: NonNegativeSchema,
-  h: NonNegativeSchema,
+  w: NumberSchema,
+  h: NumberSchema,
 })
-export const SizeSchema = v.object({
-  h: DimensionSchema,
-  w: DimensionSchema,
-  resize: v.string(),
+export const SizeSchema = object({
+  h: NumberSchema,
+  w: NumberSchema,
+  resize: StringSchema,
 })
-export const PaletteItemSchema = v.object({
-  percentage: NonNegativeSchema,
+export const PaletteItemSchema = object({
+  percentage: NumberSchema,
   rgb: RGBSchema,
 })
-export const MediaBaseSchema = v.object({
-  display_url: v.string(),
-  expanded_url: v.string(),
-  ext_media_availability: v.object({ status: v.string() }),
-  ext_media_color: v.object({ palette: v.array(PaletteItemSchema) }),
-  indices: IndicesSchema,
-  media_url_https: v.string(),
-  original_info: v.object({
-    height: DimensionSchema,
-    width: DimensionSchema,
-    focus_rects: v.array(RectSchema),
+const MediaBaseEntries = {
+  display_url: StringSchema,
+  expanded_url: StringSchema,
+  ext_media_availability: object({ status: StringSchema }),
+  ext_media_color: object({
+    palette: v.fallback(v.array(PaletteItemSchema), () => []),
   }),
-  sizes: v.object({
+  indices: PairSchema,
+  media_url_https: StringSchema,
+  original_info: object({
+    height: NumberSchema,
+    width: NumberSchema,
+    focus_rects: v.fallback(v.array(RectSchema), () => []),
+  }),
+  sizes: object({
     large: SizeSchema,
     medium: SizeSchema,
     small: SizeSchema,
     thumb: SizeSchema,
   }),
-  url: v.string(),
+  url: StringSchema,
+}
+export const VideoVariantSchema = object({
+  bitrate: v.optional(NumberSchema),
+  content_type: v.fallback(
+    v.picklist(['video/mp4', 'application/x-mpegURL']),
+    'video/mp4',
+  ),
+  url: StringSchema,
 })
-export const VideoVariantSchema = v.object({
-  bitrate: v.optional(NonNegativeSchema),
-  content_type: v.picklist(['video/mp4', 'application/x-mpegURL']),
-  url: v.string(),
+export const VideoInfoSchema = object({
+  aspect_ratio: PairSchema,
+  variants: v.fallback(v.array(VideoVariantSchema), () => []),
 })
-export const VideoInfoSchema = v.object({
-  aspect_ratio: RatioSchema,
-  variants: v.array(VideoVariantSchema),
-})
-export const MediaPhotoSchema = v.object({
-  ...MediaBaseSchema.entries,
+const MediaPhotoSchema = v.object({
+  ...MediaBaseEntries,
   type: v.literal('photo'),
-  ext_alt_text: v.optional(v.string()),
+  ext_alt_text: v.optional(StringSchema),
 })
-export const MediaVideoSchema = v.object({
-  ...MediaBaseSchema.entries,
+const MediaVideoSchema = v.object({
+  ...MediaBaseEntries,
   type: v.literal('video'),
   video_info: VideoInfoSchema,
 })
-export const MediaAnimatedGifSchema = v.object({
-  ...MediaBaseSchema.entries,
+const MediaAnimatedGifSchema = v.object({
+  ...MediaBaseEntries,
   type: v.literal('animated_gif'),
   video_info: VideoInfoSchema,
 })
@@ -83,25 +80,25 @@ export const MediaDetailsSchema = v.variant('type', [
   MediaVideoSchema,
   MediaAnimatedGifSchema,
 ])
-export const TweetPhotoSchema = v.object({
+export const TweetPhotoSchema = object({
   backgroundColor: RGBSchema,
-  cropCandidates: v.array(RectSchema),
-  expandedUrl: v.string(),
-  url: v.string(),
-  width: DimensionSchema,
-  height: DimensionSchema,
+  cropCandidates: v.fallback(v.array(RectSchema), () => []),
+  expandedUrl: StringSchema,
+  url: StringSchema,
+  width: NumberSchema,
+  height: NumberSchema,
 })
-export const LegacyVideoVariantSchema = v.object({
-  type: v.string(),
-  src: v.string(),
+export const LegacyVideoVariantSchema = object({
+  type: StringSchema,
+  src: StringSchema,
 })
-export const TweetVideoSchema = v.object({
-  aspectRatio: RatioSchema,
-  contentType: v.string(),
-  durationMs: NonNegativeSchema,
-  mediaAvailability: v.object({ status: v.string() }),
-  poster: v.string(),
-  variants: v.array(LegacyVideoVariantSchema),
-  videoId: v.object({ type: v.string(), id: v.string() }),
-  viewCount: CountSchema,
+export const TweetVideoSchema = object({
+  aspectRatio: PairSchema,
+  contentType: StringSchema,
+  durationMs: NumberSchema,
+  mediaAvailability: object({ status: StringSchema }),
+  poster: StringSchema,
+  variants: v.fallback(v.array(LegacyVideoVariantSchema), () => []),
+  videoId: object({ type: StringSchema, id: StringSchema }),
+  viewCount: NumberSchema,
 })

@@ -1,39 +1,45 @@
 # @post-embed/schema
 
-Validate and repair raw `Tweet` and `EnrichedTweet` data through [Standard Schema V1](https://github.com/standard-schema/standard-schema). The output types come from `@post-embed/types`; Valibot is an internal implementation detail.
+Normalize raw `Tweet` and `EnrichedTweet` data to the types in `@post-embed/types` through [Standard Schema V1](https://github.com/standard-schema/standard-schema).
 
 ```ts
 import { tweetSchema } from '@post-embed/schema'
 
-async function readTweet(input: unknown) {
-  const result = await tweetSchema['~standard'].validate(input)
-  if (result.issues) {
-    return { issues: result.issues }
-  }
-  return { tweet: result.value }
+const result = await tweetSchema['~standard'].validate(input)
+if (result.issues) {
+  // Handle validation failure.
+} else {
+  const tweet = result.value
 }
 ```
 
-Use `enrichedTweetSchema` for an enriched object. Choose the input representation explicitly; the schemas do not fetch tweets or run full enrichment.
+Use `enrichedTweetSchema` for enriched input. Both exports use Valibot's native Standard Schema implementation, with vendor `valibot`. The public TypeScript contract is Standard Schema; there are no repair reports or parsing options.
 
-For repair details, use `tweetWithRepairsSchema` or `enrichedTweetWithRepairsSchema`. Their Standard Schema success value is `{ data, repairs }`. All four schemas share the same validation and repair policies. Issues indicate failure; successful repairs are not reported as issues.
+## Defaults
 
-## Repair policy
+Missing or invalid values use defaults declared directly in the field schemas:
 
-- Missing or null collections become fresh empty arrays. Missing raw entities become an object containing empty entity arrays.
-- Invalid collection containers fail validation. Invalid individual raw entities or media items are dropped, preserving valid siblings and recording their original paths.
-- Missing or invalid enriched entities fall back to the visible raw text using Unicode code point ranges. Valid empty arrays are preserved.
-- Missing display ranges are derived from the text. Supplied invalid ranges are rejected.
-- Missing counts and verification/edit flags use zero/false compatibility defaults. Missing edit controls disable editing. These defaults are reported and are not evidence of the original values.
-- Missing enriched action URLs are derived from validated IDs and handles. Existing string URLs are preserved.
-- Invalid optional fields and unrecoverable parent/quoted tweets are omitted with a repair record.
-- Unknown fields are removed with a repair record. The output is not a lossless copy of the API response.
+| Type            | Default                                                                       |
+| --------------- | ----------------------------------------------------------------------------- |
+| string          | `''`, including IDs, text, dates, and URLs                                    |
+| finite number   | `0`, also used for NaN and Infinity                                           |
+| boolean         | `false`                                                                       |
+| array           | `[]`                                                                          |
+| numeric pair    | `[0, 0]` for an invalid container or length; invalid elements default to `0`  |
+| literal         | The declared literal                                                          |
+| enum            | An explicit member, such as `Circle` for avatar shape                         |
+| required object | An object with defaults for its fields                                        |
+| optional field  | Missing or undefined stays optional; supplied values use the field's defaults |
 
-Tweet identity, author identity, text, and creation time must be present and valid. Empty text is valid; an empty object or tombstone is not a tweet. Numeric tweet IDs are rejected because converting them to strings cannot recover lost precision.
+Valid strings, finite numbers, and booleans are preserved. There is no ID/date/URL format validation, positive-number restriction, range check, or scalar coercion. Unknown object keys are removed. Unknown verification badges become `undefined`.
 
-Parsers do not mutate inputs or share mutable output objects between calls. Parsing normalized data again yields the same data with no further repairs. Errors expose only standard messages and paths, not raw validation inputs.
+A recognized media or enriched entity discriminator selects its branch, whose fields receive defaults. An unknown or missing discriminator makes the **whole containing array** fall back to `[]`. Items are not individually filtered. Video content types default to `video/mp4` when invalid; valid HLS content types are preserved.
 
-The inputs are JSON-shaped data. URL fields are checked as strings, not as network permissions or rendering sanitization. Empty video variants satisfy the data type but do not guarantee playback. Consumers must handle empty collections and their own resource/rendering policies.
+Enriched entities default to `[]` and URLs to `''`. There is no text reconstruction, URL generation, aspect-ratio calculation, or other enrichment.
+
+Even `{}`, `null`, and non-object root inputs produce default-filled output. Successful validation means the output has the expected structure, not that a tweet exists or has usable content. Consumers decide what to display when text, IDs, URLs, dimensions, or collections are empty.
+
+Inputs are JSON-shaped data. Parsing does not mutate them, default objects and arrays are fresh per call, and parsing the output again preserves it. Standard issues retain Valibot's native messages and paths.
 
 ## Development
 
@@ -42,4 +48,4 @@ pnpm --filter @post-embed/schema test
 pnpm --filter @post-embed/schema build
 ```
 
-Runtime tests cover compatibility repairs and failures; type tests compare the naturally inferred canonical schemas with the independently maintained `@post-embed/types` declarations. Source comments identify the `react-tweet@3.3.1` definitions and enrichment rules used as references.
+Runtime tests cover defaults, union selection, optional fields, and input/output independence. Type tests compare naturally inferred schema outputs with the independent `@post-embed/types` declarations. Source comments identify the upstream definitions by Git tag.

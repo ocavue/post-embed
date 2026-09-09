@@ -2,38 +2,36 @@
 
 import * as v from 'valibot'
 
-import { IdSchema } from './primitives.js'
+import { BooleanSchema, StringSchema, object } from './primitives.js'
 
-export const ProfileImageShapeSchema = v.picklist([
+const ProfileImageShapeSchema = v.fallback(
+  v.picklist(['Circle', 'Square', 'Hexagon']),
   'Circle',
-  'Square',
-  'Hexagon',
-])
-export const UserHighlightedLabelSchema = v.object({
-  description: v.optional(v.string()),
-  badge: v.optional(v.object({ url: v.string() })),
+)
+export const UserHighlightedLabelSchema = object({
+  description: v.optional(StringSchema),
+  badge: v.optional(object({ url: StringSchema })),
   url: v.optional(
-    v.object({ url: v.string(), url_type: v.literal('DeepLink') }),
+    object({
+      url: StringSchema,
+      url_type: v.fallback(v.literal('DeepLink'), 'DeepLink'),
+    }),
   ),
-  user_label_type: v.literal('BusinessLabel'),
-  user_label_display_type: v.literal('Badge'),
+  user_label_type: v.fallback(v.literal('BusinessLabel'), 'BusinessLabel'),
+  user_label_display_type: v.fallback(v.literal('Badge'), 'Badge'),
 })
-export const UserCoreSchema = v.object({
-  id_str: IdSchema,
-  name: v.string(),
-  screen_name: v.string(),
-  profile_image_url_https: v.string(),
-})
-export const TweetUserSchema = v.object({
-  ...UserCoreSchema.entries,
+export const TweetUserSchema = object({
+  id_str: StringSchema,
+  name: StringSchema,
+  screen_name: StringSchema,
+  profile_image_url_https: StringSchema,
+
   profile_image_shape: ProfileImageShapeSchema,
-  verified: v.boolean(),
-  verified_type: v.optional(v.picklist(['Business', 'Government'])),
-  is_blue_verified: v.boolean(),
+  verified: BooleanSchema,
+  verified_type: v.fallback(
+    v.optional(v.picklist(['Business', 'Government'])),
+    undefined,
+  ),
+  is_blue_verified: BooleanSchema,
   highlighted_label: v.optional(UserHighlightedLabelSchema),
-})
-export const EnrichedUserSchema = v.object({
-  ...TweetUserSchema.entries,
-  url: v.string(),
-  follow_url: v.string(),
 })

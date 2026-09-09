@@ -11,132 +11,80 @@ import {
   TweetVideoSchema,
 } from './media.js'
 import {
-  CountSchema,
-  IdSchema,
-  IndicesSchema,
-  TimestampSchema,
+  BooleanSchema,
+  NumberSchema,
+  PairSchema,
+  StringSchema,
+  object,
 } from './primitives.js'
-import { TweetUserSchema, UserCoreSchema } from './user.js'
+import { TweetUserSchema } from './user.js'
 
-export const CoreSchema = v.object({
-  id_str: IdSchema,
-  text: v.string(),
-  created_at: TimestampSchema,
-  user: UserCoreSchema,
-})
-export const TweetEditControlSchema = v.object({
-  edit_tweet_ids: v.array(IdSchema),
-  editable_until_msecs: IdSchema,
-  is_edit_eligible: v.boolean(),
-  edits_remaining: IdSchema,
-})
-export const TweetBaseSchema = v.object({
-  lang: v.string(),
-  created_at: TimestampSchema,
-  display_text_range: IndicesSchema,
+const TweetBaseEntries = {
+  lang: StringSchema,
+  created_at: StringSchema,
+  display_text_range: PairSchema,
   entities: v.optional(TweetEntitiesSchema),
-  id_str: IdSchema,
-  text: v.string(),
+  id_str: StringSchema,
+  text: StringSchema,
   user: TweetUserSchema,
-  edit_control: TweetEditControlSchema,
-  isEdited: v.boolean(),
-  isStaleEdit: v.boolean(),
-  note_tweet: v.optional(v.object({ id: v.string() })),
+  edit_control: object({
+    edit_tweet_ids: v.fallback(v.array(StringSchema), () => []),
+    editable_until_msecs: StringSchema,
+    is_edit_eligible: BooleanSchema,
+    edits_remaining: StringSchema,
+  }),
+  isEdited: BooleanSchema,
+  isStaleEdit: BooleanSchema,
+  note_tweet: v.optional(object({ id: StringSchema })),
+}
+const QuotedTweetEntries = {
+  ...TweetBaseEntries,
+  reply_count: NumberSchema,
+  retweet_count: NumberSchema,
+  favorite_count: NumberSchema,
+  mediaDetails: v.optional(v.fallback(v.array(MediaDetailsSchema), () => [])),
+  self_thread: object({ id_str: StringSchema }),
+}
+const QuotedTweetSchema = object(QuotedTweetEntries)
+const TweetParentSchema = object({
+  ...TweetBaseEntries,
+  reply_count: NumberSchema,
+  retweet_count: NumberSchema,
+  favorite_count: NumberSchema,
 })
-export const QuotedTweetObjectSchema = v.object({
-  ...TweetBaseSchema.entries,
-  reply_count: CountSchema,
-  retweet_count: CountSchema,
-  favorite_count: CountSchema,
-  mediaDetails: v.optional(v.array(MediaDetailsSchema)),
-  self_thread: v.object({ id_str: IdSchema }),
-})
-export const QuotedTweetSchema = v.pipe(
-  QuotedTweetObjectSchema,
-  v.forward(
-    v.check(
-      (tweet) => tweet.display_text_range[1] <= Array.from(tweet.text).length,
-      'Range exceeds text length',
-    ),
-    ['display_text_range'],
-  ),
-)
-export const TweetParentObjectSchema = v.object({
-  ...TweetBaseSchema.entries,
-  reply_count: CountSchema,
-  retweet_count: CountSchema,
-  favorite_count: CountSchema,
-})
-export const TweetParentSchema = v.pipe(
-  TweetParentObjectSchema,
-  v.forward(
-    v.check(
-      (tweet) => tweet.display_text_range[1] <= Array.from(tweet.text).length,
-      'Range exceeds text length',
-    ),
-    ['display_text_range'],
-  ),
-)
-export const TweetObjectSchema = v.object({
-  ...TweetBaseSchema.entries,
-  __typename: v.literal('Tweet'),
-  favorite_count: CountSchema,
-  mediaDetails: v.optional(v.array(MediaDetailsSchema)),
-  photos: v.optional(v.array(TweetPhotoSchema)),
+const TweetEntries = {
+  ...TweetBaseEntries,
+  __typename: v.fallback(v.literal('Tweet'), 'Tweet'),
+  favorite_count: NumberSchema,
+  mediaDetails: v.optional(v.fallback(v.array(MediaDetailsSchema), () => [])),
+  photos: v.optional(v.fallback(v.array(TweetPhotoSchema), () => [])),
   video: v.optional(TweetVideoSchema),
-  conversation_count: CountSchema,
-  news_action_type: v.literal('conversation'),
+  conversation_count: NumberSchema,
+  news_action_type: v.fallback(v.literal('conversation'), 'conversation'),
   quoted_tweet: v.optional(QuotedTweetSchema),
-  in_reply_to_screen_name: v.optional(v.string()),
-  in_reply_to_status_id_str: v.optional(IdSchema),
-  in_reply_to_user_id_str: v.optional(IdSchema),
+  in_reply_to_screen_name: v.optional(StringSchema),
+  in_reply_to_status_id_str: v.optional(StringSchema),
+  in_reply_to_user_id_str: v.optional(StringSchema),
   parent: v.optional(TweetParentSchema),
-  possibly_sensitive: v.optional(v.boolean()),
-})
-export const TweetSchema = v.pipe(
-  TweetObjectSchema,
-  v.forward(
-    v.check(
-      (tweet) => tweet.display_text_range[1] <= Array.from(tweet.text).length,
-      'Range exceeds text length',
-    ),
-    ['display_text_range'],
-  ),
-)
-const EnrichedQuotedTweetObjectSchema = v.intersect([
-  v.omit(QuotedTweetObjectSchema, ['entities']),
-  v.object({ url: v.string(), entities: v.array(EntitySchema) }),
+  possibly_sensitive: v.optional(BooleanSchema),
+}
+export const TweetSchema = object(TweetEntries)
+const EnrichedQuotedTweetSchema = v.intersect([
+  object(v.omit(v.object(QuotedTweetEntries), ['entities']).entries),
+  object({
+    url: StringSchema,
+    entities: v.fallback(v.array(EntitySchema), () => []),
+  }),
 ])
-export const EnrichedQuotedTweetSchema = v.pipe(
-  EnrichedQuotedTweetObjectSchema,
-  v.forward(
-    v.check(
-      (tweet) => tweet.display_text_range[1] <= Array.from(tweet.text).length,
-      'Range exceeds text length',
-    ),
-    ['display_text_range'],
-  ),
-)
-export const EnrichedTweetObjectSchema = v.intersect([
-  v.omit(TweetObjectSchema, ['entities', 'quoted_tweet']),
-  v.object({
-    url: v.string(),
-    user: v.object({ url: v.string(), follow_url: v.string() }),
-    like_url: v.string(),
-    reply_url: v.string(),
-    in_reply_to_url: v.optional(v.string()),
-    entities: v.array(EntitySchema),
+export const EnrichedTweetSchema = v.intersect([
+  object(v.omit(v.object(TweetEntries), ['entities', 'quoted_tweet']).entries),
+  object({
+    url: StringSchema,
+    user: object({ url: StringSchema, follow_url: StringSchema }),
+    like_url: StringSchema,
+    reply_url: StringSchema,
+    in_reply_to_url: v.optional(StringSchema),
+    entities: v.fallback(v.array(EntitySchema), () => []),
     quoted_tweet: v.optional(EnrichedQuotedTweetSchema),
   }),
 ])
-
-export const EnrichedTweetSchema = v.pipe(
-  EnrichedTweetObjectSchema,
-  v.forward(
-    v.check(
-      (tweet) => tweet.display_text_range[1] <= Array.from(tweet.text).length,
-      'Range exceeds text length',
-    ),
-    ['display_text_range'],
-  ),
-)

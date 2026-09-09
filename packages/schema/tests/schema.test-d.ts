@@ -3,16 +3,10 @@ import type { StandardSchemaV1 } from '@standard-schema/spec'
 import type * as v from 'valibot'
 import { expectTypeOf, test } from 'vitest'
 
-import type {
-  RepairedTweet,
-  enrichedTweetSchema,
-  enrichedTweetWithRepairsSchema,
-  tweetSchema,
-  tweetWithRepairsSchema,
-} from '../src/index.js'
+import type { enrichedTweetSchema, tweetSchema } from '../src/index.js'
 import type { EnrichedTweetSchema, TweetSchema } from '../src/tweet/tweet.js'
 
-test('canonical schemas match the independent upstream types', () => {
+test('schemas match the independent upstream types', () => {
   expectTypeOf<v.InferOutput<typeof TweetSchema>>().toEqualTypeOf<Tweet>()
   expectTypeOf<
     v.InferOutput<typeof EnrichedTweetSchema>
@@ -32,10 +26,4 @@ test('public schemas accept unknown and expose only the Standard Schema contract
   expectTypeOf<
     StandardSchemaV1.InferOutput<typeof enrichedTweetSchema>
   >().toEqualTypeOf<EnrichedTweet>()
-  expectTypeOf<
-    StandardSchemaV1.InferOutput<typeof tweetWithRepairsSchema>
-  >().toEqualTypeOf<RepairedTweet<Tweet>>()
-  expectTypeOf<
-    StandardSchemaV1.InferOutput<typeof enrichedTweetWithRepairsSchema>
-  >().toEqualTypeOf<RepairedTweet<EnrichedTweet>>()
 })

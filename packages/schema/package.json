@@ -3,7 +3,7 @@
   "type": "module",
   "version": "0.0.1",
   "private": true,
-  "description": "Standard Schema validation and repair for embedded posts",
+  "description": "Standard Schema validation with type defaults for embedded posts",
   "license": "MIT",
   "exports": {
     ".": "./src/index.ts"
