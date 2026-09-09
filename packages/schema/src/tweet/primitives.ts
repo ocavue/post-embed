@@ -11,16 +11,3 @@ export const PairSchema = v.fallback(
   ),
   () => [0, 0],
 )
-
-export function object<const Entries extends v.ObjectEntries>(
-  entries: Entries,
-) {
-  // Missing object properties need an input default to run their field schemas.
-  return v.optional(
-    v.pipe(
-      v.fallback(v.looseObject({}), () => ({})),
-      v.object(entries),
-    ),
-    () => ({}),
-  )
-}

@@ -1,29 +1,29 @@
 import * as v from 'valibot'
 
-import { PairSchema, StringSchema, object } from './primitives.js'
+import { PairSchema, StringSchema } from './primitives.js'
 
-export const HashtagEntitySchema = object({
+export const HashtagEntitySchema = v.object({
   indices: PairSchema,
   text: StringSchema,
 })
-export const SymbolEntitySchema = object({
+export const SymbolEntitySchema = v.object({
   indices: PairSchema,
   text: StringSchema,
 })
-export const UrlEntitySchema = object({
+export const UrlEntitySchema = v.object({
   display_url: StringSchema,
   expanded_url: StringSchema,
   indices: PairSchema,
   url: StringSchema,
 })
 export const MediaEntitySchema = UrlEntitySchema
-export const UserMentionEntitySchema = object({
+export const UserMentionEntitySchema = v.object({
   id_str: StringSchema,
   indices: PairSchema,
   name: StringSchema,
   screen_name: StringSchema,
 })
-export const TweetEntitiesSchema = object({
+export const TweetEntitiesSchema = v.object({
   hashtags: v.fallback(v.array(HashtagEntitySchema), () => []),
   urls: v.fallback(v.array(UrlEntitySchema), () => []),
   user_mentions: v.fallback(v.array(UserMentionEntitySchema), () => []),
@@ -32,28 +32,28 @@ export const TweetEntitiesSchema = object({
 })
 
 export const EntitySchema = v.intersect([
-  object({ text: StringSchema }),
+  v.object({ text: StringSchema }),
   v.union([
-    object({ type: v.literal('text'), indices: PairSchema }),
+    v.object({ type: v.literal('text'), indices: PairSchema }),
     v.intersect([
       HashtagEntitySchema,
-      object({ type: v.literal('hashtag'), href: StringSchema }),
+      v.object({ type: v.literal('hashtag'), href: StringSchema }),
     ]),
     v.intersect([
       UserMentionEntitySchema,
-      object({ type: v.literal('mention'), href: StringSchema }),
+      v.object({ type: v.literal('mention'), href: StringSchema }),
     ]),
     v.intersect([
       UrlEntitySchema,
-      object({ type: v.literal('url'), href: StringSchema }),
+      v.object({ type: v.literal('url'), href: StringSchema }),
     ]),
     v.intersect([
       MediaEntitySchema,
-      object({ type: v.literal('media'), href: StringSchema }),
+      v.object({ type: v.literal('media'), href: StringSchema }),
     ]),
     v.intersect([
       SymbolEntitySchema,
-      object({ type: v.literal('symbol'), href: StringSchema }),
+      v.object({ type: v.literal('symbol'), href: StringSchema }),
     ]),
   ]),
 ])

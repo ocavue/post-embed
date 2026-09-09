@@ -5,6 +5,14 @@ import { enrichedTweetSchema, tweetSchema } from '../index.js'
 
 import { enriched, raw } from './fixtures.js'
 
+const minimal = { user: {}, edit_control: {} }
+const mediaObjects = {
+  ext_media_availability: {},
+  ext_media_color: {},
+  original_info: {},
+  sizes: { large: {}, medium: {}, small: {}, thumb: {} },
+}
+
 async function parse<Output>(
   schema: StandardSchemaV1<unknown, Output>,
   input: unknown,
@@ -24,46 +32,56 @@ function freeze(input: unknown) {
 
 describe('type defaults', () => {
   test.each([{}, undefined, null, false, 42, 'tweet', []])(
-    'defaults a root input: %j',
+    'rejects missing required objects: %j',
     async (input) => {
-      const tweet = await parse(tweetSchema, input)
-      expect(tweet).toEqual({
-        __typename: 'Tweet',
-        lang: '',
-        created_at: '',
-        display_text_range: [0, 0],
-        id_str: '',
-        text: '',
-        user: {
-          id_str: '',
-          name: '',
-          screen_name: '',
-          profile_image_url_https: '',
-          profile_image_shape: 'Circle',
-          verified: false,
-          is_blue_verified: false,
-        },
-        edit_control: {
-          edit_tweet_ids: [],
-          editable_until_msecs: '',
-          is_edit_eligible: false,
-          edits_remaining: '',
-        },
-        isEdited: false,
-        isStaleEdit: false,
-        favorite_count: 0,
-        conversation_count: 0,
-        news_action_type: 'conversation',
-      })
-      const normalized = await parse(enrichedTweetSchema, input)
-      expect(normalized).toEqual({
-        ...tweet,
-        entities: [],
-        url: '',
-        like_url: '',
-        reply_url: '',
-        user: { ...tweet.user, url: '', follow_url: '' },
-      })
+      for (const schema of [tweetSchema, enrichedTweetSchema]) {
+        const result = await schema['~standard'].validate(input)
+        expect(result.issues?.length).toBeGreaterThan(0)
+      }
+    },
+  )
+
+  test('defaults fields inside supplied required objects', async () => {
+    const tweet = await parse(tweetSchema, minimal)
+    expect(tweet.user).toEqual({
+      id_str: '',
+      name: '',
+      screen_name: '',
+      profile_image_url_https: '',
+      profile_image_shape: 'Circle',
+      verified: false,
+      is_blue_verified: false,
+    })
+    expect(tweet.edit_control).toEqual({
+      edit_tweet_ids: [],
+      editable_until_msecs: '',
+      is_edit_eligible: false,
+      edits_remaining: '',
+    })
+    expect(tweet.text).toBe('')
+    expect(tweet.favorite_count).toBe(0)
+    const normalized = await parse(enrichedTweetSchema, minimal)
+    expect(normalized.entities).toEqual([])
+    expect(normalized.user).toEqual({ ...tweet.user, url: '', follow_url: '' })
+  })
+
+  test.each(['user', 'edit_control'])(
+    'reports the invalid required object path: %s',
+    async (key) => {
+      for (const value of [undefined, null, false, 123, 'invalid']) {
+        const result = await tweetSchema['~standard'].validate({
+          ...minimal,
+          [key]: value,
+        })
+        expect(
+          result.issues?.some((issue) => {
+            return issue.path?.some((segment) => { return typeof segment === 'object'
+                ? segment.key === key
+                : segment === key },
+            )
+          }),
+        ).toBe(true)
+      }
     },
   )
 
@@ -71,6 +89,7 @@ describe('type defaults', () => {
     'defaults invalid strings: %j',
     async (value) => {
       const tweet = await parse(tweetSchema, {
+        ...minimal,
         id_str: value,
         text: value,
         created_at: value,
@@ -89,7 +108,8 @@ describe('type defaults', () => {
     'defaults invalid numbers: %j',
     async (value) => {
       expect(
-        (await parse(tweetSchema, { favorite_count: value })).favorite_count,
+        (await parse(tweetSchema, { ...minimal, favorite_count: value }))
+          .favorite_count,
       ).toBe(0)
     },
   )
@@ -97,14 +117,15 @@ describe('type defaults', () => {
   test.each([undefined, null, 'true', 1, {}, []])(
     'defaults invalid booleans: %j',
     async (value) => {
-      expect((await parse(tweetSchema, { isEdited: value })).isEdited).toBe(
-        false,
-      )
+      expect(
+        (await parse(tweetSchema, { ...minimal, isEdited: value })).isEdited,
+      ).toBe(false)
     },
   )
 
   test('preserves type-valid values without extra business constraints', async () => {
     const tweet = await parse(tweetSchema, {
+      ...minimal,
       id_str: 'not-a-decimal-id',
       text: '  😀  ',
       created_at: 'not-a-date',
@@ -132,6 +153,7 @@ describe('type defaults', () => {
 
   test('defaults literals and enums without adding new members', async () => {
     const tweet = await parse(tweetSchema, {
+      ...minimal,
       __typename: 'TweetTombstone',
       news_action_type: null,
       user: {
@@ -156,7 +178,7 @@ describe('type defaults', () => {
     'preserves verified type %s',
     async (verified_type) => {
       expect(
-        (await parse(tweetSchema, { user: { verified_type } })).user
+        (await parse(tweetSchema, { ...minimal, user: { verified_type } })).user
           .verified_type,
       ).toBe(verified_type)
     },
@@ -166,7 +188,7 @@ describe('type defaults', () => {
     'defaults invalid tuple length or container: %j',
     async (value) => {
       expect(
-        (await parse(tweetSchema, { display_text_range: value }))
+        (await parse(tweetSchema, { ...minimal, display_text_range: value }))
           .display_text_range,
       ).toEqual([0, 0])
     },
@@ -174,8 +196,12 @@ describe('type defaults', () => {
 
   test('defaults tuple elements independently', async () => {
     expect(
-      (await parse(tweetSchema, { display_text_range: [false, 12] }))
-        .display_text_range,
+      (
+        await parse(tweetSchema, {
+          ...minimal,
+          display_text_range: [false, 12],
+        })
+      ).display_text_range,
     ).toEqual([0, 12])
   })
 })
@@ -184,7 +210,7 @@ describe('collections and optional fields', () => {
   test.each([{}, { entities: undefined }])(
     'preserves absent optional fields: %j',
     async (input) => {
-      const tweet = await parse(tweetSchema, input)
+      const tweet = await parse(tweetSchema, { ...minimal, ...input })
       expect(tweet.entities).toBeUndefined()
       expect(tweet.photos).toBeUndefined()
       expect(tweet.parent).toBeUndefined()
@@ -193,10 +219,12 @@ describe('collections and optional fields', () => {
     },
   )
 
-  test.each([{}, null, false, 'entities'])(
+  test.each([{}])(
     'fills a supplied raw entities object: %j',
     async (entities) => {
-      expect((await parse(tweetSchema, { entities })).entities).toEqual({
+      expect(
+        (await parse(tweetSchema, { ...minimal, entities })).entities,
+      ).toEqual({
         hashtags: [],
         urls: [],
         user_mentions: [],
@@ -209,6 +237,7 @@ describe('collections and optional fields', () => {
     'defaults required arrays: %j',
     async (value) => {
       const tweet = await parse(tweetSchema, {
+        ...minimal,
         entities: {
           hashtags: value,
           urls: value,
@@ -225,6 +254,7 @@ describe('collections and optional fields', () => {
       })
       expect(tweet.edit_control.edit_tweet_ids).toEqual([])
       const normalized = await parse(enrichedTweetSchema, {
+        ...minimal,
         entities: value,
         url: null,
       })
@@ -233,37 +263,51 @@ describe('collections and optional fields', () => {
     },
   )
 
-  test('defaults invalid supplied optional fields', async () => {
+  test('defaults optional scalars and arrays', async () => {
     const tweet = await parse(tweetSchema, {
+      ...minimal,
       photos: null,
       mediaDetails: false,
       possibly_sensitive: 'true',
       in_reply_to_status_id_str: 123,
-      parent: null,
-      quoted_tweet: {},
-      video: null,
-      note_tweet: null,
     })
     expect(tweet).toMatchObject({
       photos: [],
       mediaDetails: [],
       possibly_sensitive: false,
       in_reply_to_status_id_str: '',
-      parent: { text: '', reply_count: 0 },
-      quoted_tweet: { text: '', self_thread: { id_str: '' } },
-      video: {
-        variants: [],
-        aspectRatio: [0, 0],
-        videoId: { id: '', type: '' },
-      },
-      note_tweet: { id: '' },
     })
+  })
+
+  test.each(['entities', 'parent', 'quoted_tweet', 'video', 'note_tweet'])(
+    'rejects an invalid supplied optional object: %s',
+    async (key) => {
+      const result = await tweetSchema['~standard'].validate({
+        ...minimal,
+        [key]: null,
+      })
+      expect(result.issues?.length).toBeGreaterThan(0)
+    },
+  )
+
+  test('requires nested objects in supplied parent, quote, and video', async () => {
+    for (const key of ['parent', 'quoted_tweet', 'video']) {
+      const result = await tweetSchema['~standard'].validate({
+        ...minimal,
+        [key]: {},
+      })
+      expect(result.issues?.length).toBeGreaterThan(0)
+    }
   })
 
   test('keeps items with defaultable fields and does not derive content', async () => {
     const tweet = await parse(tweetSchema, {
-      photos: [{ url: 'first' }, { url: null }],
-      entities: { hashtags: [{ text: 'tag' }, null] },
+      ...minimal,
+      photos: [
+        { backgroundColor: {}, url: 'first' },
+        { backgroundColor: {}, url: null },
+      ],
+      entities: { hashtags: [{ text: 'tag' }, {}] },
       edit_control: { edit_tweet_ids: ['123', 456] },
     })
     expect(tweet.photos?.map((photo) => photo.url)).toEqual(['first', ''])
@@ -273,8 +317,9 @@ describe('collections and optional fields', () => {
     ])
     expect(tweet.edit_control.edit_tweet_ids).toEqual(['123', ''])
     const normalized = await parse(enrichedTweetSchema, {
+      ...minimal,
       text: 'Keep raw text',
-      quoted_tweet: null,
+      quoted_tweet: { ...minimal, self_thread: {} },
     })
     expect(normalized.text).toBe('Keep raw text')
     expect(normalized.entities).toEqual([])
@@ -291,7 +336,15 @@ describe('union selection', () => {
     'retains media type %s and fills nested metadata',
     async (type) => {
       const tweet = await parse(tweetSchema, {
-        mediaDetails: [{ type, media_url_https: 'existing' }],
+        ...minimal,
+        mediaDetails: [
+          {
+            ...mediaObjects,
+            type,
+            media_url_https: 'existing',
+            video_info: {},
+          },
+        ],
       })
       expect(tweet.mediaDetails).toHaveLength(1)
       expect(tweet.mediaDetails?.[0]).toMatchObject({
@@ -313,6 +366,7 @@ describe('union selection', () => {
     'retains enriched entity type %s',
     async (type) => {
       const tweet = await parse(enrichedTweetSchema, {
+        ...minimal,
         entities: [{ type, text: 'existing', href: 'link' }],
       })
       expect(tweet.entities).toHaveLength(1)
@@ -330,20 +384,36 @@ describe('union selection', () => {
     'defaults the whole array for an unrecognized branch: %j',
     async (invalid) => {
       const tweet = await parse(tweetSchema, {
-        mediaDetails: [{ type: 'photo' }, invalid],
+        ...minimal,
+        mediaDetails: [{ ...mediaObjects, type: 'photo' }, invalid],
       })
       expect(tweet.mediaDetails).toEqual([])
       const normalized = await parse(enrichedTweetSchema, {
+        ...minimal,
         entities: [{ type: 'text', text: 'original' }, invalid],
       })
       expect(normalized.entities).toEqual([])
     },
   )
 
+  test('defaults a containing array when an item lacks a required object', async () => {
+    const tweet = await parse(tweetSchema, {
+      ...minimal,
+      mediaDetails: [{ ...mediaObjects, type: 'photo' }, { type: 'photo' }],
+      photos: [{ url: 'missing backgroundColor' }],
+      entities: { hashtags: [null] },
+    })
+    expect(tweet.mediaDetails).toEqual([])
+    expect(tweet.photos).toEqual([])
+    expect(tweet.entities?.hashtags).toEqual([])
+  })
+
   test('preserves HLS and defaults unsupported video content types', async () => {
     const tweet = await parse(tweetSchema, {
+      ...minimal,
       mediaDetails: [
         {
+          ...mediaObjects,
           type: 'video',
           video_info: {
             variants: [
@@ -380,8 +450,8 @@ test('preserves valid fixtures and returns independent output without mutating i
 })
 
 test('defaults are fresh across calls and parsing is idempotent', async () => {
-  const first = await parse(enrichedTweetSchema, {})
-  const second = await parse(enrichedTweetSchema, {})
+  const first = await parse(enrichedTweetSchema, { ...minimal })
+  const second = await parse(enrichedTweetSchema, { ...minimal })
   expect(await parse(enrichedTweetSchema, first)).toEqual(first)
   first.entities.push({ type: 'text', text: 'changed', indices: [0, 0] })
   first.edit_control.edit_tweet_ids.push('changed')
@@ -395,6 +465,7 @@ test('defaults are fresh across calls and parsing is idempotent', async () => {
 
 test('strips unknown keys while preserving known nested values', async () => {
   const tweet = await parse(enrichedTweetSchema, {
+    ...minimal,
     extra: true,
     user: { extra: true, name: 'author', url: 'profile' },
     entities: [
@@ -412,7 +483,7 @@ test('exposes native Standard Schema results', async () => {
   for (const schema of [tweetSchema, enrichedTweetSchema]) {
     expect(schema['~standard'].version).toBe(1)
     expect(schema['~standard'].vendor).toBe('valibot')
-    const result = await schema['~standard'].validate({})
+    const result = await schema['~standard'].validate(minimal)
     expect(result).toHaveProperty('value')
     expect(result.issues).toBeUndefined()
   }

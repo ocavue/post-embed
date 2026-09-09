@@ -28,18 +28,18 @@ Missing or invalid values use defaults declared directly in the field schemas:
 | numeric pair    | `[0, 0]` for an invalid container or length; invalid elements default to `0`  |
 | literal         | The declared literal                                                          |
 | enum            | An explicit member, such as `Circle` for avatar shape                         |
-| required object | An object with defaults for its fields                                        |
+| required object | Must be present and pass `v.object`; fields may have defaults                 |
 | optional field  | Missing or undefined stays optional; supplied values use the field's defaults |
 
 Valid strings, finite numbers, and booleans are preserved. There is no ID/date/URL format validation, positive-number restriction, range check, or scalar coercion. Unknown object keys are removed. Unknown verification badges become `undefined`.
 
-A recognized media or enriched entity discriminator selects its branch, whose fields receive defaults. An unknown or missing discriminator makes the **whole containing array** fall back to `[]`. Items are not individually filtered. Video content types default to `video/mp4` when invalid; valid HLS content types are preserved.
+A recognized media or enriched entity discriminator selects its branch, whose fields receive defaults. An unknown discriminator or an item missing a required object makes the **whole containing array** fall back to `[]`. Items are not individually filtered. Video content types default to `video/mp4` when invalid; valid HLS content types are preserved.
 
 Enriched entities default to `[]` and URLs to `''`. There is no text reconstruction, URL generation, aspect-ratio calculation, or other enrichment.
 
-Even `{}`, `null`, and non-object root inputs produce default-filled output. Successful validation means the output has the expected structure, not that a tweet exists or has usable content. Consumers decide what to display when text, IDs, URLs, dimensions, or collections are empty.
+Required objects such as `user` and `edit_control` must be present. `{}` and `null` root inputs fail validation. Optional objects may be omitted, but supplied invalid objects fail validation. For example, `{ user: {}, edit_control: {} }` succeeds with field defaults; `{ user: null, edit_control: {} }` fails. Object failures are returned as Standard Schema issues, not thrown exceptions. Successful validation means the output has the expected structure, not that a tweet exists or has usable content. Consumers decide what to display when text, IDs, URLs, dimensions, or collections are empty.
 
-Inputs are JSON-shaped data. Parsing does not mutate them, default objects and arrays are fresh per call, and parsing the output again preserves it. Standard issues retain Valibot's native messages and paths.
+Inputs are JSON-shaped data. Parsing does not mutate them, default arrays are fresh per call, and parsing the output again preserves it. Standard issues retain Valibot's native messages and paths.
 
 ## Development
 

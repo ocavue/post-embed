@@ -1,42 +1,42 @@
 import * as v from 'valibot'
 
-import { NumberSchema, PairSchema, StringSchema, object } from './primitives.js'
+import { NumberSchema, PairSchema, StringSchema } from './primitives.js'
 
-export const RGBSchema = object({
+export const RGBSchema = v.object({
   red: NumberSchema,
   green: NumberSchema,
   blue: NumberSchema,
 })
-export const RectSchema = object({
+export const RectSchema = v.object({
   x: NumberSchema,
   y: NumberSchema,
   w: NumberSchema,
   h: NumberSchema,
 })
-export const SizeSchema = object({
+export const SizeSchema = v.object({
   h: NumberSchema,
   w: NumberSchema,
   resize: StringSchema,
 })
-export const PaletteItemSchema = object({
+export const PaletteItemSchema = v.object({
   percentage: NumberSchema,
   rgb: RGBSchema,
 })
 const MediaBaseEntries = {
   display_url: StringSchema,
   expanded_url: StringSchema,
-  ext_media_availability: object({ status: StringSchema }),
-  ext_media_color: object({
+  ext_media_availability: v.object({ status: StringSchema }),
+  ext_media_color: v.object({
     palette: v.fallback(v.array(PaletteItemSchema), () => []),
   }),
   indices: PairSchema,
   media_url_https: StringSchema,
-  original_info: object({
+  original_info: v.object({
     height: NumberSchema,
     width: NumberSchema,
     focus_rects: v.fallback(v.array(RectSchema), () => []),
   }),
-  sizes: object({
+  sizes: v.object({
     large: SizeSchema,
     medium: SizeSchema,
     small: SizeSchema,
@@ -44,7 +44,7 @@ const MediaBaseEntries = {
   }),
   url: StringSchema,
 }
-export const VideoVariantSchema = object({
+export const VideoVariantSchema = v.object({
   bitrate: v.optional(NumberSchema),
   content_type: v.fallback(
     v.picklist(['video/mp4', 'application/x-mpegURL']),
@@ -52,7 +52,7 @@ export const VideoVariantSchema = object({
   ),
   url: StringSchema,
 })
-export const VideoInfoSchema = object({
+export const VideoInfoSchema = v.object({
   aspect_ratio: PairSchema,
   variants: v.fallback(v.array(VideoVariantSchema), () => []),
 })
@@ -76,7 +76,7 @@ export const MediaDetailsSchema = v.variant('type', [
   MediaVideoSchema,
   MediaAnimatedGifSchema,
 ])
-export const TweetPhotoSchema = object({
+export const TweetPhotoSchema = v.object({
   backgroundColor: RGBSchema,
   cropCandidates: v.fallback(v.array(RectSchema), () => []),
   expandedUrl: StringSchema,
@@ -84,17 +84,17 @@ export const TweetPhotoSchema = object({
   width: NumberSchema,
   height: NumberSchema,
 })
-export const LegacyVideoVariantSchema = object({
+export const LegacyVideoVariantSchema = v.object({
   type: StringSchema,
   src: StringSchema,
 })
-export const TweetVideoSchema = object({
+export const TweetVideoSchema = v.object({
   aspectRatio: PairSchema,
   contentType: StringSchema,
   durationMs: NumberSchema,
-  mediaAvailability: object({ status: StringSchema }),
+  mediaAvailability: v.object({ status: StringSchema }),
   poster: StringSchema,
   variants: v.fallback(v.array(LegacyVideoVariantSchema), () => []),
-  videoId: object({ type: StringSchema, id: StringSchema }),
+  videoId: v.object({ type: StringSchema, id: StringSchema }),
   viewCount: NumberSchema,
 })

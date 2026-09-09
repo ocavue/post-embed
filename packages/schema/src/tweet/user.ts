@@ -1,16 +1,16 @@
 import * as v from 'valibot'
 
-import { BooleanSchema, StringSchema, object } from './primitives.js'
+import { BooleanSchema, StringSchema } from './primitives.js'
 
 const ProfileImageShapeSchema = v.fallback(
   v.picklist(['Circle', 'Square', 'Hexagon']),
   'Circle',
 )
-export const UserHighlightedLabelSchema = object({
+export const UserHighlightedLabelSchema = v.object({
   description: v.optional(StringSchema),
-  badge: v.optional(object({ url: StringSchema })),
+  badge: v.optional(v.object({ url: StringSchema })),
   url: v.optional(
-    object({
+    v.object({
       url: StringSchema,
       url_type: v.fallback(v.literal('DeepLink'), 'DeepLink'),
     }),
@@ -18,7 +18,7 @@ export const UserHighlightedLabelSchema = object({
   user_label_type: v.fallback(v.literal('BusinessLabel'), 'BusinessLabel'),
   user_label_display_type: v.fallback(v.literal('Badge'), 'Badge'),
 })
-export const TweetUserSchema = object({
+export const TweetUserSchema = v.object({
   id_str: StringSchema,
   name: StringSchema,
   screen_name: StringSchema,
