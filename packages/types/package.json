@@ -1,0 +1,31 @@
+{
+  "name": "@post-embed/types",
+  "type": "module",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Shared post embed types",
+  "license": "MIT",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "test": "vitest run --typecheck.only"
+  },
+  "devDependencies": {
+    "react-tweet": "3.3.1",
+    "tsdown": "^0.23.0",
+    "typescript": "^6.0.3",
+    "vitest": "^5.0.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "types": "./dist/index.d.ts",
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    }
+  }
+}
