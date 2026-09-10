@@ -7,8 +7,8 @@ import {
 } from '@aria-ui/core'
 import { TweetSchema } from '@post-embed/schema'
 import type { Tweet } from '@post-embed/types'
-import { html, render, type RootPart } from 'lit-html'
 
+import { domFactory } from '../typed-dom-helper.ts'
 import { assumeNotPromise } from '../utils.ts'
 
 import { renderTweet } from './render-tweet.ts'
@@ -23,7 +23,6 @@ export interface XPostElement extends HTMLElement, XPostProps {}
 /** @internal */
 export function useXPost(host: HostElement, props: State<XPostProps>): void {
   let container: HTMLDivElement | undefined
-  let root: RootPart | undefined
 
   useHostEffect(host, () => {
     host.dataset.postEmbed = 'x-post'
@@ -36,7 +35,7 @@ export function useXPost(host: HostElement, props: State<XPostProps>): void {
       container.replaceChildren()
       if (!container.parentNode) host.append(container)
     }
-    root?.setConnected(true)
+    const el = domFactory(host.ownerDocument)
     const result =
       data == null
         ? undefined
@@ -46,21 +45,25 @@ export function useXPost(host: HostElement, props: State<XPostProps>): void {
       console.error('[post-embed] Invalid X post data:', result.issues)
     }
 
-    root = render(
+    container.replaceChildren(
       result && !result.issues
         ? // Upstream enrichment mutates display_text_range on the tweet and quote.
-          renderTweet(enrichTweet(structuredClone(result.value)))
-        : html`<article data-fallback>
-            <header data-author><bdi>X post</bdi></header>
-            <p data-body>This post is unavailable.</p>
-            <footer data-footer>No saved post could be displayed.</footer>
-          </article>`,
-      container,
+          renderTweet(el, enrichTweet(structuredClone(result.value)))
+        : el(
+            'article',
+            { 'data-fallback': '' },
+            el('header', { 'data-author': '' }, el('bdi', {}, 'X post')),
+            el('p', { 'data-body': '' }, 'This post is unavailable.'),
+            el(
+              'footer',
+              { 'data-footer': '' },
+              'No saved post could be displayed.',
+            ),
+          ),
     )
     return () => {
       for (const video of container?.querySelectorAll('video') || [])
         video.pause()
-      root?.setConnected(false)
     }
   })
 }

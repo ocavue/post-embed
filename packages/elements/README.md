@@ -19,4 +19,6 @@ export function showTweet(container: HTMLElement, tweet: Tweet) {
 
 Assign a new `Tweet` object to `element.data` to update the post, or `null` to clear it. The theme import is optional.
 
+Each snapshot update replaces the rendered card, resetting media playback and sensitive-media reveals. Copy feedback and media interactions update their existing nodes through native DOM APIs. Disconnecting the element pauses its videos; reconnecting renders the latest snapshot. The marked root container and other host children are retained.
+
 See the [playground](../../apps/playground) for examples.
