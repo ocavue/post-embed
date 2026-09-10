@@ -1,10 +1,10 @@
 {
-  "name": "@starter-monorepo/monorepo",
+  "name": "post-embed",
   "type": "module",
   "version": "0.0.0",
   "private": true,
   "packageManager": "pnpm@12.3.4",
-  "description": "Monorepo for the starter monorepo",
+  "description": "Snapshot post components for the web",
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",

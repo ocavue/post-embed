@@ -12,16 +12,16 @@ See [the element documentation](packages/elements/README.md) for usage and styli
 
 ```sh
 pnpm install
-pnpm --filter @starter-monorepo/astro-app dev
+pnpm dev
 ```
 
-Open `/x-post` for the vanilla snapshot demo. It includes long text, RTL, encoded text, clearing, reconnecting, and optional themes. The other apps and utility packages are starter scaffolding.
+Open http://localhost:3003 for the [Astrobook playground](apps/playground/README.md). Its X post stories cover text, links, RTL, missing and invalid snapshots, and themes, with controls for updating and reconnecting posts.
 
 ```sh
 pnpm typecheck
 pnpm test
 pnpm test:run
-pnpm --filter @post-embed/elements build
+pnpm build
 ```
 
 Run `pnpm exec vitest` (or `pnpm test`) from the root to watch all runtime, browser, and type tests. Use `pnpm test:run` for a single run, as in CI.
