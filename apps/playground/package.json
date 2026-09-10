@@ -1,0 +1,21 @@
+{
+  "name": "@post-embed/playground",
+  "type": "module",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev --port 3003",
+    "build": "astro build",
+    "preview": "astro preview --port 3003",
+    "postinstall": "astro sync"
+  },
+  "dependencies": {
+    "@post-embed/elements": "workspace:*"
+  },
+  "devDependencies": {
+    "@post-embed/types": "workspace:*",
+    "astro": "^7.3.1",
+    "astrobook": "^0.13.3",
+    "typescript": "^6.0.3"
+  }
+}
