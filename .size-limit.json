@@ -14,9 +14,7 @@
   {
     "name": "@post-embed/elements/x/theme.css (gzip)",
     "path": "packages/elements/dist/x/theme.css",
-    "disablePlugins": [
-      "esbuild"
-    ],
+    "disablePlugins": ["esbuild"],
     "gzip": true
   }
 ]
