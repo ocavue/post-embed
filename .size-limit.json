@@ -1,0 +1,14 @@
+[
+  {
+    "name": "@post-embed/elements/x",
+    "path": "packages/elements/dist/x/index.js",
+    "import": "*",
+    "gzip": true
+  },
+  {
+    "name": "@post-embed/schema",
+    "path": "packages/schema/dist/index.js",
+    "import": "*",
+    "gzip": true
+  }
+]
