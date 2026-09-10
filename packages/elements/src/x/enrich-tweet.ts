@@ -23,6 +23,8 @@ function getUserUrl(usernameOrTweet: string | TweetBase) {
   }`
 }
 
+// REVIEW: FIXME: 好像你这整个文件都是从https://github.com/vercel/react-tweet/blob/react-tweet@3.3.1/packages/react-tweet/src/utils.ts 复制过来的，那么你就直接把这个 文件 叫做 packages/elements/src/x/utils.ts 就好，然后在文件的开头提一下你这个文件的代码来源，不需要每个函数都写 jsdom 说明引用。没必要
+
 /** @see https://github.com/vercel/react-tweet/blob/react-tweet@3.3.1/packages/react-tweet/src/utils.ts */
 function getLikeUrl(tweet: TweetBase) {
   return `https://x.com/intent/like?tweet_id=${tweet.id_str}`
