@@ -25,7 +25,8 @@
     "@post-embed/schema": "workspace:^",
     "@post-embed/types": "workspace:^",
     "entities": "^8.1.0",
-    "lit-html": "^3.3.3"
+    "lit-html": "^3.3.3",
+    "valibot": "^1.4.2"
   },
   "devDependencies": {
     "@vitest/browser-playwright": "5.0.0",

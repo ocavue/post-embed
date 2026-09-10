@@ -1,22 +1,21 @@
 import type { EnrichedTweet, Tweet } from '@post-embed/types'
 import type { StandardSchemaV1 } from '@standard-schema/spec'
+import { safeParse } from 'valibot'
 import { expectTypeOf, test } from 'vitest'
 
-import type { enrichedTweetSchema, tweetSchema } from './index.ts'
+import { enrichedTweetSchema, tweetSchema } from './index.ts'
 
 test('tweetSchema', () => {
-  expectTypeOf<
-    StandardSchemaV1.InferInput<typeof tweetSchema>
-  >().toEqualTypeOf<unknown>()
+  expectTypeOf(safeParse(tweetSchema, {})).not.toExtend<PromiseLike<object>>()
   expectTypeOf<
     StandardSchemaV1.InferOutput<typeof tweetSchema>
   >().toEqualTypeOf<Tweet>()
 })
 
 test('enrichedTweetSchema', () => {
-  expectTypeOf<
-    StandardSchemaV1.InferInput<typeof enrichedTweetSchema>
-  >().toEqualTypeOf<unknown>()
+  expectTypeOf(safeParse(enrichedTweetSchema, {})).not.toExtend<
+    PromiseLike<object>
+  >()
   expectTypeOf<
     StandardSchemaV1.InferOutput<typeof enrichedTweetSchema>
   >().toEqualTypeOf<EnrichedTweet>()

@@ -7,7 +7,8 @@ import {
 } from '@aria-ui/core'
 import { tweetSchema } from '@post-embed/schema'
 import type { Tweet } from '@post-embed/types'
-import { html, nothing, render, type RootPart } from 'lit-html'
+import { html, render, type RootPart } from 'lit-html'
+import { safeParse } from 'valibot'
 
 import { renderTweet } from './render-tweet.ts'
 import { enrichTweet } from './utils.ts'
@@ -27,30 +28,29 @@ export function useXPost(host: HostElement, props: State<XPostProps>): void {
     host.dataset.postEmbed = 'x-post'
     const data = props.data.get()
     if (!container) {
-      container = host.ownerDocument.createElement('div')
-      container.dataset.postPart = 'root'
-      host.append(container)
+      container =
+        host.querySelector<HTMLDivElement>(':scope > div[data-root]') ??
+        host.ownerDocument.createElement('div')
+      container.dataset.root = ''
+      container.replaceChildren()
+      if (!container.parentNode) host.append(container)
     }
-    const target = container
     root?.setConnected(true)
-    root = render(nothing, target)
-    let active = true
-
-    async function update() {
-      if (data == null) return
-      const result = await tweetSchema['~standard'].validate(data)
-      if (!active) return
-      root = render(
-        result.issues
-          ? html`<p>Post data unavailable</p>`
-          : renderTweet(enrichTweet(structuredClone(result.value))),
-        target,
-      )
+    const result = data == null ? undefined : safeParse(tweetSchema, data)
+    if (result?.issues) {
+      console.error('[post-embed] Invalid X post data:', result.issues)
     }
-
-    void update()
+    root = render(
+      result && !result.issues
+        ? renderTweet(enrichTweet(structuredClone(result.output)))
+        : html`<article data-fallback>
+            <header data-author><bdi>X post</bdi></header>
+            <p data-body>This post is unavailable.</p>
+            <footer data-footer>No saved post could be displayed.</footer>
+          </article>`,
+      container,
+    )
     return () => {
-      active = false
       root?.setConnected(false)
     }
   })

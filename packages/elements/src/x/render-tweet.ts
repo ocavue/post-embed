@@ -38,24 +38,20 @@ export function renderTweet(tweet: EnrichedTweet) {
       })
     : nothing
 
-  const content = html`<span style="white-space: pre-wrap">${body}</span>`
+  const content = html`<span data-text>${body}</span>`
 
   return html`<article>
     ${
       author
-        ? html`<header data-post-part="author">
+        ? html`<header data-author>
             <bdi>${tweet.user.name}</bdi>
             ${tweet.user.screen_name ? html`<bdi>${validHandle ? renderLink(`@${tweet.user.screen_name}`, tweet.user.url) : `@${tweet.user.screen_name}`}</bdi>` : nothing}
           </header>`
         : nothing
     }
-    <p
-      data-post-part="body"
-      dir="auto"
-      lang=${ifDefined(tweet.lang || undefined)}
-    >
+    <p data-body dir="auto" lang=${ifDefined(tweet.lang || undefined)}>
       ${content}
     </p>
-    ${permalink ? html`<footer data-post-part="footer">${renderLink('View on X', permalink)}</footer>` : nothing}
+    ${permalink ? html`<footer data-footer>${renderLink('View on X', permalink)}</footer>` : nothing}
   </article>`
 }

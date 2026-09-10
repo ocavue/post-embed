@@ -1,3 +1,5 @@
+import './theme.css'
+
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 import { page, server, userEvent } from 'vitest/browser'
 
@@ -67,16 +69,24 @@ describe('X post', () => {
     await expect.element(post.getByText('Second')).toBeVisible()
     element.data = createTweet('Late')
     element.data = null
-    await expect.element(post).toHaveTextContent('')
-    await Promise.resolve()
-    expect(element.textContent).toBe('')
+    await expect
+      .element(post.getByText('This post is unavailable.'))
+      .toBeVisible()
+    expect(element.textContent).not.toContain('Late')
   })
 
   it('shows invalid input and recovers with a valid snapshot', async () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {})
     const element = mount('Before')
     await expect.element(post.getByText('Before')).toBeVisible()
     Reflect.set(element, 'data', {})
-    await expect.element(post.getByText('Post data unavailable')).toBeVisible()
+    await expect
+      .element(post.getByText('This post is unavailable.'))
+      .toBeVisible()
+    expect(error).toHaveBeenCalledWith(
+      '[post-embed] Invalid X post data:',
+      expect.any(Array),
+    )
     element.data = createTweet('Recovered')
     await expect.element(post.getByText('Recovered')).toBeVisible()
   })
@@ -101,8 +111,61 @@ describe('X post', () => {
     await expect.element(post.getByText('Reconnected')).toBeVisible()
     await expect.element(post.getByText('Host annotation')).toBeVisible()
     element.data = null
-    await expect.element(post).toHaveTextContent('Host annotation')
+    await expect.element(post.getByText('Host annotation')).toBeVisible()
+    await expect
+      .element(post.getByText('This post is unavailable.'))
+      .toBeVisible()
     expect(element.children.length).toBe(2)
+  })
+
+  it('reuses only the direct marked container and replaces server content', async () => {
+    const element = document.createElement('post-embed-x-post')
+    element.dataset.testid = 'post'
+    const annotation = document.createElement('div')
+    annotation.innerHTML = '<div data-root>Host annotation</div>'
+    const container = document.createElement('div')
+    container.dataset.root = ''
+    container.textContent = 'Server fallback'
+    element.append(annotation, container)
+    element.data = createTweet('Saved snapshot')
+    document.body.append(element)
+    await expect.element(post.getByText('Saved snapshot')).toBeVisible()
+    expect(element.querySelector(':scope > [data-root]')).toBe(container)
+    expect(element.children.length).toBe(2)
+    expect(container.textContent).not.toContain('Server fallback')
+    expect(annotation.textContent).toBe('Host annotation')
+    element.data = createTweet('Updated snapshot')
+    await expect.element(post.getByText('Updated snapshot')).toBeVisible()
+    expect(element.querySelector(':scope > [data-root]')).toBe(container)
+  })
+
+  it('shows a themed fallback for missing data without logging an error', async () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const element = document.createElement('post-embed-x-post')
+    element.dataset.testid = 'post'
+    document.body.append(element)
+    await expect
+      .element(post.getByText('This post is unavailable.'))
+      .toBeVisible()
+    expect(element.querySelector('[data-fallback]')).not.toBeNull()
+    expect(error).not.toHaveBeenCalled()
+  })
+
+  it('preserves whitespace through the theme and inherits custom properties', async () => {
+    const wrapper = document.createElement('div')
+    wrapper.style.setProperty('--post-embed-padding', '24px')
+    wrapper.style.setProperty('--post-embed-color', 'rgb(12, 34, 56)')
+    document.body.append(wrapper)
+    const element = mount('First  second')
+    wrapper.append(element)
+    await expect.element(post.getByText('First second')).toBeVisible()
+    const content = element.querySelector('[data-text]')
+    const root = element.querySelector('[data-root]')
+    if (!content || !root) throw new Error('Missing rendered post parts')
+    expect(getComputedStyle(content).whiteSpace).toBe('pre-wrap')
+    expect(getComputedStyle(root).padding).toBe('24px')
+    expect(getComputedStyle(content).color).toBe('rgb(12, 34, 56)')
+    expect(element.querySelector('[style]')).toBeNull()
   })
 
   it('keeps instances independent and registration idempotent', async () => {

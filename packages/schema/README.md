@@ -13,7 +13,7 @@ if (result.issues) {
 }
 ```
 
-Use `enrichedTweetSchema` for enriched input. Both exports use Valibot's native Standard Schema implementation, with vendor `valibot`. The public TypeScript contract is Standard Schema; there are no repair reports or parsing options.
+Use `enrichedTweetSchema` for enriched input. Both exports use Valibot's native Standard Schema implementation, with vendor `valibot`. The exports retain their concrete synchronous Valibot types and remain compatible with Standard Schema V1. Use Valibot's `safeParse(tweetSchema, input)` for synchronous validation; the Standard Schema adapter's type still permits a Promise.
 
 ## Defaults
 
