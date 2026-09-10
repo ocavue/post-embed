@@ -1,8 +1,7 @@
 import type { MediaDetails } from '@post-embed/types/internal/tweet/media'
 import type { TweetPhoto } from '@post-embed/types/internal/tweet/photo'
 import type { TweetVideo } from '@post-embed/types/internal/tweet/video'
-
-import type { DOMFactory } from '../typed-dom-helper.ts'
+import el from 'crelt'
 
 import { renderLink } from './render-shared.ts'
 import { getSafeUrl } from './safe-url.ts'
@@ -56,7 +55,7 @@ function normalizeMedia(media: MediaDetails): Media {
   }
 }
 
-function renderItem(el: DOMFactory, media: Media, permalink?: string) {
+function renderItem(media: Media, permalink?: string) {
   if (
     media.unavailable ||
     (media.type === 'photo' ? !media.poster : media.sources.length === 0)
@@ -65,7 +64,7 @@ function renderItem(el: DOMFactory, media: Media, permalink?: string) {
       'div',
       { 'data-media-unavailable': '' },
       'Media unavailable. ',
-      renderLink(el, 'View on X', permalink),
+      renderLink('View on X', permalink),
     )
   }
 
@@ -73,7 +72,7 @@ function renderItem(el: DOMFactory, media: Media, permalink?: string) {
     'div',
     { 'data-media-error': '', hidden: true },
     'Media could not be loaded. ',
-    renderLink(el, 'View on X', permalink),
+    renderLink('View on X', permalink),
   )
   let content: HTMLAnchorElement | HTMLVideoElement
   if (media.type === 'photo') {
@@ -108,7 +107,7 @@ function renderItem(el: DOMFactory, media: Media, permalink?: string) {
       'video',
       {
         controls: true,
-        playsinline: true,
+        playsInline: true,
         preload: 'none',
         'aria-label': media.alt,
         poster: media.poster,
@@ -117,7 +116,7 @@ function renderItem(el: DOMFactory, media: Media, permalink?: string) {
         loop: media.type === 'animated_gif',
       },
       sources,
-      renderLink(el, 'Watch on X', permalink),
+      renderLink('Watch on X', permalink),
     )
     video.muted = media.type === 'animated_gif'
     const showError = () => {
@@ -142,7 +141,6 @@ function renderItem(el: DOMFactory, media: Media, permalink?: string) {
 }
 
 export function renderMedia(
-  el: DOMFactory,
   tweet: {
     mediaDetails?: MediaDetails[]
     photos?: TweetPhoto[]
@@ -197,7 +195,7 @@ export function renderMedia(
     return el(
       'div',
       { 'data-media': '', 'data-count': String(media.length) },
-      media.map((item) => renderItem(el, item, permalink)),
+      media.map((item) => renderItem(item, permalink)),
     )
   }
   if (!sensitive) return gallery()

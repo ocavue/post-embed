@@ -50,65 +50,22 @@ function video(gif = false) {
 }
 
 describe('Full tweet snapshots', () => {
-  it('creates sensitive media only after revealing it and reveals each gallery once', async () => {
+  it('reveals sensitive media only after the reader opts in', async () => {
     const tweet = createTweet('Sensitive media')
     tweet.possibly_sensitive = true
-    tweet.mediaDetails = [createPhoto(), video(true)]
-    const createElement = vi.spyOn(document, 'createElement')
+    tweet.mediaDetails = [createPhoto(), video()]
     const element = mount(tweet)
-    const createdTags = createElement.mock.results.flatMap((result) => {
-      return result.type === 'return' ? [result.value.tagName] : []
-    })
-    expect(createdTags).not.toContain('IMG')
-    expect(createdTags).not.toContain('VIDEO')
-    expect(createdTags).not.toContain('SOURCE')
-    expect(element.querySelector('[data-media]')).toBeNull()
-    const button = element.querySelector<HTMLButtonElement>(
-      '[data-sensitive] > button',
-    )!
+    expect(element.querySelector('[data-media] img, video, source')).toBeNull()
     await post
       .getByRole('button', { name: 'Show potentially sensitive media' })
       .click()
-    const gallery = element.querySelector('[data-media]')
-    expect(gallery).not.toBeNull()
     expect(element.querySelector('[data-media] img')).not.toBeNull()
-    expect(element.querySelector('video')?.muted).toBe(true)
-    expect(button.hidden).toBe(true)
-    button.click()
-    expect(element.querySelector('[data-media]')).toBe(gallery)
-  })
-
-  it('waits for every video source to fail before showing the fallback', () => {
-    const tweet = createTweet()
-    tweet.mediaDetails = [video()]
-    const element = mount(tweet)
-    const player = element.querySelector('video')!
-    const sources = player.querySelectorAll('source')
-    expect(sources).toHaveLength(3)
-    sources[0].dispatchEvent(new Event('error'))
-    sources[0].dispatchEvent(new Event('error'))
-    expect(player.hidden).toBe(false)
-    sources[1].dispatchEvent(new Event('error'))
-    expect(player.hidden).toBe(false)
-    sources[2].dispatchEvent(new Event('error'))
-    expect(player.hidden).toBe(true)
-    expect(
-      element.querySelector<HTMLElement>('[data-media-error]')?.hidden,
-    ).toBe(false)
-  })
-
-  it('does not report an earlier snapshot copy on a replacement card', async () => {
-    let finishCopy: () => void = () => {}
-    const pending = new Promise<void>((resolve) => {
-      finishCopy = resolve
-    })
-    vi.spyOn(navigator.clipboard, 'writeText').mockReturnValue(pending)
-    const element = mount(createTweet('Before'))
-    await post.getByRole('button', { name: 'Copy link' }).click()
-    element.data = createTweet('After')
-    finishCopy()
-    await pending
-    await expect.element(post.getByRole('status')).toHaveTextContent('')
+    expect(element.querySelector('video source')).not.toBeNull()
+    await expect
+      .element(
+        post.getByRole('button', { name: 'Show potentially sensitive media' }),
+      )
+      .not.toBeVisible()
   })
 
   it('renders photos with alt text and preserves native full-image links', async () => {

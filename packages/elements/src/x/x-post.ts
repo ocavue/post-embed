@@ -7,8 +7,8 @@ import {
 } from '@aria-ui/core'
 import { TweetSchema } from '@post-embed/schema'
 import type { Tweet } from '@post-embed/types'
+import el from 'crelt'
 
-import { domFactory } from '../typed-dom-helper.ts'
 import { assumeNotPromise } from '../utils.ts'
 
 import { renderTweet } from './render-tweet.ts'
@@ -35,7 +35,6 @@ export function useXPost(host: HostElement, props: State<XPostProps>): void {
       container.replaceChildren()
       if (!container.parentNode) host.append(container)
     }
-    const el = domFactory(host.ownerDocument)
     const result =
       data == null
         ? undefined
@@ -48,7 +47,7 @@ export function useXPost(host: HostElement, props: State<XPostProps>): void {
     container.replaceChildren(
       result && !result.issues
         ? // Upstream enrichment mutates display_text_range on the tweet and quote.
-          renderTweet(el, enrichTweet(structuredClone(result.value)))
+          renderTweet(enrichTweet(structuredClone(result.value)))
         : el(
             'article',
             { 'data-fallback': '' },

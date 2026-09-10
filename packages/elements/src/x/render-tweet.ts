@@ -1,8 +1,7 @@
 import type { EnrichedTweet } from '@post-embed/types'
 import type { EnrichedQuotedTweet } from '@post-embed/types/internal/tweet/enriched-tweet'
+import el from 'crelt'
 import { decodeHTML } from 'entities'
-
-import type { DOMFactory } from '../typed-dom-helper.ts'
 
 import { renderAuthor } from './render-author.ts'
 import { renderMedia } from './render-media.ts'
@@ -15,7 +14,7 @@ import {
 
 type Post = EnrichedTweet | EnrichedQuotedTweet
 
-function renderBody(el: DOMFactory, tweet: Post) {
+function renderBody(tweet: Post) {
   const permalink = getPermalink(tweet)
   return el(
     'p',
@@ -32,48 +31,42 @@ function renderBody(el: DOMFactory, tweet: Post) {
                 .map((line, index) => {
                   return [index ? el('br', {}) : undefined, line]
                 })
-            : renderLink(el, decodeHTML(entity.text), entity.href)
+            : renderLink(decodeHTML(entity.text), entity.href)
         }),
     ),
     tweet.note_tweet && permalink
-      ? [' ', renderLink(el, 'Show more', permalink)]
+      ? [' ', renderLink('Show more', permalink)]
       : undefined,
   )
 }
 
-function renderEdit(el: DOMFactory, tweet: Post) {
+function renderEdit(tweet: Post) {
   return tweet.isStaleEdit
     ? el(
         'span',
         { 'data-edited': '' },
         'This is an earlier version. ',
-        renderLink(el, 'View latest on X', getPermalink(tweet)),
+        renderLink('View latest on X', getPermalink(tweet)),
       )
     : tweet.isEdited
       ? el('span', { 'data-edited': '' }, 'Edited')
       : undefined
 }
 
-function renderQuoted(
-  el: DOMFactory,
-  tweet: EnrichedQuotedTweet,
-  sensitive: boolean,
-) {
+function renderQuoted(tweet: EnrichedQuotedTweet, sensitive: boolean) {
   const permalink = getPermalink(tweet)
   return el(
     'article',
     { 'data-quoted': '', 'aria-label': 'Quoted post' },
-    renderAuthor(el, tweet.user),
-    renderBody(el, tweet),
-    renderMedia(el, tweet, permalink, sensitive),
+    renderAuthor(tweet.user),
+    renderBody(tweet),
+    renderMedia(tweet, permalink, sensitive),
     el(
       'footer',
       { 'data-footer': '' },
-      renderDate(el, tweet),
-      renderEdit(el, tweet),
-      permalink
-        ? renderLink(el, 'View quoted post on X', permalink)
-        : undefined,
+      renderDate(tweet),
+      renderEdit(tweet),
+      permalink ? renderLink('View quoted post on X', permalink) : undefined,
     ),
   )
 }
@@ -94,11 +87,7 @@ async function copyLink(
   }
 }
 
-function renderActions(
-  el: DOMFactory,
-  tweet: EnrichedTweet,
-  permalink: string,
-) {
+function renderActions(tweet: EnrichedTweet, permalink: string) {
   const button = el('button', { type: 'button' }, 'Copy link')
   const status = el('span', { role: 'status', 'aria-live': 'polite' })
   button.addEventListener('click', () => {
@@ -107,18 +96,14 @@ function renderActions(
   return el(
     'div',
     { 'data-actions': '' },
-    renderLink(
-      el,
-      `Like · ${formatCount(tweet.favorite_count)}`,
-      tweet.like_url,
-    ),
-    renderLink(el, 'Reply', tweet.reply_url),
+    renderLink(`Like · ${formatCount(tweet.favorite_count)}`, tweet.like_url),
+    renderLink('Reply', tweet.reply_url),
     button,
     status,
   )
 }
 
-export function renderTweet(el: DOMFactory, tweet: EnrichedTweet) {
+export function renderTweet(tweet: EnrichedTweet) {
   const permalink = getPermalink(tweet)
   const replyHandle = tweet.in_reply_to_screen_name
   const replyUrl =
@@ -130,30 +115,29 @@ export function renderTweet(el: DOMFactory, tweet: EnrichedTweet) {
   return el(
     'article',
     {},
-    renderAuthor(el, tweet.user, true),
+    renderAuthor(tweet.user, true),
     replyHandle
       ? el(
           'div',
           { 'data-reply-to': '' },
-          renderLink(el, `Replying to @${replyHandle}`, replyUrl),
+          renderLink(`Replying to @${replyHandle}`, replyUrl),
         )
       : undefined,
-    renderBody(el, tweet),
-    renderMedia(el, tweet, permalink, tweet.possibly_sensitive),
+    renderBody(tweet),
+    renderMedia(tweet, permalink, tweet.possibly_sensitive),
     tweet.quoted_tweet
-      ? renderQuoted(el, tweet.quoted_tweet, Boolean(tweet.possibly_sensitive))
+      ? renderQuoted(tweet.quoted_tweet, Boolean(tweet.possibly_sensitive))
       : undefined,
     el(
       'footer',
       { 'data-footer': '' },
-      renderDate(el, tweet),
-      renderEdit(el, tweet),
+      renderDate(tweet),
+      renderEdit(tweet),
       permalink
         ? [
-            renderLink(el, 'View on X', permalink),
-            renderActions(el, tweet, permalink),
+            renderLink('View on X', permalink),
+            renderActions(tweet, permalink),
             renderLink(
-              el,
               tweet.conversation_count > 0
                 ? `Read ${formatCount(tweet.conversation_count)} ${tweet.conversation_count === 1 ? 'reply' : 'replies'} on X`
                 : 'Read more on X',

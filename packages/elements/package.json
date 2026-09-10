@@ -23,6 +23,7 @@
     "@aria-ui/core": "^0.2.1",
     "@post-embed/schema": "workspace:^",
     "@post-embed/types": "workspace:^",
+    "crelt": "^1.0.7",
     "entities": "^8.1.0"
   },
   "devDependencies": {

@@ -1,12 +1,11 @@
 import type { TweetUser } from '@post-embed/types/internal/tweet/user'
+import el from 'crelt'
 import { decodeHTML } from 'entities'
-
-import type { DOMFactory } from '../typed-dom-helper.ts'
 
 import { renderLink } from './render-shared.ts'
 import { getSafeUrl } from './safe-url.ts'
 
-export function renderAuthor(el: DOMFactory, user: TweetUser, follow = false) {
+export function renderAuthor(user: TweetUser, follow = false) {
   if (!user.name && !user.screen_name) return
   const validHandle = /^\w{1,15}$/.test(user.screen_name)
   const avatar = getSafeUrl(user.profile_image_url_https)
@@ -53,7 +52,6 @@ export function renderAuthor(el: DOMFactory, user: TweetUser, follow = false) {
           : undefined,
         label
           ? renderLink(
-              el,
               el(
                 'span',
                 { 'data-label': '' },
@@ -78,7 +76,6 @@ export function renderAuthor(el: DOMFactory, user: TweetUser, follow = false) {
             'bdi',
             {},
             renderLink(
-              el,
               `@${user.screen_name}`,
               validHandle ? `https://x.com/${user.screen_name}` : undefined,
             ),
@@ -89,7 +86,6 @@ export function renderAuthor(el: DOMFactory, user: TweetUser, follow = false) {
             'span',
             { 'data-follow': '' },
             renderLink(
-              el,
               'Follow',
               `https://x.com/intent/follow?screen_name=${user.screen_name}`,
             ),

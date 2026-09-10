@@ -1,14 +1,9 @@
 import type { TweetBase } from '@post-embed/types/internal/tweet/tweet'
-
-import type { Child, DOMFactory } from '../typed-dom-helper.ts'
+import el from 'crelt'
 
 import { getSafeUrl } from './safe-url.ts'
 
-export function renderLink(
-  el: DOMFactory,
-  content: Child,
-  destination?: string,
-) {
+export function renderLink(content: string | Node, destination?: string) {
   const href = destination && getSafeUrl(destination)
   return href
     ? el('a', { href, target: '_blank', rel: 'noopener noreferrer' }, content)
@@ -24,13 +19,11 @@ export function getPermalink(
 }
 
 export function renderDate(
-  el: DOMFactory,
   tweet: Pick<TweetBase, 'id_str' | 'user' | 'created_at'>,
 ) {
   const date = new Date(tweet.created_at)
   if (!Number.isFinite(date.getTime())) return
   return renderLink(
-    el,
     el(
       'time',
       { datetime: date.toISOString() },
