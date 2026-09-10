@@ -49,3 +49,17 @@ jobs:
       - run: pnpm --filter @post-embed/elements exec playwright install --with-deps chromium firefox webkit
       - name: Test
         run: pnpm run test:run
+
+  all-green:
+    runs-on: ubuntu-slim
+    timeout-minutes: 5
+
+    if: always()
+    needs: [lint, typecheck, build, test]
+
+    steps:
+      - name: Verify that all jobs succeeded
+        if: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') || contains(needs.*.result, 'skipped') }}
+        run: |
+          echo 'Some jobs did not succeed: ${{ toJSON(needs) }}'
+          exit 1
