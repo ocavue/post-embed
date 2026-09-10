@@ -12,7 +12,6 @@ import {
   renderDate,
   renderLink,
 } from './render-shared.ts'
-import { enrichTweet } from './utils.ts'
 
 type Post = EnrichedTweet | EnrichedQuotedTweet
 
@@ -49,14 +48,11 @@ function renderEdit(tweet: Post) {
       : nothing
 }
 
-function renderQuoted(tweet: Post, sensitive: boolean, parent = false) {
-  return html`<article
-    data-quoted
-    aria-label=${parent ? 'Parent post' : 'Quoted post'}
-  >
+function renderQuoted(tweet: EnrichedQuotedTweet, sensitive: boolean) {
+  return html`<article data-quoted aria-label="Quoted post">
     ${renderAuthor(tweet.user)}${renderBody(tweet)}${renderMedia(tweet, getPermalink(tweet), sensitive)}
     <footer data-footer>
-      ${renderDate(tweet)}${renderEdit(tweet)}${getPermalink(tweet) ? renderLink(parent ? 'View parent on X' : 'View quoted post on X', getPermalink(tweet)) : nothing}
+      ${renderDate(tweet)}${renderEdit(tweet)}${getPermalink(tweet) ? renderLink('View quoted post on X', getPermalink(tweet)) : nothing}
     </footer>
   </article>`
 }
@@ -83,7 +79,6 @@ export function renderTweet(tweet: EnrichedTweet) {
       ? tweet.in_reply_to_url
       : undefined
   return html`<article>
-    ${tweet.parent ? renderQuoted(enrichTweet({ ...tweet.parent, __typename: 'Tweet', conversation_count: tweet.parent.reply_count, news_action_type: 'conversation' }), false, true) : nothing}
     ${renderAuthor(tweet.user, true)}
     ${replyHandle ? html`<div data-reply-to>${renderLink(`Replying to @${replyHandle}`, replyUrl)}</div>` : nothing}
     ${renderBody(tweet)}

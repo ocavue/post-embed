@@ -85,14 +85,6 @@ export function addMediaSnapshot(tweet: Tweet, name: string): void {
   if (name === 'reply') {
     tweet.in_reply_to_screen_name = 'example'
     tweet.in_reply_to_status_id_str = '987654321'
-    tweet.parent = {
-      ...structuredClone(tweet),
-      id_str: '987654321',
-      text: 'The saved parent post.',
-      display_text_range: [0, 22],
-      reply_count: 1,
-      retweet_count: 0,
-    }
   }
   if (name === 'verified') {
     tweet.user.verified_type = 'Business'

@@ -92,14 +92,8 @@ describe('Full tweet snapshots', () => {
     expect(element.querySelector('video')).toBeNull()
   })
 
-  it('renders quotes, parents, reply context, and long-post links', async () => {
+  it('renders quotes, reply context, and long-post links', async () => {
     const tweet = createTweet('A reply with a quote')
-    tweet.parent = {
-      ...createTweet('Parent body'),
-      id_str: '111',
-      reply_count: 1,
-      retweet_count: 2,
-    }
     tweet.quoted_tweet = {
       ...createTweet('Quote body'),
       id_str: '222',
@@ -117,13 +111,6 @@ describe('Full tweet snapshots', () => {
         post
           .getByRole('article', { name: 'Quoted post' })
           .getByText('Quote body'),
-      )
-      .toBeVisible()
-    await expect
-      .element(
-        post
-          .getByRole('article', { name: 'Parent post' })
-          .getByText('Parent body'),
       )
       .toBeVisible()
     await expect
