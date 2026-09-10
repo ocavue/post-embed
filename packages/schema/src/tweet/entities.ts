@@ -1,4 +1,5 @@
 import * as v from 'valibot'
+import { looseArray } from '../primitives'
 
 export const IndicesSchema = v.fallback(
   v.pipe(
@@ -44,7 +45,8 @@ export const SymbolEntitySchema = v.object({
 })
 
 export const TweetEntitiesSchema = v.object({
-  hashtags: v.fallback(v.array(HashtagEntitySchema), () => []),
+  // FIXME: use looseArray here instead of v.fallback(v.array(HashtagEntitySchema), () => []) to avoid duplication
+  hashtags: looseArray(HashtagEntitySchema),
   urls: v.fallback(v.array(UrlEntitySchema), () => []),
   user_mentions: v.fallback(v.array(UserMentionEntitySchema), () => []),
   symbols: v.fallback(v.array(SymbolEntitySchema), () => []),
