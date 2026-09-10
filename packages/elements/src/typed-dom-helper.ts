@@ -52,7 +52,9 @@ type Attributes<K extends Tag> = CommonAttributes &
 export type Child =
   Node | string | number | null | undefined | false | readonly Child[]
 
-/** Creates HTML nodes with the attributes used by the post renderers. */
+/**
+ * Creates HTML nodes with the attributes used by the post renderers.
+ */
 export function domFactory(doc: Document) {
   function append(parent: Element, child: Child): void {
     if (child == null || child === false) return
