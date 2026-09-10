@@ -45,7 +45,7 @@ Inputs are JSON-shaped data. Parsing does not mutate them, default arrays are fr
 
 ## Type correspondence
 
-Tweet definition files mirror `packages/types/src/tweet/`. Shared `NumberSchema`, `StringSchema`, and `looseArray` live in `src/primitives.ts` to avoid duplicating fallback expressions. Each named type `X` has an `XSchema` in the same relative file, with matching module export visibility. For example, `IndicesSchema` lives in `tweet/entities.ts`, `TweetEditControlSchema` in `tweet/edit.ts`, and enriched schemas in `tweet/enriched-tweet.ts`. Anonymous nested types have inline schemas.
+Tweet definition files mirror `packages/types/src/tweet/`. Shared `NumberSchema`, `StringSchema`, `BooleanSchema`, and `looseArray` live in `src/primitives.ts` to avoid duplicating fallback expressions. Each named type `X` has an `XSchema` in the same relative file, with matching module export visibility. For example, `IndicesSchema` lives in `tweet/entities.ts`, `TweetEditControlSchema` in `tweet/edit.ts`, and enriched schemas in `tweet/enriched-tweet.ts`. Anonymous nested types have inline schemas.
 
 Each definition file has a neighboring `*.test-d.ts` file, with an individual output-type check for every exported schema. Type tests import their counterparts through `@post-embed/types/internal/...`; relative imports under `src/` use `.ts` extensions. Tests also check file/name correspondence. Runtime tests and their fixtures remain under `src/`; they are test support, not mirrored type definitions.
 

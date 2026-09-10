@@ -1,6 +1,11 @@
 import * as v from 'valibot'
 
-import { NumberSchema, StringSchema, looseArray } from '../primitives.ts'
+import {
+  BooleanSchema,
+  NumberSchema,
+  StringSchema,
+  looseArray,
+} from '../primitives.ts'
 
 import { TweetEditControlSchema } from './edit.ts'
 import { IndicesSchema, TweetEntitiesSchema } from './entities.ts'
@@ -18,8 +23,8 @@ export const TweetBaseSchema = v.object({
   text: StringSchema,
   user: TweetUserSchema,
   edit_control: TweetEditControlSchema,
-  isEdited: v.fallback(v.boolean(), false),
-  isStaleEdit: v.fallback(v.boolean(), false),
+  isEdited: BooleanSchema,
+  isStaleEdit: BooleanSchema,
   note_tweet: v.optional(v.object({ id: StringSchema })),
 })
 
@@ -53,5 +58,5 @@ export const TweetSchema = v.object({
   in_reply_to_status_id_str: v.optional(StringSchema),
   in_reply_to_user_id_str: v.optional(StringSchema),
   parent: v.optional(TweetParentSchema),
-  possibly_sensitive: v.optional(v.fallback(v.boolean(), false)),
+  possibly_sensitive: v.optional(BooleanSchema),
 })

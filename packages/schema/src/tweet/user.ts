@@ -1,6 +1,6 @@
 import * as v from 'valibot'
 
-import { StringSchema } from '../primitives.ts'
+import { BooleanSchema, StringSchema } from '../primitives.ts'
 
 export const HighlightedBadgeSchema = v.object({
   url: StringSchema,
@@ -28,11 +28,11 @@ export const TweetUserSchema = v.object({
     'Circle',
   ),
   screen_name: StringSchema,
-  verified: v.fallback(v.boolean(), false),
+  verified: BooleanSchema,
   verified_type: v.fallback(
     v.optional(v.picklist(['Business', 'Government'])),
     undefined,
   ),
-  is_blue_verified: v.fallback(v.boolean(), false),
+  is_blue_verified: BooleanSchema,
   highlighted_label: v.optional(UserHighlightedLabelSchema),
 })
