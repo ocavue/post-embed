@@ -36,9 +36,15 @@ export function useXPost(host: HostElement, props: State<XPostProps>): void {
     }
     root?.setConnected(true)
     const result = data == null ? undefined : parseTweet(data)
+
+    // FIXME: 1. let's add a new elements/src/utils.ts that exports a function to assume that a value is not a promise, and just call that function here. We still do not want to add a dependency on valibot in elements. Let's just use TweetSchema here.
+
+
     if (result?.issues) {
       console.error('[post-embed] Invalid X post data:', result.issues)
     }
+
+
     root = render(
       result && !result.issues
         ? // Upstream enrichment mutates display_text_range on the tweet and quote.
