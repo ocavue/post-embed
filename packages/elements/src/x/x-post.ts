@@ -5,9 +5,11 @@ import {
   type State,
   useEffect as useHostEffect,
 } from '@aria-ui/core'
-import { parseTweet } from '@post-embed/schema'
+import { TweetSchema } from '@post-embed/schema'
 import type { Tweet } from '@post-embed/types'
 import { html, render, type RootPart } from 'lit-html'
+
+import { assumeNotPromise } from '../utils.ts'
 
 import { renderTweet } from './render-tweet.ts'
 import { enrichTweet } from './utils.ts'
@@ -35,15 +37,14 @@ export function useXPost(host: HostElement, props: State<XPostProps>): void {
       if (!container.parentNode) host.append(container)
     }
     root?.setConnected(true)
-    const result = data == null ? undefined : parseTweet(data)
-
-    // FIXME: 1. let's add a new elements/src/utils.ts that exports a function to assume that a value is not a promise, and just call that function here. We still do not want to add a dependency on valibot in elements. Let's just use TweetSchema here.
-
+    const result =
+      data == null
+        ? undefined
+        : assumeNotPromise(TweetSchema['~standard'].validate(data))
 
     if (result?.issues) {
       console.error('[post-embed] Invalid X post data:', result.issues)
     }
-
 
     root = render(
       result && !result.issues

@@ -1,36 +1,19 @@
 import type { EnrichedTweet, Tweet } from '@post-embed/types'
 import type { StandardSchemaV1 } from '@standard-schema/spec'
-import { safeParse } from 'valibot'
 import { expectTypeOf, test } from 'vitest'
 
-import {
-  enrichedTweetSchema,
-  tweetSchema,
-  parseTweet,
-  parseEnrichedTweet,
-} from './index.ts'
+import { EnrichedTweetSchema, TweetSchema } from './index.ts'
 
-test('tweetSchema', () => {
-  expectTypeOf(safeParse(tweetSchema, {})).not.toExtend<PromiseLike<object>>()
+test('TweetSchema', () => {
+  expectTypeOf(TweetSchema.async).toEqualTypeOf<false>()
   expectTypeOf<
-    StandardSchemaV1.InferOutput<typeof tweetSchema>
+    StandardSchemaV1.InferOutput<typeof TweetSchema>
   >().toEqualTypeOf<Tweet>()
 })
 
-test('enrichedTweetSchema', () => {
-  expectTypeOf(safeParse(enrichedTweetSchema, {})).not.toExtend<
-    PromiseLike<object>
-  >()
+test('EnrichedTweetSchema', () => {
+  expectTypeOf(EnrichedTweetSchema.async).toEqualTypeOf<false>()
   expectTypeOf<
-    StandardSchemaV1.InferOutput<typeof enrichedTweetSchema>
+    StandardSchemaV1.InferOutput<typeof EnrichedTweetSchema>
   >().toEqualTypeOf<EnrichedTweet>()
-})
-
-test('synchronous parser results', () => {
-  expectTypeOf(tweetSchema.async).toEqualTypeOf<false>()
-  expectTypeOf(enrichedTweetSchema.async).toEqualTypeOf<false>()
-  expectTypeOf(parseTweet({})).toEqualTypeOf<StandardSchemaV1.Result<Tweet>>()
-  expectTypeOf(parseEnrichedTweet({})).toEqualTypeOf<
-    StandardSchemaV1.Result<EnrichedTweet>
-  >()
 })
