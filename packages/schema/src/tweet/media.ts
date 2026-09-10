@@ -1,6 +1,7 @@
 import * as v from 'valibot'
 
 import { IndicesSchema } from './entities.ts'
+import { NumberSchema } from '../primitives.ts'
 
 export const RGBSchema = v.object({
   red: v.fallback(v.pipe(v.number(), v.finite()), 0),
@@ -22,16 +23,11 @@ export const SizeSchema = v.object({
 })
 
 export const VideoInfoSchema = v.object({
+  // FIXME: for [number, number] tuple, just use the following pattern. It is simpler. Notice that the fallback value might
+  // be different for different use cases. for aspect_ratio, [0,0] is not a good fallback value, so we use [1,1] instead. For other cases, you might want to use [0,0] as the fallback value.
   aspect_ratio: v.fallback(
-    v.pipe(
-      v.array(v.unknown()),
-      v.length(2),
-      v.strictTuple([
-        v.fallback(v.pipe(v.number(), v.finite()), 0),
-        v.fallback(v.pipe(v.number(), v.finite()), 0),
-      ]),
-    ),
-    () => [0, 0],
+    v.tuple([NumberSchema, NumberSchema]),
+    () => ([1, 1] satisfies [number, number]),
   ),
   variants: v.fallback(
     v.array(
