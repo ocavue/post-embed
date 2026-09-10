@@ -25,7 +25,7 @@ Pass a name to `registerXPost('my-x-post')` to register another tag. Multiple na
 
 `XPostProps` describes the data property. The `@internal` `useXPost(host, props)` function is also exported for composing an aria-ui host with `State<XPostProps>`.
 
-Assign a new raw `Tweet` object to update, or `null` to show the unavailable fallback. Data is a property, never a JSON attribute. In-place mutations do not trigger updates. The element validates with `tweetSchema`, copies the result, and runs the locally copied upstream `enrichTweet` implementation. It does not change the host's snapshot. `EnrichedTweet` is not an accepted input.
+Assign a new raw `Tweet` object to update, or `null` to show the unavailable fallback. Data is a property, never a JSON attribute. In-place mutations do not trigger updates. The element validates synchronously with `parseTweet`, copies the result, and runs the locally copied upstream `enrichTweet` implementation. It does not change the host's snapshot. `EnrichedTweet` is not an accepted input.
 
 Null or invalid data displays an unavailable card. Invalid data also logs its validation issues to `console.error`. Empty visible text stays empty, with available attribution retained. Schema defaults do not prove completeness: a default empty display range can hide nonempty raw text. Upstream range trimming and media entity omission are retained. Truncated snapshots cannot recover missing text. No requests are made until the reader follows a link.
 

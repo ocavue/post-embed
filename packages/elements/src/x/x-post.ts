@@ -5,10 +5,9 @@ import {
   type State,
   useEffect as useHostEffect,
 } from '@aria-ui/core'
-import { tweetSchema } from '@post-embed/schema'
+import { parseTweet } from '@post-embed/schema'
 import type { Tweet } from '@post-embed/types'
 import { html, render, type RootPart } from 'lit-html'
-import { safeParse } from 'valibot'
 
 import { renderTweet } from './render-tweet.ts'
 import { enrichTweet } from './utils.ts'
@@ -36,13 +35,14 @@ export function useXPost(host: HostElement, props: State<XPostProps>): void {
       if (!container.parentNode) host.append(container)
     }
     root?.setConnected(true)
-    const result = data == null ? undefined : safeParse(tweetSchema, data)
+    const result = data == null ? undefined : parseTweet(data)
     if (result?.issues) {
       console.error('[post-embed] Invalid X post data:', result.issues)
     }
     root = render(
       result && !result.issues
-        ? renderTweet(enrichTweet(structuredClone(result.output)))
+        ? // Upstream enrichment mutates display_text_range on the tweet and quote.
+          renderTweet(enrichTweet(structuredClone(result.value)))
         : html`<article data-fallback>
             <header data-author><bdi>X post</bdi></header>
             <p data-body>This post is unavailable.</p>

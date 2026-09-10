@@ -14,3 +14,5 @@ if (result.issues) {
 ```
 
 Use `enrichedTweetSchema` for enriched input.
+
+For synchronous validation, use `parseTweet(input)` or `parseEnrichedTweet(input)`. Both return a `StandardSchemaV1.Result`: read `value` on success or `issues` on failure. No Valibot import or `await` is needed.

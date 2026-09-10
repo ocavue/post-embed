@@ -3,7 +3,12 @@ import type { StandardSchemaV1 } from '@standard-schema/spec'
 import { safeParse } from 'valibot'
 import { expectTypeOf, test } from 'vitest'
 
-import { enrichedTweetSchema, tweetSchema } from './index.ts'
+import {
+  enrichedTweetSchema,
+  tweetSchema,
+  parseTweet,
+  parseEnrichedTweet,
+} from './index.ts'
 
 test('tweetSchema', () => {
   expectTypeOf(safeParse(tweetSchema, {})).not.toExtend<PromiseLike<object>>()
@@ -19,4 +24,13 @@ test('enrichedTweetSchema', () => {
   expectTypeOf<
     StandardSchemaV1.InferOutput<typeof enrichedTweetSchema>
   >().toEqualTypeOf<EnrichedTweet>()
+})
+
+test('synchronous parser results', () => {
+  expectTypeOf(tweetSchema.async).toEqualTypeOf<false>()
+  expectTypeOf(enrichedTweetSchema.async).toEqualTypeOf<false>()
+  expectTypeOf(parseTweet({})).toEqualTypeOf<StandardSchemaV1.Result<Tweet>>()
+  expectTypeOf(parseEnrichedTweet({})).toEqualTypeOf<
+    StandardSchemaV1.Result<EnrichedTweet>
+  >()
 })

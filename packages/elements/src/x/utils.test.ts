@@ -57,6 +57,8 @@ describe('enrichTweet', () => {
         .map((entity) => entity.text)
         .join(''),
     ).toBe('Saved text ')
+    expect(tweet.display_text_range).toEqual([0, 11])
+    expect(tweet.quoted_tweet?.display_text_range).toEqual([0, 11])
     expect(result.display_text_range).toEqual([0, 11])
     expect(result.quoted_tweet?.display_text_range).toEqual([0, 11])
   })
