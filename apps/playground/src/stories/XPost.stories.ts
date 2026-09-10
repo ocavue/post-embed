@@ -19,3 +19,28 @@ export const DarkTheme = {
 export const Narrow = {
   args: { snapshot: 'long', narrow: true } satisfies Props,
 }
+
+export const Photo = { args: { snapshot: 'photo' } satisfies Props }
+export const TwoPhotos = { args: { snapshot: 'two-photos' } satisfies Props }
+export const ThreePhotos = {
+  args: { snapshot: 'three-photos' } satisfies Props,
+}
+export const FourPhotos = { args: { snapshot: 'four-photos' } satisfies Props }
+export const Video = { args: { snapshot: 'video' } satisfies Props }
+export const Gif = { args: { snapshot: 'gif' } satisfies Props }
+export const MixedMedia = { args: { snapshot: 'mixed-media' } satisfies Props }
+export const Sensitive = { args: { snapshot: 'sensitive' } satisfies Props }
+export const Unavailable = { args: { snapshot: 'unavailable' } satisfies Props }
+export const BrokenMedia = {
+  args: { snapshot: 'broken-media' } satisfies Props,
+}
+export const Quote = { args: { snapshot: 'quote' } satisfies Props }
+export const Reply = { args: { snapshot: 'reply' } satisfies Props }
+export const Verified = { args: { snapshot: 'verified' } satisfies Props }
+export const Edited = { args: { snapshot: 'edited' } satisfies Props }
+export const StaleEdit = { args: { snapshot: 'stale-edit' } satisfies Props }
+export const Note = { args: { snapshot: 'note' } satisfies Props }
+export const Counts = { args: { snapshot: 'counts' } satisfies Props }
+export const LegacyMedia = {
+  args: { snapshot: 'legacy-media' } satisfies Props,
+}

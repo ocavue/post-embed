@@ -58,6 +58,8 @@ export function useXPost(host: HostElement, props: State<XPostProps>): void {
       container,
     )
     return () => {
+      for (const video of container?.querySelectorAll('video') || [])
+        video.pause()
       root?.setConnected(false)
     }
   })

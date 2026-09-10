@@ -4,7 +4,7 @@ Snapshot post components for the web. Pass saved tweet data to a custom element 
 
 - `@post-embed/types`: tweet data types copied from react-tweet.
 - `@post-embed/schema`: Standard Schema validation with field defaults.
-- `@post-embed/elements/x`: the text-only X post element and explicit registration.
+- `@post-embed/elements/x`: the X post element with text, media, quotes, and explicit registration.
 
 See [the element documentation](packages/elements/README.md) for usage and styling.
 

@@ -64,3 +64,24 @@ export function createMediaTweet(): Tweet {
   }
   return tweet
 }
+
+export function createPhoto() {
+  return {
+    type: 'photo' as const,
+    ext_alt_text: 'Blue illustrated mountains',
+    display_url: 'pic.x.com/example',
+    expanded_url: 'https://x.com/example/status/1234567890123456789/photo/1',
+    ext_media_availability: { status: 'Available' },
+    ext_media_color: { palette: [] },
+    indices: [0, 0] as [number, number],
+    media_url_https: new URL('./image.svg?no-inline', import.meta.url).href,
+    original_info: { height: 400, width: 640, focus_rects: [] },
+    sizes: {
+      large: { h: 400, w: 640, resize: 'fit' },
+      medium: { h: 400, w: 640, resize: 'fit' },
+      small: { h: 400, w: 640, resize: 'fit' },
+      thumb: { h: 100, w: 100, resize: 'crop' },
+    },
+    url: 'https://t.co/media',
+  }
+}
