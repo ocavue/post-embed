@@ -10,9 +10,14 @@ import { html, nothing, render, type RootPart } from 'lit-html'
 import { enrichTweet } from './enrich-tweet.ts'
 import { renderTweet } from './render-tweet.ts'
 
+/** FIXME: export a XPostProps { data: Tweet|null} first  */
 export interface XPostElement extends HTMLElement {
   data: Tweet | null
 }
+
+// FIXME: first create a useXPost hook, which is just a function. mark it as @internal. re-export it un x/index.ts;
+//
+// then in the const XPost = defineCustomElement() ... use useXPost hook
 
 export const XPost = defineCustomElement(
   (host, props) => {

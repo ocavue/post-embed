@@ -5,6 +5,7 @@ import { createMediaTweet, createTweet } from './testing/fixtures.ts'
 
 import { registerXPost } from './index.ts'
 
+// FIXME: run "registerXPost" in a beforeAll hook
 registerXPost()
 
 function mount(text = 'Hello 😀\nA saved post.') {
