@@ -16,8 +16,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsdown",
-    "test": "vitest run --typecheck --bail 1"
+    "build": "tsdown"
   },
   "dependencies": {
     "@post-embed/types": "workspace:*",

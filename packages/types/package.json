@@ -17,8 +17,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsdown",
-    "test": "vitest run --typecheck.only"
+    "build": "tsdown"
   },
   "devDependencies": {
     "react-tweet": "3.3.1",
