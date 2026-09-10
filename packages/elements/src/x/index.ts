@@ -1,0 +1,11 @@
+import type { XPostElement } from './x-post.ts'
+
+export { registerXPost } from './register.ts'
+export { useXPost } from './x-post.ts'
+export type { XPostElement, XPostProps } from './x-post.ts'
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'post-embed-x-post': XPostElement
+  }
+}

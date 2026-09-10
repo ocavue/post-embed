@@ -2,12 +2,19 @@
   "name": "@post-embed/schema",
   "type": "module",
   "version": "0.0.1",
-  "private": true,
   "description": "Standard Schema validation with type defaults for embedded posts",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ocavue/post-embed.git",
+    "directory": "packages/schema"
+  },
   "exports": {
     ".": "./src/index.ts"
   },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsdown",
     "test": "vitest run --typecheck --bail 1"

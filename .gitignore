@@ -21,3 +21,4 @@ temp
 playwright-report
 .next
 next-env.d.ts
+.vitest

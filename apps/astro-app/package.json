@@ -12,6 +12,7 @@
     "postinstall": "astro sync"
   },
   "dependencies": {
+    "@post-embed/elements": "workspace:*",
     "@tanstack/react-query": "^5.95.2",
     "@trpc/client": "^11.18.0",
     "@trpc/react-query": "^11.18.0",
@@ -22,6 +23,7 @@
   "devDependencies": {
     "@astrojs/react": "^6.0.5",
     "@astrojs/vercel": "^11.0.10",
+    "@post-embed/types": "workspace:*",
     "@starter-monorepo/api": "workspace:^",
     "@starter-monorepo/utils": "workspace:^",
     "@tailwindcss/vite": "^4.3.3",

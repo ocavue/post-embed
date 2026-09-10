@@ -1,0 +1,101 @@
+---
+
+---
+
+<!doctype html>
+<html lang="en">
+  <head
+    ><meta charset="UTF-8" /><meta
+      name="viewport"
+      content="width=device-width"
+    /><title>X post snapshots</title></head
+  >
+  <body>
+    <main>
+      <h1>X post snapshots</h1>
+      <p>Local data, selectable text, no provider requests.</p>
+      <label
+        >Snapshot <select id="snapshot"
+          ><option value="plain">Plain text</option><option value="long"
+            >Long text</option
+          ><option value="rtl">RTL</option><option value="encoded"
+            >Encoded text</option
+          ><option value="empty">Empty text</option></select
+        ></label
+      >
+      <button id="clear">Clear</button><button id="restore">Restore</button
+      ><button id="reconnect">Remove / reinsert</button>
+      <label
+        >Theme <select id="theme"
+          ><option value="default">Default</option><option value="custom"
+            >Custom</option
+          ><option value="none">No theme</option></select
+        ></label
+      >
+      <div id="preview"></div>
+    </main>
+    <script>
+      import { registerXPost } from '@post-embed/elements/x'
+      import themeCss from '@post-embed/elements/x/theme.css?raw'
+      import { createSnapshot } from '../snapshots/x-post.ts'
+
+      registerXPost()
+      const element = document.createElement('post-embed-x-post')
+      const preview = document.getElementById('preview')
+      const selection = document.getElementById('snapshot')
+      const themeSelection = document.getElementById('theme')
+      const style = document.createElement('style')
+      document.head.append(style)
+      style.textContent = themeCss
+      preview?.append(element)
+      const update = () => {
+        element.data = createSnapshot(
+          selection instanceof HTMLSelectElement ? selection.value : 'plain',
+        )
+      }
+      update()
+      selection?.addEventListener('change', update)
+      document.getElementById('clear')?.addEventListener('click', () => {
+        element.data = null
+      })
+      document.getElementById('restore')?.addEventListener('click', update)
+      document.getElementById('reconnect')?.addEventListener('click', () => {
+        element.remove()
+        preview?.append(element)
+      })
+      themeSelection?.addEventListener('change', () => {
+        if (!(themeSelection instanceof HTMLSelectElement)) return
+        style.textContent = themeSelection.value === 'none' ? '' : themeCss
+        preview?.classList.toggle('custom', themeSelection.value === 'custom')
+      })
+    </script>
+    <style>
+      :global(body) {
+        margin: 0;
+        padding: 2rem 1rem;
+        font: 16px/1.5 system-ui;
+        background: #f7f8fa;
+        color: #253044;
+      }
+      main {
+        max-width: 38rem;
+        margin: auto;
+      }
+      button,
+      select {
+        font: inherit;
+        margin: 0.3rem;
+      }
+      #preview {
+        margin-top: 1.5rem;
+      }
+      :global(.custom) {
+        --post-embed-background: #172237;
+        --post-embed-color: #edf4ff;
+        --post-embed-border-color: #475a75;
+        --post-embed-link-color: #9cc4ff;
+        --post-embed-radius: 1.25rem;
+      }
+    </style>
+  </body>
+</html>

@@ -1,0 +1,86 @@
+@property --post-embed-color {
+  syntax: '*';
+  inherits: true;
+}
+
+@property --post-embed-background {
+  syntax: '*';
+  inherits: true;
+}
+
+@property --post-embed-border-color {
+  syntax: '*';
+  inherits: true;
+}
+
+@property --post-embed-radius {
+  syntax: '*';
+  inherits: true;
+}
+
+@property --post-embed-padding {
+  syntax: '*';
+  inherits: true;
+}
+
+@property --post-embed-muted-color {
+  syntax: '*';
+  inherits: true;
+}
+
+@property --post-embed-link-color {
+  syntax: '*';
+  inherits: true;
+}
+
+@layer post-embed {
+  :where([data-post-embed='x-post']) {
+    display: block;
+    font: inherit;
+    color: var(--post-embed-color, inherit);
+
+    :where([data-root]) {
+      background: var(--post-embed-background, transparent);
+      border: 1px solid var(--post-embed-border-color, currentColor);
+      border-radius: var(--post-embed-radius, 0.75rem);
+      padding: var(--post-embed-padding, 1rem);
+      overflow-wrap: anywhere;
+    }
+
+    :where([data-author]) {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.25rem 0.5rem;
+
+      & > :where(bdi:first-child) {
+        font-weight: 600;
+      }
+    }
+
+    :where([data-body]) {
+      margin-block: 0.75rem;
+      line-height: 1.6;
+    }
+
+    :where([data-text]) {
+      white-space: pre-wrap;
+    }
+
+    :where([data-footer]) {
+      color: var(--post-embed-muted-color, inherit);
+      font-size: 0.875em;
+    }
+
+    :where(a) {
+      color: var(--post-embed-link-color, LinkText);
+      text-decoration: underline;
+      text-underline-offset: 0.15em;
+
+      &:where(:focus-visible) {
+        outline: 2px solid currentColor;
+        outline-offset: 3px;
+        border-radius: 2px;
+      }
+    }
+  }
+}

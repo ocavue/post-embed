@@ -10,6 +10,12 @@
     },
     {
       "path": "../../packages/utils/tsconfig.json"
+    },
+    {
+      "path": "../../packages/elements/tsconfig.json"
+    },
+    {
+      "path": "../../packages/types/tsconfig.json"
     }
   ]
 }
