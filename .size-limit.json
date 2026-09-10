@@ -1,20 +1,14 @@
 [
   {
-    "name": "@post-embed/elements/x (JS, gzip)",
+    "name": "@post-embed/elements/x",
     "path": "packages/elements/dist/x/index.js",
     "import": "*",
     "gzip": true
   },
   {
-    "name": "@post-embed/schema (JS, gzip)",
+    "name": "@post-embed/schema",
     "path": "packages/schema/dist/index.js",
     "import": "*",
-    "gzip": true
-  },
-  {
-    "name": "@post-embed/elements/x/theme.css (gzip)",
-    "path": "packages/elements/dist/x/theme.css",
-    "disablePlugins": ["esbuild"],
     "gzip": true
   }
 ]
