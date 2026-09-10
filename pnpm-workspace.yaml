@@ -1,6 +1,4 @@
 packages:
-  - website
-  - examples/*
   - packages/*
   - apps/*
 
