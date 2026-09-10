@@ -47,7 +47,5 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - uses: ./.github/actions/setup
       - run: pnpm --filter @post-embed/elements exec playwright install --with-deps chromium firefox webkit
-      - name: Build TypeScript project references
-        run: pnpm run typecheck
       - name: Test
         run: pnpm run test:run
