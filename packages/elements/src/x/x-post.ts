@@ -8,7 +8,6 @@ import {
 import { TweetSchema } from '@post-embed/schema'
 import type { Tweet } from '@post-embed/types'
 import { html, render, type RootPart } from 'lit-html'
-import { keyed } from 'lit-html/directives/keyed.js'
 
 import { assumeNotPromise } from '../utils.ts'
 
@@ -50,7 +49,7 @@ export function useXPost(host: HostElement, props: State<XPostProps>): void {
     root = render(
       result && !result.issues
         ? // Upstream enrichment mutates display_text_range on the tweet and quote.
-          keyed(data, renderTweet(enrichTweet(structuredClone(result.value))))
+          renderTweet(enrichTweet(structuredClone(result.value)))
         : html`<article data-fallback>
             <header data-author><bdi>X post</bdi></header>
             <p data-body>This post is unavailable.</p>

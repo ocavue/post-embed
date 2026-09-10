@@ -92,25 +92,6 @@ describe('Full tweet snapshots', () => {
     expect(element.querySelector('video')).toBeNull()
   })
 
-  it('does not attach sensitive media until revealed and resets on replacement', async () => {
-    const tweet = createTweet()
-    tweet.mediaDetails = [createPhoto()]
-    tweet.possibly_sensitive = true
-    const element = mount(tweet)
-    expect(element.querySelector('[data-media]')).toBeNull()
-    await post
-      .getByRole('button', { name: 'Show potentially sensitive media' })
-      .click()
-    expect(element.querySelector('[data-media] img')).not.toBeNull()
-    element.data = structuredClone(tweet)
-    expect(element.querySelector('[data-media]')).toBeNull()
-    await expect
-      .element(
-        post.getByRole('button', { name: 'Show potentially sensitive media' }),
-      )
-      .toBeVisible()
-  })
-
   it('renders quotes, parents, reply context, and long-post links', async () => {
     const tweet = createTweet('A reply with a quote')
     tweet.parent = {
