@@ -63,38 +63,3 @@ jobs:
         run: |
           echo 'Some jobs did not succeed: ${{ toJSON(needs) }}'
           exit 1
-
-  publish-snapshot:
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-
-    needs: [build]
-
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-
-      - uses: ./.github/actions/setup
-
-      - name: Build
-        run: pnpm run build
-
-      - name: Publish snapshot packages
-        if: ${{ github.event_name == 'pull_request' }}
-        run: |
-          max_attempts=8
-          base_sleep=10
-          for attempt in $(seq 1 "${max_attempts}"); do
-            echo "Attempt ${attempt} to publish snapshot packages..."
-            if pnpm run ci:publish:snapshot; then
-              echo "Publish snapshot packages succeeded"
-              break
-            elif [ "${attempt}" -eq "${max_attempts}" ]; then
-              echo "Publish snapshot packages failed"
-              exit 1
-            fi
-            sleep_duration=$((base_sleep * attempt))
-            echo "Sleeping ${sleep_duration}s before retry..."
-            sleep "${sleep_duration}"
-          done
