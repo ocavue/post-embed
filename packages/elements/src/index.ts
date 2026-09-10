@@ -1,3 +1,3 @@
 // Empty export
 
-export { }
+export {}
