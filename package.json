@@ -21,17 +21,20 @@
     "build:package": "turbo run build --filter='./packages/*'",
     "change": "changeset",
     "ci:version": "changeset version && pnpm install --no-frozen-lockfile",
-    "ci:publish": "pnpm --filter='./packages/*' publish --access public --no-git-checks --tag latest"
+    "ci:publish": "pnpm --filter='./packages/*' publish --access public --no-git-checks --tag latest",
+    "size": "pnpm run build:package && size-limit"
   },
   "devDependencies": {
     "@changesets/cli": "^3.0.2",
     "@ocavue/eslint-config": "^4.16.1",
     "@ocavue/tsconfig": "^0.7.1",
+    "@size-limit/preset-small-lib": "13.0.3",
     "@types/node": "^24.0.0",
     "eslint": "^10.1.0",
     "monorepo-typescript-references": "^1.1.2",
     "prettier": "^3.9.6",
     "prettier-plugin-astro": "^0.14.1",
+    "size-limit": "13.0.3",
     "turbo": "^2.9.1",
     "typescript": "^6.0.3",
     "vitest": "^5.0.0"

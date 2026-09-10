@@ -1,0 +1,45 @@
+name: size-limit
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  size:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: ./.github/actions/setup
+
+      # The action switches to the base branch after measuring the PR.
+      # Keep a fallback outside the checkout for bases predating this setup.
+      - name: Prepare baseline support
+        run: |
+          cp .size-limit.json "$RUNNER_TEMP/post-embed-size-limit.json"
+          cat > "$RUNNER_TEMP/post-embed-size-limit.sh" <<'SCRIPT'
+          set -euo pipefail
+          if [ ! -f .size-limit.json ]; then
+            pnpm add -Dw --save-exact --ignore-scripts size-limit@13.0.3 @size-limit/preset-small-lib@13.0.3 >&2
+            cp "$RUNNER_TEMP/post-embed-size-limit.json" .size-limit.json
+          fi
+          pnpm exec size-limit --json
+          SCRIPT
+
+      - uses: andresz1/size-limit-action@94bc357df29c36c8f8d50ea497c3e225c3c95d1d # v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          package_manager: pnpm
+          build_script: build:package
+          skip_step: install
+          script: bash ${{ runner.temp }}/post-embed-size-limit.sh
