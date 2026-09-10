@@ -147,7 +147,6 @@ export function renderMedia(
     video?: TweetVideo
   },
   permalink?: string,
-  sensitive = false,
 ) {
   const media = tweet.mediaDetails?.map(normalizeMedia) || []
   if (media.length === 0) {
@@ -191,29 +190,9 @@ export function renderMedia(
     }
   }
   if (media.length === 0) return
-  const gallery = () => {
-    return el(
-      'div',
-      { 'data-media': '', 'data-count': String(media.length) },
-      media.map((item) => renderItem(item, permalink)),
-    )
-  }
-  if (!sensitive) return gallery()
-
-  // Do not create image/video URLs until the reader opts in.
-  const button = el(
-    'button',
-    { type: 'button' },
-    'Show potentially sensitive media',
+  return el(
+    'div',
+    { 'data-media': '', 'data-count': String(media.length) },
+    media.map((item) => renderItem(item, permalink)),
   )
-  const content = el('div', { 'data-sensitive-content': '' })
-  button.addEventListener(
-    'click',
-    () => {
-      content.replaceChildren(gallery())
-      button.hidden = true
-    },
-    { once: true },
-  )
-  return el('div', { 'data-sensitive': '' }, button, content)
 }

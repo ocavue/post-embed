@@ -50,24 +50,6 @@ function video(gif = false) {
 }
 
 describe('Full tweet snapshots', () => {
-  it('reveals sensitive media only after the reader opts in', async () => {
-    const tweet = createTweet('Sensitive media')
-    tweet.possibly_sensitive = true
-    tweet.mediaDetails = [createPhoto(), video()]
-    const element = mount(tweet)
-    expect(element.querySelector('[data-media] img, video, source')).toBeNull()
-    await post
-      .getByRole('button', { name: 'Show potentially sensitive media' })
-      .click()
-    expect(element.querySelector('[data-media] img')).not.toBeNull()
-    expect(element.querySelector('video source')).not.toBeNull()
-    await expect
-      .element(
-        post.getByRole('button', { name: 'Show potentially sensitive media' }),
-      )
-      .not.toBeVisible()
-  })
-
   it('renders photos with alt text and preserves native full-image links', async () => {
     expect(createPhoto().media_url_https).toMatch(/^https?:/u)
     const tweet = createTweet('Four pictures')

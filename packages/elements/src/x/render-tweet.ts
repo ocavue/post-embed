@@ -53,14 +53,14 @@ function renderEdit(tweet: Post) {
       : undefined
 }
 
-function renderQuoted(tweet: EnrichedQuotedTweet, sensitive: boolean) {
+function renderQuoted(tweet: EnrichedQuotedTweet) {
   const permalink = getPermalink(tweet)
   return el(
     'article',
     { 'data-quoted': '', 'aria-label': 'Quoted post' },
     renderAuthor(tweet.user),
     renderBody(tweet),
-    renderMedia(tweet, permalink, sensitive),
+    renderMedia(tweet, permalink),
     el(
       'footer',
       { 'data-footer': '' },
@@ -124,10 +124,8 @@ export function renderTweet(tweet: EnrichedTweet) {
         )
       : undefined,
     renderBody(tweet),
-    renderMedia(tweet, permalink, tweet.possibly_sensitive),
-    tweet.quoted_tweet
-      ? renderQuoted(tweet.quoted_tweet, Boolean(tweet.possibly_sensitive))
-      : undefined,
+    renderMedia(tweet, permalink),
+    tweet.quoted_tweet ? renderQuoted(tweet.quoted_tweet) : undefined,
     el(
       'footer',
       { 'data-footer': '' },
