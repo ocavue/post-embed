@@ -17,8 +17,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsdown",
-    "test": "vitest run --bail 1"
+    "build": "tsdown"
   },
   "dependencies": {
     "@aria-ui/core": "^0.2.1",
