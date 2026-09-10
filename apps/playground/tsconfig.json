@@ -1,0 +1,12 @@
+{
+  "extends": "@ocavue/tsconfig/dom/app.json",
+  "include": ["./**/*", "./.astro/**/*"],
+  "references": [
+    {
+      "path": "../../packages/elements/tsconfig.json"
+    },
+    {
+      "path": "../../packages/types/tsconfig.json"
+    }
+  ]
+}

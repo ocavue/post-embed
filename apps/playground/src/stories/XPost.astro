@@ -1,0 +1,110 @@
+---
+import '@post-embed/elements/x/theme.css'
+import type { Snapshot } from '../snapshots.ts'
+interface Props {
+  snapshot: Snapshot
+  dark?: boolean
+  narrow?: boolean
+}
+const { snapshot, dark = false, narrow = false } = Astro.props
+---
+
+<post-embed-demo data-snapshot={snapshot} class:list={[{ dark, narrow }]}>
+  <nav aria-label="Debug controls">
+    <button data-action="clear">Clear</button>
+    <button data-action="restore">Restore</button>
+    <button data-action="update">Replace with plain text</button>
+    <button data-action="reconnect">Remove / reinsert</button>
+    <button data-action="theme">Toggle dark theme</button>
+  </nav>
+  <div data-preview></div>
+  <details><summary>Raw snapshot</summary><pre></pre></details>
+</post-embed-demo>
+
+<script>
+  import { registerXPost } from '@post-embed/elements/x'
+  import { createSnapshot, type Snapshot } from '../snapshots.ts'
+
+  registerXPost()
+  // A custom wrapper initializes each new story during Astro client navigation.
+  class PostEmbedDemo extends HTMLElement {
+    connectedCallback() {
+      if (this.querySelector('post-embed-x-post')) return
+      const preview = this.querySelector('[data-preview]')!
+      const raw = this.querySelector('pre')!
+      const element = document.createElement('post-embed-x-post')
+      const update = (snapshot: Snapshot) => {
+        element.data = createSnapshot(snapshot)
+        raw.textContent = JSON.stringify(element.data, null, 2)
+      }
+      preview.append(element)
+      update(this.dataset.snapshot as Snapshot)
+      this.addEventListener('click', (event) => {
+        if (!(event.target instanceof HTMLButtonElement)) return
+        switch (event.target.dataset.action) {
+          case 'clear':
+            update('missing')
+            break
+          case 'restore':
+            update(this.dataset.snapshot as Snapshot)
+            break
+          case 'update':
+            update('plain')
+            break
+          case 'reconnect':
+            element.remove()
+            preview.append(element)
+            break
+          case 'theme':
+            this.classList.toggle('dark')
+            break
+        }
+      })
+    }
+  }
+  if (!customElements.get('post-embed-demo'))
+    customElements.define('post-embed-demo', PostEmbedDemo)
+</script>
+
+<style>
+  post-embed-demo {
+    display: block;
+    max-width: 42rem;
+    margin: 2rem auto;
+    padding: 1rem;
+    font: 16px/1.5 system-ui;
+    color: #253044;
+    background: #fff;
+    --post-embed-border-color: #cbd5e1;
+    --post-embed-muted-color: #526074;
+  }
+  .narrow {
+    max-width: 20rem;
+  }
+  .dark {
+    color: #edf4ff;
+    background: #172237;
+    --post-embed-background: #172237;
+    --post-embed-border-color: #475a75;
+    --post-embed-muted-color: #bac8dc;
+    --post-embed-link-color: #9cc4ff;
+  }
+  nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+  button {
+    font: inherit;
+    cursor: pointer;
+  }
+  details {
+    margin-top: 1rem;
+  }
+  pre {
+    overflow: auto;
+    max-height: 24rem;
+    font-size: 0.8rem;
+  }
+</style>

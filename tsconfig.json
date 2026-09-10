@@ -24,6 +24,9 @@
     },
     {
       "path": "./packages/elements/tsconfig.json"
+    },
+    {
+      "path": "./apps/playground/tsconfig.json"
     }
   ]
 }
