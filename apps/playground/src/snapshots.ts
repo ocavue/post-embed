@@ -1,5 +1,7 @@
 import type { Tweet } from '@post-embed/types'
 
+import { addMediaSnapshot } from './media-snapshots.ts'
+
 function createTweet(text = 'Hello 😀\nA saved post.'): Tweet {
   return {
     __typename: 'Tweet',
@@ -47,6 +49,24 @@ export type Snapshot =
   | 'empty'
   | 'missing'
   | 'invalid'
+  | 'photo'
+  | 'two-photos'
+  | 'three-photos'
+  | 'four-photos'
+  | 'video'
+  | 'gif'
+  | 'mixed-media'
+  | 'sensitive'
+  | 'unavailable'
+  | 'broken-media'
+  | 'quote'
+  | 'reply'
+  | 'verified'
+  | 'edited'
+  | 'stale-edit'
+  | 'note'
+  | 'counts'
+  | 'legacy-media'
 
 export function createSnapshot(name: Snapshot): Tweet | null {
   if (name === 'missing') return null
@@ -62,7 +82,12 @@ export function createSnapshot(name: Snapshot): Tweet | null {
     encoded: 'A &amp; B\n&lt;script&gt;literal text&lt;/script&gt; &amp;lt;',
     empty: '',
   }
-  const tweet = createTweet(texts[name])
+  const tweet = createTweet(
+    Object.hasOwn(texts, name)
+      ? texts[name as keyof typeof texts]
+      : `Snapshot: ${name}`,
+  )
+  addMediaSnapshot(tweet, name)
   if (name === 'rtl') tweet.lang = 'ar'
   if (name === 'links' && tweet.entities) {
     tweet.entities.user_mentions = [

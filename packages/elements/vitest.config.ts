@@ -13,6 +13,7 @@ export default defineConfig({
         },
       },
       {
+        optimizeDeps: { include: ['lit-html/directives/keyed.js'] },
         test: {
           name: 'browser',
           include: ['src/**/*.browser.test.ts'],

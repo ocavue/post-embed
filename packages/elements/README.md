@@ -1,6 +1,6 @@
 # @post-embed/elements
 
-Text-only snapshot elements. The X element renders author text, body links, and a permalink using saved `Tweet` data. It does not fetch, refresh, or persist data, or render avatars, media, quotes, counts, or timestamps.
+Snapshot elements for saved `Tweet` data. The X element renders text, author information, photos, videos, quoted posts, reply context, and engagement links. It does not fetch, refresh, or persist tweet data.
 
 ## Usage
 
@@ -27,13 +27,35 @@ Pass a name to `registerXPost('my-x-post')` to register another tag. Multiple na
 
 Assign a new raw `Tweet` object to update, or `null` to show the unavailable fallback. Data is a property, never a JSON attribute. In-place mutations do not trigger updates. The element validates synchronously with `TweetSchema`, copies the result, and runs the locally copied upstream `enrichTweet` implementation. It does not change the host's snapshot. `EnrichedTweet` is not an accepted input.
 
-Null or invalid data displays an unavailable card. Invalid data also logs its validation issues to `console.error`. Empty visible text stays empty, with available attribution retained. Schema defaults do not prove completeness: a default empty display range can hide nonempty raw text. Upstream range trimming and media entity omission are retained. Truncated snapshots cannot recover missing text. No requests are made until the reader follows a link.
+Null or invalid data displays an unavailable card. Invalid data also logs its validation issues to `console.error`. Empty visible text stays empty, with available attribution retained. Schema defaults do not prove completeness: a default empty display range can hide nonempty raw text. Upstream range trimming and media entity omission are retained. Truncated snapshots cannot recover missing text. Images, avatars, badges, and video posters load from the snapshot URLs. Videos use `preload="none"` and start through native controls. Sensitive media URLs are attached only after the reader clicks Show potentially sensitive media.
 
-Normal text entities are decoded once with `entities`, then rendered as text by Lit. Links accept absolute HTTP(S) destinations without credentials. Unsafe destinations stay readable as text. External links open in a new tab with `noopener noreferrer`.
+Text entities are decoded once with `entities`, then rendered as text by Lit. Links and media accept absolute HTTP(S) URLs without credentials. Hosts can rewrite media URLs in the snapshot to their own archive origin. Unsafe destinations stay readable as text. External links open in a new tab with `noopener noreferrer`.
+
+## Supported content
+
+The presentation follows [react-tweet 3.3.1](https://github.com/vercel/react-tweet/tree/react-tweet%403.3.1/packages/react-tweet/src/twitter-theme), using Lit and native browser controls.
+
+| Snapshot feature               | Rendering                                                                                                 |
+| ------------------------------ | --------------------------------------------------------------------------------------------------------- |
+| Author                         | Avatar, circle/square/hexagon shape, name, handle, verified account type, organization label, Follow link |
+| Text                           | Unicode, RTL, whitespace, links, hashtags, mentions, cashtags; `note_tweet` adds Show more                |
+| Photos                         | Responsive gallery, supplied alt text, native link to full image                                          |
+| Videos and animated GIFs       | Native controls and poster, MP4 preferred over HLS, GIF looping and muted audio; no autoplay              |
+| Legacy media                   | `photos` and `video` used when `mediaDetails` is absent or empty                                          |
+| Quotes and replies             | Quote card with media, saved parent text when present, Replying to link                                   |
+| Metadata                       | UTC timestamp, edited/earlier-version indicator                                                           |
+| Actions                        | Saved like and reply counts, X intent links, copy-link button with success/failure status                 |
+| Unavailable or sensitive media | Visible failure fallback or explicit reveal button                                                        |
+
+Replacing the snapshot resets media and copy state. Disconnecting or updating the element pauses its videos. Media errors leave an outbound link when attribution is valid. HLS playback depends on native browser support; no HLS player is bundled. Image links open the original resource in a new tab; there is no modal lightbox.
+
+Counts and badges describe the saved snapshot, not live account state. Like, Reply, Follow, and Show more navigate to X; they do not perform account actions inside the embed. Parent and quoted posts are limited to data included in `Tweet`; the component does not fetch a thread.
+
+The react-tweet snapshot contract does not provide poll choices/results, arbitrary website card previews, Community Notes, Spaces playback, or the missing body of a truncated long post. Those cannot be reconstructed from these types and are not invented by the renderer. A skeleton/fetching state is the host's responsibility because this element accepts synchronous snapshots.
 
 ## Styling
 
-The optional CSS uses light DOM and low-specificity selectors, scoped by the `data-post-embed="x-post"` attribute set on connection. The same theme applies to default and custom tag names. Without it, content remains readable and selectable. Styles use the `post-embed` cascade layer, nested selectors, and inherited custom properties registered with `@property`. Use `data-root`, `data-author`, `data-body`, `data-text`, `data-footer`, and `data-fallback` to style parts. There is no shadow root or `::part` API.
+The optional CSS uses light DOM and low-specificity selectors, scoped by the `data-post-embed="x-post"` attribute set on connection. The same theme applies to default and custom tag names. Without it, content remains readable and selectable. Styles use the `post-embed` cascade layer, nested selectors, and inherited custom properties registered with `@property`. Use `data-root`, `data-author`, `data-body`, `data-text`, `data-footer`, `data-fallback`, `data-avatar`, `data-verified`, `data-label`, `data-media`, `data-media-item`, `data-quoted`, `data-actions`, and `data-sensitive` to style parts. There is no shadow root or `::part` API.
 
 ```css
 post-embed-x-post {
