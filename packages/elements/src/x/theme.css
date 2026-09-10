@@ -168,7 +168,7 @@
     :where([data-media][data-count='3'] [data-media-item]:first-child) {
       grid-row: span 2;
     }
-    :where([data-media-unavailable], [data-media-error], [data-sensitive]) {
+    :where([data-media-unavailable], [data-media-error]) {
       padding: 0.75rem;
       border: 1px solid var(--post-embed-border-color, currentColor);
       border-radius: 0.5rem;

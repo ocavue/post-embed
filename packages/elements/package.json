@@ -23,8 +23,8 @@
     "@aria-ui/core": "^0.2.1",
     "@post-embed/schema": "workspace:^",
     "@post-embed/types": "workspace:^",
-    "entities": "^8.1.0",
-    "lit-html": "^3.3.3"
+    "crelt": "^1.0.7",
+    "entities": "^8.1.0"
   },
   "devDependencies": {
     "@vitest/browser-playwright": "5.0.0",

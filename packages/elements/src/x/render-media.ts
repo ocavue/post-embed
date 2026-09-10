@@ -1,8 +1,7 @@
 import type { MediaDetails } from '@post-embed/types/internal/tweet/media'
 import type { TweetPhoto } from '@post-embed/types/internal/tweet/photo'
 import type { TweetVideo } from '@post-embed/types/internal/tweet/video'
-import { html, nothing, render } from 'lit-html'
-import { ifDefined } from 'lit-html/directives/if-defined.js'
+import el from 'crelt'
 
 import { renderLink } from './render-shared.ts'
 import { getSafeUrl } from './safe-url.ts'
@@ -56,85 +55,89 @@ function normalizeMedia(media: MediaDetails): Media {
   }
 }
 
-function showMediaError(element: HTMLElement) {
-  element.hidden = true
-  const message = element
-    .closest('[data-media-item]')
-    ?.querySelector<HTMLElement>('[data-media-error]')
-  if (message) message.hidden = false
-}
-function onMediaError(event: Event) {
-  const target = event.currentTarget as HTMLElement
-  if (target.tagName === 'SOURCE') {
-    target.dataset.failed = ''
-    const video = target.parentElement!
-    if (
-      Array.from(video.querySelectorAll('source')).every((item) => {
-        return item.hasAttribute('data-failed')
-      })
-    )
-      showMediaError(video)
-  } else {
-    showMediaError(target.tagName === 'IMG' ? target.parentElement! : target)
-  }
-}
-
-function renderSource(source: Media['sources'][number]) {
-  return html`<source
-    src=${source.url}
-    type=${source.type}
-    @error=${onMediaError}
-  />`
-}
-
 function renderItem(media: Media, permalink?: string) {
   if (
     media.unavailable ||
     (media.type === 'photo' ? !media.poster : media.sources.length === 0)
   ) {
-    return html`<div data-media-unavailable>
-      Media unavailable. ${renderLink('View on X', permalink)}
-    </div>`
+    return el(
+      'div',
+      { 'data-media-unavailable': '' },
+      'Media unavailable. ',
+      renderLink('View on X', permalink),
+    )
   }
-  return html`<div data-media-item>
-    ${
-      media.type === 'photo'
-        ? html`<a
-            href=${media.poster!}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <img
-              src=${media.poster!}
-              alt=${media.alt}
-              width=${ifDefined(dimension(media.width))}
-              height=${ifDefined(dimension(media.height))}
-              loading="lazy"
-              decoding="async"
-              referrerpolicy="no-referrer"
-              @error=${onMediaError}
-            />
-          </a>`
-        : html`<video
-            controls
-            playsinline
-            preload="none"
-            aria-label=${media.alt}
-            poster=${ifDefined(media.poster)}
-            width=${ifDefined(dimension(media.width))}
-            height=${ifDefined(dimension(media.height))}
-            ?loop=${media.type === 'animated_gif'}
-            .muted=${media.type === 'animated_gif'}
-            @error=${onMediaError}
-          >
-            ${media.sources.map(renderSource)}
-            ${renderLink('Watch on X', permalink)}
-          </video>`
+
+  const error = el(
+    'div',
+    { 'data-media-error': '', hidden: true },
+    'Media could not be loaded. ',
+    renderLink('View on X', permalink),
+  )
+  let content: HTMLAnchorElement | HTMLVideoElement
+  if (media.type === 'photo') {
+    const image = el('img', {
+      src: media.poster!,
+      alt: media.alt,
+      width: dimension(media.width),
+      height: dimension(media.height),
+      loading: 'lazy',
+      decoding: 'async',
+      referrerpolicy: 'no-referrer',
+    })
+    const link = el(
+      'a',
+      {
+        href: media.poster!,
+        target: '_blank',
+        rel: 'noopener noreferrer',
+      },
+      image,
+    )
+    image.addEventListener('error', () => {
+      link.hidden = true
+      error.hidden = false
+    })
+    content = link
+  } else {
+    const sources = media.sources.map((source) => {
+      return el('source', { src: source.url, type: source.type })
+    })
+    const video = el(
+      'video',
+      {
+        controls: true,
+        playsInline: true,
+        preload: 'none',
+        'aria-label': media.alt,
+        poster: media.poster,
+        width: dimension(media.width),
+        height: dimension(media.height),
+        loop: media.type === 'animated_gif',
+      },
+      sources,
+      renderLink('Watch on X', permalink),
+    )
+    video.muted = media.type === 'animated_gif'
+    const showError = () => {
+      video.hidden = true
+      error.hidden = false
     }
-    <div data-media-error hidden>
-      Media could not be loaded. ${renderLink('View on X', permalink)}
-    </div>
-  </div>`
+    video.addEventListener('error', showError)
+    let failedSources = 0
+    for (const source of sources) {
+      source.addEventListener(
+        'error',
+        () => {
+          failedSources++
+          if (failedSources === sources.length) showError()
+        },
+        { once: true },
+      )
+    }
+    content = video
+  }
+  return el('div', { 'data-media-item': '' }, content, error)
 }
 
 export function renderMedia(
@@ -144,7 +147,6 @@ export function renderMedia(
     video?: TweetVideo
   },
   permalink?: string,
-  sensitive = false,
 ) {
   const media = tweet.mediaDetails?.map(normalizeMedia) || []
   if (media.length === 0) {
@@ -187,27 +189,10 @@ export function renderMedia(
       })
     }
   }
-  if (media.length === 0) return nothing
-  const gallery = () => {
-    return html`<div data-media data-count=${media.length}>
-      ${media.map((item) => renderItem(item, permalink))}
-    </div>`
-  }
-  // Do not insert image/video URLs until the reader opts in.
-  return sensitive
-    ? html`<div data-sensitive>
-        <button
-          type="button"
-          @click=${(event: Event) => {
-            const button = event.currentTarget as HTMLButtonElement
-            const container = button.nextElementSibling as HTMLElement
-            render(gallery(), container)
-            button.hidden = true
-          }}
-        >
-          Show potentially sensitive media
-        </button>
-        <div data-sensitive-content></div>
-      </div>`
-    : gallery()
+  if (media.length === 0) return
+  return el(
+    'div',
+    { 'data-media': '', 'data-count': String(media.length) },
+    media.map((item) => renderItem(item, permalink)),
+  )
 }
