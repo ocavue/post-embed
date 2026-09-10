@@ -4,6 +4,7 @@ package-lock.json
 CHANGELOG.md
 
 .cache
+.changeset
 .DS_Store
 .idea
 *.log
