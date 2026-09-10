@@ -188,13 +188,46 @@ describe('type defaults', () => {
     },
   )
 
-  test.each([undefined, null, [], [1], [1, 2, 3], 'pair'])(
-    'defaults invalid tuple length or container: %j',
+  test.each([undefined, null, 'pair'])(
+    'defaults an invalid tuple container: %j',
     async (value) => {
       expect(
         (await parse(tweetSchema, { ...minimal, display_text_range: value }))
           .display_text_range,
       ).toEqual([0, 0])
+    },
+  )
+
+  test.each([
+    { input: [], expected: [0, 0] },
+    { input: [1], expected: [1, 0] },
+    { input: [1, 2, 3], expected: [1, 2] },
+  ])('uses native tuple parsing for $input', async ({ input, expected }) => {
+    const tweet = await parse(tweetSchema, {
+      ...minimal,
+      display_text_range: input,
+    })
+    expect(tweet.display_text_range).toEqual(expected)
+  })
+
+  test.each([undefined, null, 'ratio'])(
+    'defaults both video aspect ratios: %j',
+    async (input) => {
+      const tweet = await parse(tweetSchema, {
+        ...minimal,
+        video: { aspectRatio: input, mediaAvailability: {}, videoId: {} },
+        mediaDetails: [
+          {
+            ...mediaObjects,
+            type: 'video',
+            video_info: { aspect_ratio: input },
+          },
+        ],
+      })
+      expect(tweet.video?.aspectRatio).toEqual([1, 1])
+      expect(tweet.mediaDetails?.[0]).toMatchObject({
+        video_info: { aspect_ratio: [1, 1] },
+      })
     },
   )
 
@@ -360,7 +393,7 @@ describe('union selection', () => {
       })
       if (type !== 'photo')
         expect(tweet.mediaDetails?.[0]).toHaveProperty('video_info', {
-          aspect_ratio: [0, 0],
+          aspect_ratio: [1, 1],
           variants: [],
         })
     },
@@ -502,7 +535,8 @@ test('schema definition files and names mirror the type declarations', () => {
         return (
           path.endsWith('.ts') &&
           !/\.test(?:-d)?\.ts$/.test(path) &&
-          !path.endsWith('/fixtures.ts')
+          !path.endsWith('/fixtures.ts') &&
+          path !== 'primitives.ts'
         )
       })
       .sort()

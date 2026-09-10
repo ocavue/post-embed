@@ -1,54 +1,47 @@
 import * as v from 'valibot'
-import { looseArray } from '../primitives'
+
+import { NumberSchema, StringSchema, looseArray } from '../primitives.ts'
 
 export const IndicesSchema = v.fallback(
-  v.pipe(
-    v.array(v.unknown()),
-    v.length(2),
-    v.strictTuple([
-      v.fallback(v.pipe(v.number(), v.finite()), 0),
-      v.fallback(v.pipe(v.number(), v.finite()), 0),
-    ]),
-  ),
-  () => [0, 0],
+  v.tuple([NumberSchema, NumberSchema]),
+  () => [0, 0] satisfies [number, number],
 )
 
 export const HashtagEntitySchema = v.object({
   indices: IndicesSchema,
-  text: v.fallback(v.string(), ''),
+  text: StringSchema,
 })
 
 export const UserMentionEntitySchema = v.object({
-  id_str: v.fallback(v.string(), ''),
+  id_str: StringSchema,
   indices: IndicesSchema,
-  name: v.fallback(v.string(), ''),
-  screen_name: v.fallback(v.string(), ''),
+  name: StringSchema,
+  screen_name: StringSchema,
 })
 
 export const MediaEntitySchema = v.object({
-  display_url: v.fallback(v.string(), ''),
-  expanded_url: v.fallback(v.string(), ''),
+  display_url: StringSchema,
+  expanded_url: StringSchema,
   indices: IndicesSchema,
-  url: v.fallback(v.string(), ''),
+  url: StringSchema,
 })
 
 export const UrlEntitySchema = v.object({
-  display_url: v.fallback(v.string(), ''),
-  expanded_url: v.fallback(v.string(), ''),
+  display_url: StringSchema,
+  expanded_url: StringSchema,
   indices: IndicesSchema,
-  url: v.fallback(v.string(), ''),
+  url: StringSchema,
 })
 
 export const SymbolEntitySchema = v.object({
   indices: IndicesSchema,
-  text: v.fallback(v.string(), ''),
+  text: StringSchema,
 })
 
 export const TweetEntitiesSchema = v.object({
-  // FIXME: use looseArray here instead of v.fallback(v.array(HashtagEntitySchema), () => []) to avoid duplication
   hashtags: looseArray(HashtagEntitySchema),
-  urls: v.fallback(v.array(UrlEntitySchema), () => []),
-  user_mentions: v.fallback(v.array(UserMentionEntitySchema), () => []),
-  symbols: v.fallback(v.array(SymbolEntitySchema), () => []),
-  media: v.optional(v.fallback(v.array(MediaEntitySchema), () => [])),
+  urls: looseArray(UrlEntitySchema),
+  user_mentions: looseArray(UserMentionEntitySchema),
+  symbols: looseArray(SymbolEntitySchema),
+  media: v.optional(looseArray(MediaEntitySchema)),
 })

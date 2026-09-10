@@ -1,5 +1,7 @@
 import * as v from 'valibot'
 
+import { StringSchema, looseArray } from '../primitives.ts'
+
 import {
   HashtagEntitySchema,
   IndicesSchema,
@@ -16,34 +18,34 @@ const TextEntitySchema = v.object({
 })
 
 const EntitySchema = v.intersect([
-  v.object({ text: v.fallback(v.string(), '') }),
+  v.object({ text: StringSchema }),
   v.union([
     TextEntitySchema,
     v.intersect([
       HashtagEntitySchema,
       v.object({
         type: v.literal('hashtag'),
-        href: v.fallback(v.string(), ''),
+        href: StringSchema,
       }),
     ]),
     v.intersect([
       UserMentionEntitySchema,
       v.object({
         type: v.literal('mention'),
-        href: v.fallback(v.string(), ''),
+        href: StringSchema,
       }),
     ]),
     v.intersect([
       UrlEntitySchema,
-      v.object({ type: v.literal('url'), href: v.fallback(v.string(), '') }),
+      v.object({ type: v.literal('url'), href: StringSchema }),
     ]),
     v.intersect([
       MediaEntitySchema,
-      v.object({ type: v.literal('media'), href: v.fallback(v.string(), '') }),
+      v.object({ type: v.literal('media'), href: StringSchema }),
     ]),
     v.intersect([
       SymbolEntitySchema,
-      v.object({ type: v.literal('symbol'), href: v.fallback(v.string(), '') }),
+      v.object({ type: v.literal('symbol'), href: StringSchema }),
     ]),
   ]),
 ])
@@ -51,23 +53,23 @@ const EntitySchema = v.intersect([
 export const EnrichedQuotedTweetSchema = v.intersect([
   v.omit(QuotedTweetSchema, ['entities']),
   v.object({
-    url: v.fallback(v.string(), ''),
-    entities: v.fallback(v.array(EntitySchema), () => []),
+    url: StringSchema,
+    entities: looseArray(EntitySchema),
   }),
 ])
 
 export const EnrichedTweetSchema = v.intersect([
   v.omit(TweetSchema, ['entities', 'quoted_tweet']),
   v.object({
-    url: v.fallback(v.string(), ''),
+    url: StringSchema,
     user: v.object({
-      url: v.fallback(v.string(), ''),
-      follow_url: v.fallback(v.string(), ''),
+      url: StringSchema,
+      follow_url: StringSchema,
     }),
-    like_url: v.fallback(v.string(), ''),
-    reply_url: v.fallback(v.string(), ''),
-    in_reply_to_url: v.optional(v.fallback(v.string(), '')),
-    entities: v.fallback(v.array(EntitySchema), () => []),
+    like_url: StringSchema,
+    reply_url: StringSchema,
+    in_reply_to_url: v.optional(StringSchema),
+    entities: looseArray(EntitySchema),
     quoted_tweet: v.optional(EnrichedQuotedTweetSchema),
   }),
 ])

@@ -19,17 +19,19 @@ Use `enrichedTweetSchema` for enriched input. Both exports use Valibot's native 
 
 Missing or invalid values use defaults declared directly in the field schemas:
 
-| Type            | Default                                                                       |
-| --------------- | ----------------------------------------------------------------------------- |
-| string          | `''`, including IDs, text, dates, and URLs                                    |
-| finite number   | `0`, also used for NaN and Infinity                                           |
-| boolean         | `false`                                                                       |
-| array           | `[]`                                                                          |
-| numeric pair    | `[0, 0]` for an invalid container or length; invalid elements default to `0`  |
-| literal         | The declared literal                                                          |
-| enum            | An explicit member, such as `Circle` for avatar shape                         |
-| required object | Must be present and pass `v.object`; fields may have defaults                 |
-| optional field  | Missing or undefined stays optional; supplied values use the field's defaults |
+| Type            | Default                                                                             |
+| --------------- | ----------------------------------------------------------------------------------- |
+| string          | `''`, including IDs, text, dates, and URLs                                          |
+| finite number   | `0`, also used for NaN and Infinity                                                 |
+| boolean         | `false`                                                                             |
+| array           | `[]`                                                                                |
+| numeric pair    | `[0, 0]` for invalid index containers; `[1, 1]` for invalid aspect-ratio containers |
+| literal         | The declared literal                                                                |
+| enum            | An explicit member, such as `Circle` for avatar shape                               |
+| required object | Must be present and pass `v.object`; fields may have defaults                       |
+| optional field  | Missing or undefined stays optional; supplied values use the field's defaults       |
+
+Numeric pairs use native `v.tuple` parsing: missing or invalid elements become 0, and extra elements are removed. For example, `[1]` becomes `[1, 0]` and `[1, 2, 3]` becomes `[1, 2]`. An empty array becomes `[0, 0]`; it does not trigger the whole aspect-ratio fallback.
 
 Valid strings, finite numbers, and booleans are preserved. There is no ID/date/URL format validation, positive-number restriction, range check, or scalar coercion. Unknown object keys are removed. Unknown verification badges become `undefined`.
 
@@ -43,7 +45,7 @@ Inputs are JSON-shaped data. Parsing does not mutate them, default arrays are fr
 
 ## Type correspondence
 
-Definition files under `src/` mirror `packages/types/src/`. Each named type `X` has an `XSchema` in the same relative file, with matching module export visibility. For example, `IndicesSchema` lives in `tweet/entities.ts`, `TweetEditControlSchema` in `tweet/edit.ts`, and enriched schemas in `tweet/enriched-tweet.ts`. Anonymous nested types have inline schemas.
+Tweet definition files mirror `packages/types/src/tweet/`. Shared `NumberSchema`, `StringSchema`, and `looseArray` live in `src/primitives.ts` to avoid duplicating fallback expressions. Each named type `X` has an `XSchema` in the same relative file, with matching module export visibility. For example, `IndicesSchema` lives in `tweet/entities.ts`, `TweetEditControlSchema` in `tweet/edit.ts`, and enriched schemas in `tweet/enriched-tweet.ts`. Anonymous nested types have inline schemas.
 
 Each definition file has a neighboring `*.test-d.ts` file, with an individual output-type check for every exported schema. Type tests import their counterparts through `@post-embed/types/internal/...`; relative imports under `src/` use `.ts` extensions. Tests also check file/name correspondence. Runtime tests and their fixtures remain under `src/`; they are test support, not mirrored type definitions.
 

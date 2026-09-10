@@ -1,15 +1,17 @@
 import * as v from 'valibot'
 
+import { StringSchema } from '../primitives.ts'
+
 export const HighlightedBadgeSchema = v.object({
-  url: v.fallback(v.string(), ''),
+  url: StringSchema,
 })
 
 export const UserHighlightedLabelSchema = v.object({
-  description: v.optional(v.fallback(v.string(), '')),
+  description: v.optional(StringSchema),
   badge: v.optional(HighlightedBadgeSchema),
   url: v.optional(
     v.object({
-      url: v.fallback(v.string(), ''),
+      url: StringSchema,
       url_type: v.fallback(v.literal('DeepLink'), 'DeepLink'),
     }),
   ),
@@ -18,14 +20,14 @@ export const UserHighlightedLabelSchema = v.object({
 })
 
 export const TweetUserSchema = v.object({
-  id_str: v.fallback(v.string(), ''),
-  name: v.fallback(v.string(), ''),
-  profile_image_url_https: v.fallback(v.string(), ''),
+  id_str: StringSchema,
+  name: StringSchema,
+  profile_image_url_https: StringSchema,
   profile_image_shape: v.fallback(
     v.picklist(['Circle', 'Square', 'Hexagon']),
     'Circle',
   ),
-  screen_name: v.fallback(v.string(), ''),
+  screen_name: StringSchema,
   verified: v.fallback(v.boolean(), false),
   verified_type: v.fallback(
     v.optional(v.picklist(['Business', 'Government'])),
