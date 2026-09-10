@@ -21,15 +21,19 @@ export function showTweet(container: HTMLElement, savedTweet: Tweet) {
 
 Register before creating the element or assigning data. Registration is a silent no-op if the name is already registered, and in Node. Importing does not register elements. Only `./x` and `./x/theme.css` are exported; there is no root entry.
 
+Pass a name to `registerXPost('my-x-post')` to register another tag. Multiple names can coexist. For custom names, use `XPostElement` to type the created element or extend your application's `HTMLElementTagNameMap`. The default tag name is the only one declared globally by this package.
+
+`XPostProps` describes the data property. The `@internal` `useXPost(host, props)` function is also exported for composing an aria-ui host with `State<XPostProps>`.
+
 Assign a new raw `Tweet` object to update, or `null` to clear. Data is a property, never a JSON attribute. In-place mutations do not trigger updates. The element validates with `tweetSchema`, copies the result, and runs the locally copied upstream `enrichTweet` implementation. It does not change the host's snapshot. `EnrichedTweet` is not an accepted input.
 
-Invalid data displays “Post data unavailable”. Empty visible text displays “No text available”. Schema defaults do not prove completeness: a default empty display range can hide nonempty raw text. Upstream range trimming and media entity omission are retained. Truncated snapshots cannot recover missing text. No requests are made until the reader follows a link.
+Invalid data displays “Post data unavailable”. Empty visible text stays empty, with available attribution retained. Schema defaults do not prove completeness: a default empty display range can hide nonempty raw text. Upstream range trimming and media entity omission are retained. Truncated snapshots cannot recover missing text. No requests are made until the reader follows a link.
 
 Normal text entities are decoded once with `entities`, then rendered as text by Lit. Links accept absolute HTTP(S) destinations without credentials. Unsafe destinations stay readable as text. External links open in a new tab with `noopener noreferrer`.
 
 ## Styling
 
-The optional CSS uses light DOM and low-specificity selectors. Without it, content remains readable and selectable. Use the `root`, `author`, `body`, and `footer` values of `data-post-part` to style parts. There is no shadow root or `::part` API.
+The optional CSS uses light DOM and low-specificity selectors, scoped by the `data-post-embed="x-post"` attribute set on connection. The same theme applies to default and custom tag names. Without it, content remains readable and selectable. Use the `root`, `author`, `body`, and `footer` values of `data-post-part` to style parts. There is no shadow root or `::part` API.
 
 ```css
 post-embed-x-post {

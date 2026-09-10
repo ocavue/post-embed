@@ -36,7 +36,7 @@ export function renderTweet(tweet: EnrichedTweet) {
           ? renderText(decodeHTML(entity.text))
           : renderLink(entity.text, entity.href)
       })
-    : 'No text available' // REVIEW：do not show "No text available".  "No text available" is our own word (english). We don't want to show our own word unless really really necessary.  Let's say the final user is a Japanese user.  If we show "No text available", the user will see English word, which is not good.  Just show nothing here
+    : nothing
 
   const content = html`<span style="white-space: pre-wrap">${body}</span>`
 

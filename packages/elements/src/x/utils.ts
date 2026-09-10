@@ -1,3 +1,5 @@
+// Source: https://github.com/vercel/react-tweet/blob/react-tweet@3.3.1/packages/react-tweet/src/utils.ts
+
 import type { EnrichedTweet, Tweet } from '@post-embed/types'
 import type {
   HashtagEntity,
@@ -9,12 +11,10 @@ import type {
 } from '@post-embed/types/internal/tweet/entities'
 import type { TweetBase } from '@post-embed/types/internal/tweet/tweet'
 
-/** @see https://github.com/vercel/react-tweet/blob/react-tweet@3.3.1/packages/react-tweet/src/utils.ts */
 function getTweetUrl(tweet: TweetBase) {
   return `https://x.com/${tweet.user.screen_name}/status/${tweet.id_str}`
 }
 
-/** @see https://github.com/vercel/react-tweet/blob/react-tweet@3.3.1/packages/react-tweet/src/utils.ts */
 function getUserUrl(usernameOrTweet: string | TweetBase) {
   return `https://x.com/${
     typeof usernameOrTweet === 'string'
@@ -23,34 +23,26 @@ function getUserUrl(usernameOrTweet: string | TweetBase) {
   }`
 }
 
-// REVIEW: FIXME: 好像你这整个文件都是从https://github.com/vercel/react-tweet/blob/react-tweet@3.3.1/packages/react-tweet/src/utils.ts 复制过来的，那么你就直接把这个 文件 叫做 packages/elements/src/x/utils.ts 就好，然后在文件的开头提一下你这个文件的代码来源，不需要每个函数都写 jsdom 说明引用。没必要
-
-/** @see https://github.com/vercel/react-tweet/blob/react-tweet@3.3.1/packages/react-tweet/src/utils.ts */
 function getLikeUrl(tweet: TweetBase) {
   return `https://x.com/intent/like?tweet_id=${tweet.id_str}`
 }
 
-/** @see https://github.com/vercel/react-tweet/blob/react-tweet@3.3.1/packages/react-tweet/src/utils.ts */
 function getReplyUrl(tweet: TweetBase) {
   return `https://x.com/intent/tweet?in_reply_to=${tweet.id_str}`
 }
 
-/** @see https://github.com/vercel/react-tweet/blob/react-tweet@3.3.1/packages/react-tweet/src/utils.ts */
 function getFollowUrl(tweet: TweetBase) {
   return `https://x.com/intent/follow?screen_name=${tweet.user.screen_name}`
 }
 
-/** @see https://github.com/vercel/react-tweet/blob/react-tweet@3.3.1/packages/react-tweet/src/utils.ts */
 function getHashtagUrl(hashtag: HashtagEntity) {
   return `https://x.com/hashtag/${hashtag.text}`
 }
 
-/** @see https://github.com/vercel/react-tweet/blob/react-tweet@3.3.1/packages/react-tweet/src/utils.ts */
 function getSymbolUrl(symbol: SymbolEntity) {
   return `https://x.com/search?q=%24${symbol.text}`
 }
 
-/** @see https://github.com/vercel/react-tweet/blob/react-tweet@3.3.1/packages/react-tweet/src/utils.ts */
 function getInReplyToUrl(tweet: Tweet) {
   return `https://x.com/${tweet.in_reply_to_screen_name}/status/${tweet.in_reply_to_status_id_str}`
 }
@@ -82,7 +74,6 @@ type Entity = {
   | (SymbolEntity & { type: 'symbol'; href: string })
 )
 
-/** @see https://github.com/vercel/react-tweet/blob/react-tweet@3.3.1/packages/react-tweet/src/utils.ts */
 function getEntities(tweet: TweetBase): Entity[] {
   const textMap = Array.from(tweet.text)
   const result: EntityWithType[] = [
@@ -123,7 +114,6 @@ function getEntities(tweet: TweetBase): Entity[] {
   })
 }
 
-/** @see https://github.com/vercel/react-tweet/blob/react-tweet@3.3.1/packages/react-tweet/src/utils.ts */
 function addEntities(
   result: EntityWithType[],
   type: EntityWithType['type'],
@@ -164,7 +154,6 @@ function addEntities(
 /**
  * Update display_text_range to work w/ Array.from
  * Array.from is unicode aware, unlike string.slice()
- * @see https://github.com/vercel/react-tweet/blob/react-tweet@3.3.1/packages/react-tweet/src/utils.ts
  */
 function fixRange(tweet: TweetBase, entities: EntityWithType[]) {
   const media = tweet.entities?.media
@@ -179,7 +168,6 @@ function fixRange(tweet: TweetBase, entities: EntityWithType[]) {
 
 /**
  * Enriches a tweet with additional data used to more easily use the tweet in a UI.
- * @see https://github.com/vercel/react-tweet/blob/react-tweet@3.3.1/packages/react-tweet/src/utils.ts
  */
 export function enrichTweet(tweet: Tweet): EnrichedTweet {
   return {

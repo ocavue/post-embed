@@ -266,19 +266,19 @@ importers:
   packages/elements:
     dependencies:
       '@aria-ui/core':
-        specifier: 0.2.1
+        specifier: ^0.2.1
         version: 0.2.1
       '@post-embed/schema':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../schema
       '@post-embed/types':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../types
       entities:
-        specifier: 8.1.0
+        specifier: ^8.1.0
         version: 8.1.0
       lit-html:
-        specifier: 3.3.3
+        specifier: ^3.3.3
         version: 3.3.3
     devDependencies:
       '@vitest/browser-playwright':

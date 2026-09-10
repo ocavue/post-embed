@@ -1,12 +1,13 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 import { page, server, userEvent } from 'vitest/browser'
 
 import { createMediaTweet, createTweet } from './testing/fixtures.ts'
 
-import { registerXPost } from './index.ts'
+import { registerXPost, type XPostElement } from './index.ts'
 
-// FIXME: run "registerXPost" in a beforeAll hook
-registerXPost()
+beforeAll(() => {
+  registerXPost()
+})
 
 function mount(text = 'Hello 😀\nA saved post.') {
   const element = document.createElement('post-embed-x-post')
@@ -83,7 +84,7 @@ describe('X post', () => {
   it('handles schema defaults without inventing attribution', async () => {
     const element = mount()
     Reflect.set(element, 'data', { user: {}, edit_control: {} })
-    await expect.element(post.getByText('No text available')).toBeVisible()
+    await expect.element(post).toHaveTextContent('')
     await expect.element(post.getByRole('link')).not.toBeInTheDocument()
   })
 
@@ -118,6 +119,37 @@ describe('X post', () => {
     await expect
       .element(page.getByTestId('second').getByText('Second'))
       .toBeVisible()
+  })
+
+  it('registers independent custom names alongside the default element', async () => {
+    registerXPost('custom-x-post')
+    registerXPost('another-x-post')
+    registerXPost('custom-x-post')
+    const element = document.createElement('custom-x-post') as XPostElement
+    element.dataset.testid = 'custom-post'
+    element.data = createTweet('Custom name')
+    document.body.append(element)
+    await expect
+      .element(page.getByTestId('custom-post').getByText('Custom name'))
+      .toBeVisible()
+    await expect
+      .element(page.getByTestId('custom-post'))
+      .toHaveAttribute('data-post-embed', 'x-post')
+    const another = document.createElement('another-x-post') as XPostElement
+    another.dataset.testid = 'another-post'
+    another.data = createTweet('Another name')
+    document.body.append(another)
+    await expect
+      .element(page.getByTestId('another-post').getByText('Another name'))
+      .toBeVisible()
+  })
+
+  it('keeps attribution when the body is empty', async () => {
+    mount('')
+    await expect
+      .element(post.getByRole('link', { name: 'View on X' }))
+      .toBeVisible()
+    await expect.element(post.getByRole('paragraph')).toHaveTextContent('')
   })
 
   it('does not mutate frozen host ranges, including quotes', async () => {

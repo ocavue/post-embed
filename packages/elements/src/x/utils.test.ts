@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
-import { enrichTweet } from './enrich-tweet.ts'
 import { createMediaTweet, createTweet } from './testing/fixtures.ts'
+import { enrichTweet } from './utils.ts'
 
 describe('enrichTweet', () => {
   it('splits Unicode text and ordered link entities', () => {
