@@ -1,7 +1,7 @@
 {
   "name": "@post-embed/exporter",
   "type": "module",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Read X post data from the page's own GraphQL responses",
   "license": "MIT",
   "repository": {
