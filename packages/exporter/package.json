@@ -25,11 +25,11 @@
     "@post-embed/types": "workspace:^",
     "birpc": "^4.2.0",
     "lru.min": "^1.1.5",
-    "valibot": "^1.4.2"
+    "valibot": "^1.5.0"
   },
   "devDependencies": {
     "@vitest/browser-playwright": "^5.0.0",
-    "playwright": "^1.58.0",
+    "playwright": "^1.58.2",
     "tsdown": "^0.23.0",
     "typescript": "^6.0.3",
     "vitest": "^5.0.0"

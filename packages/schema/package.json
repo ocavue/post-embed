@@ -21,7 +21,7 @@
   "dependencies": {
     "@post-embed/types": "workspace:*",
     "@standard-schema/spec": "^1.1.0",
-    "valibot": "^1.4.2"
+    "valibot": "^1.5.0"
   },
   "devDependencies": {
     "tsdown": "^0.23.0",
