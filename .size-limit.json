@@ -6,6 +6,12 @@
     "gzip": true
   },
   {
+    "name": "@post-embed/elements/youtube",
+    "path": "packages/elements/dist/youtube/index.js",
+    "import": "*",
+    "gzip": true
+  },
+  {
     "name": "@post-embed/schema",
     "path": "packages/schema/dist/index.js",
     "import": "*",
