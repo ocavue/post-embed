@@ -83,6 +83,16 @@ describe('toSegments', () => {
     ])
   })
 
+  it('keeps the display text of a link without a destination', () => {
+    expect(
+      toSegments('See https://t.co/a now', undefined, {
+        urls: [
+          { indices: [4, 18], display_url: 'example.com', expanded_url: '' },
+        ],
+      }),
+    ).toEqual([{ type: 'text', text: 'See example.com now' }])
+  })
+
   it('keeps newlines inside a segment and trims the trailing whitespace', () => {
     expect(toSegments('one\n\ntwo', undefined)).toEqual([
       { type: 'text', text: 'one\n\ntwo' },

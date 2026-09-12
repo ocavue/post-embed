@@ -76,25 +76,29 @@ export function toSegments(
   const start = Math.max(0, range?.[0] ?? 0)
   const end = Math.min(chars.length, range?.[1] ?? chars.length, mediaStart)
   const segments: XPostSegment[] = []
-  const pushText = (from: number, to: number) => {
-    if (to <= from) return
-    const value = decodeHTML(chars.slice(from, to).join(''))
-    if (value) segments.push({ type: 'text', text: value })
+  const pushText = (value: string) => {
+    if (!value) return
+    const last = segments.at(-1)
+    if (last?.type === 'text') last.text += value
+    else segments.push({ type: 'text', text: value })
+  }
+  const pushSlice = (from: number, to: number) => {
+    if (to > from) pushText(decodeHTML(chars.slice(from, to).join('')))
   }
   let cursor = start
   for (const link of links) {
     if (link.start < cursor || link.start >= end) continue
-    pushText(cursor, link.start)
-    if (link.end <= end && link.url) {
-      segments.push({
-        type: 'link',
-        text: decodeHTML(link.text),
-        url: link.url,
-      })
+    pushSlice(cursor, link.start)
+    if (link.end > end) {
+      cursor = end
+      continue
     }
-    cursor = Math.min(link.end, end)
+    const text = decodeHTML(link.text)
+    if (link.url) segments.push({ type: 'link', text, url: link.url })
+    else pushText(text)
+    cursor = link.end
   }
-  pushText(cursor, end)
+  pushSlice(cursor, end)
   const last = segments.at(-1)
   if (last?.type === 'text') {
     last.text = last.text.trimEnd()
