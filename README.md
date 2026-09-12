@@ -6,6 +6,7 @@ Snapshot post components for the web. Pass saved tweet or YouTube oEmbed data to
 - `@post-embed/schema`: Standard Schema validation with field defaults.
 - `@post-embed/elements/x`: the X post element with text, media, quotes, and explicit registration.
 - `@post-embed/elements/youtube`: the YouTube video card built from oEmbed data, with optional click-to-play.
+- `@post-embed/exporter/x`: reads X posts from the GraphQL responses the x.com page receives and normalizes them to `Tweet`, for MAIN world content scripts.
 
 See [the element documentation](packages/elements/README.md) for usage and styling.
 
