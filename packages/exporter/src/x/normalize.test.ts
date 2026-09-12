@@ -162,6 +162,19 @@ describe('toXPost', () => {
     ])
   })
 
+  it('keeps the truncated legacy text when the note result has no text', () => {
+    const long = findTweet(tweetDetail, '2000000000000000001')
+    const post = toXPost({
+      ...long,
+      note_tweet: { note_tweet_results: { result: { id: 'note' } } },
+    })!.post
+    const text = segmentsToText(post.body)
+    expect(text.startsWith('A long post keeps')).toBe(true)
+    expect(text.endsWith('never cut it at…')).toBe(true)
+    expect(post.truncated).toBe(true)
+    expect(post.media).toHaveLength(1)
+  })
+
   it('reads edit_control_initial for an edited post', () => {
     const edited = findTweet(tweetDetail, '2000000000000000001')
     expect(toXPost(edited)!.post.edit).toBe('edited')

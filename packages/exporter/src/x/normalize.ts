@@ -189,7 +189,8 @@ function toEdit(result: GraphQLTweet): XPostBase['edit'] {
 /**
  * Fields shared by a top-level post and a quoted post. A long post's full
  * note text replaces the truncated `full_text`; the note's entities are
- * relative to it and it carries no media link.
+ * relative to it and it carries no media link. A note without text leaves
+ * the truncated `full_text` in place and marks the post truncated.
  */
 function toBase(result: GraphQLTweet, user: GraphQLUser): XPostBase {
   const legacy = result.legacy
@@ -199,8 +200,8 @@ function toBase(result: GraphQLTweet, user: GraphQLUser): XPostBase {
     id: result.rest_id,
     createdAt: toISODate(legacy.created_at),
     author: toAuthor(user),
-    body: note
-      ? toSegments(note.text ?? '', undefined, note.entity_set)
+    body: note?.text
+      ? toSegments(note.text, undefined, note.entity_set)
       : toSegments(legacy.full_text ?? '', legacy.display_text_range, {
           ...legacy.entities,
           media,
@@ -210,6 +211,7 @@ function toBase(result: GraphQLTweet, user: GraphQLUser): XPostBase {
   if (media.length > 0) post.media = media.map(toMedia)
   const edit = toEdit(result)
   if (edit) post.edit = edit
+  if (note && !note.text) post.truncated = true
   return post
 }
 
