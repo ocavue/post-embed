@@ -60,6 +60,7 @@ export function observeXTweets(options: XObserverOptions = {}): XObserver {
   const entries = new Map<string, XTweetEntry>()
   const listeners = new Set<(entry: XTweetEntry) => void>()
 
+  // FIXME: use lru.min npm package. do not write your own LRU cache.
   const remember = (entry: XTweetEntry) => {
     entries.delete(entry.tweet.id_str)
     entries.set(entry.tweet.id_str, entry)
