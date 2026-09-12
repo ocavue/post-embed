@@ -3,13 +3,31 @@ import '@post-embed/elements/x/theme.css'
 import type { Snapshot } from '../snapshots.ts'
 interface Props {
   snapshot: Snapshot
+  remote?: boolean
   dark?: boolean
   narrow?: boolean
 }
-const { snapshot, dark = false, narrow = false } = Astro.props
+const { snapshot, remote = false, dark = false, narrow = false } = Astro.props
 ---
 
 <post-embed-demo data-snapshot={snapshot} class:list={[{ dark, narrow }]}>
+  {
+    remote && (
+      <form>
+        <label>
+          Post URL or ID
+          <input
+            name="url"
+            type="text"
+            value="https://x.com/jack/status/20"
+            spellcheck="false"
+          />
+        </label>
+        <button type="submit">Load</button>
+      </form>
+    )
+  }
+  <p data-status role="status"></p>
   <nav aria-label="Debug controls">
     <button data-action="clear">Clear</button>
     <button data-action="restore">Restore</button>
@@ -23,22 +41,72 @@ const { snapshot, dark = false, narrow = false } = Astro.props
 
 <script>
   import { registerXPost } from '@post-embed/elements/x'
+  import type { Tweet } from '@post-embed/types'
+
   import { createSnapshot, type Snapshot } from '../snapshots.ts'
 
   registerXPost()
+
+  const API_URL = 'https://react-tweet.vercel.app/api/tweet/'
+
+  function parseTweetId(input: string): string | undefined {
+    const value = input.trim()
+    if (/^\d+$/.test(value)) return value
+    try {
+      return new URL(value).pathname.match(/\/status(?:es)?\/(\d+)/)?.[1]
+    } catch {
+      return undefined
+    }
+  }
   // A custom wrapper initializes each new story during Astro client navigation.
   class PostEmbedDemo extends HTMLElement {
     connectedCallback() {
       if (this.querySelector('post-embed-x-post')) return
       const preview = this.querySelector('[data-preview]')!
       const raw = this.querySelector('pre')!
+      const status = this.querySelector<HTMLElement>('[data-status]')!
+      const form = this.querySelector('form')
       const element = document.createElement('post-embed-x-post')
+      const setData = (data: Tweet | null) => {
+        element.data = data
+        raw.textContent = data ? JSON.stringify(data, null, 2) : ''
+      }
       const update = (snapshot: Snapshot) => {
-        element.data = createSnapshot(snapshot)
-        raw.textContent = JSON.stringify(element.data, null, 2)
+        setData(createSnapshot(snapshot))
+      }
+      const load = async () => {
+        const input = form!.elements.namedItem('url') as HTMLInputElement
+        const id = parseTweetId(input.value)
+        if (!id) {
+          status.textContent =
+            'Enter a post URL like https://x.com/jack/status/20 or a numeric ID.'
+          return
+        }
+        status.textContent = `Loading ${id}…`
+        setData(null)
+        try {
+          const response = await fetch(API_URL + id)
+          const json = (await response.json()) as { data?: Tweet | null }
+          if (!response.ok || !json.data) {
+            status.textContent = `Post ${id} was not found (HTTP ${response.status}).`
+            return
+          }
+          setData(json.data)
+          status.textContent = `Loaded ${id} from ${API_URL}`
+        } catch (error) {
+          status.textContent = `Failed to load ${id}: ${String(error)}`
+        }
+      }
+      const restore = () => {
+        if (form) void load()
+        else update(this.dataset.snapshot as Snapshot)
       }
       preview.append(element)
-      update(this.dataset.snapshot as Snapshot)
+      restore()
+      form?.addEventListener('submit', (event) => {
+        event.preventDefault()
+        void load()
+      })
       this.addEventListener('click', (event) => {
         if (!(event.target instanceof HTMLButtonElement)) return
         switch (event.target.dataset.action) {
@@ -46,7 +114,7 @@ const { snapshot, dark = false, narrow = false } = Astro.props
             update('missing')
             break
           case 'restore':
-            update(this.dataset.snapshot as Snapshot)
+            restore()
             break
           case 'update':
             update('plain')
@@ -88,6 +156,30 @@ const { snapshot, dark = false, narrow = false } = Astro.props
     --post-embed-border-color: #475a75;
     --post-embed-muted-color: #bac8dc;
     --post-embed-link-color: #9cc4ff;
+  }
+  form {
+    display: flex;
+    gap: 0.5rem;
+    align-items: end;
+    margin-bottom: 1rem;
+  }
+  label {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 0.25rem;
+    font-size: 0.9rem;
+  }
+  input {
+    font: inherit;
+  }
+  [data-status] {
+    margin: 0 0 1rem;
+    font-size: 0.9rem;
+    color: var(--post-embed-muted-color);
+  }
+  [data-status]:empty {
+    display: none;
   }
   nav {
     display: flex;

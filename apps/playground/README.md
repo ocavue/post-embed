@@ -15,8 +15,6 @@ Use the controls to clear, restore, replace, or reconnect a post and switch them
 
 Media assets are original synthetic fixtures in `public/media/`. The two-second MP4 is a silent animation of a moving square. Valid media examples load entirely from the playground origin; BrokenMedia intentionally returns a missing-image error. Videos start with native controls and never autoplay.
 
-The RemotePost story loads a real post by URL or ID through the public react-tweet API (`https://react-tweet.vercel.app/api/tweet/:id`). It needs network access and is meant for trying arbitrary posts, not for reproducible fixtures.
-
 Add fixtures in `src/snapshots.ts` or `src/media-snapshots.ts` and stories in `src/stories/XPost.stories.ts`.
 
 ```sh
