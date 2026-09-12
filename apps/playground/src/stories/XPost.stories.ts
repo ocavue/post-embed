@@ -2,7 +2,12 @@ import type { Snapshot } from '../snapshots.ts'
 
 import XPost from './XPost.astro'
 
-type Props = { snapshot: Snapshot; dark?: boolean; narrow?: boolean }
+type Props = {
+  snapshot: Snapshot
+  remote?: boolean
+  dark?: boolean
+  narrow?: boolean
+}
 export default { component: XPost }
 
 export const PlainText = { args: { snapshot: 'plain' } satisfies Props }
@@ -43,4 +48,8 @@ export const Note = { args: { snapshot: 'note' } satisfies Props }
 export const Counts = { args: { snapshot: 'counts' } satisfies Props }
 export const LegacyMedia = {
   args: { snapshot: 'legacy-media' } satisfies Props,
+}
+
+export const Remote = {
+  args: { snapshot: 'missing', remote: true } satisfies Props,
 }
