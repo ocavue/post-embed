@@ -30,10 +30,3 @@ export function renderDate(
     getPermalink(tweet),
   )
 }
-
-export function formatCount(count: number): string {
-  return new Intl.NumberFormat('en', {
-    notation: 'compact',
-    maximumFractionDigits: 1,
-  }).format(Number.isFinite(count) ? Math.max(0, Math.floor(count)) : 0)
-}

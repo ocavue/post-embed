@@ -5,7 +5,7 @@ import { decodeHTML } from 'entities'
 import { renderLink } from '../render-link.ts'
 import { getSafeUrl } from '../safe-url.ts'
 
-export function renderAuthor(user: TweetUser, follow = false) {
+export function renderAuthor(user: TweetUser) {
   if (!user.name && !user.screen_name) return
   const validHandle = /^\w{1,15}$/.test(user.screen_name)
   const avatar = getSafeUrl(user.profile_image_url_https)
@@ -78,16 +78,6 @@ export function renderAuthor(user: TweetUser, follow = false) {
             renderLink(
               `@${user.screen_name}`,
               validHandle ? `https://x.com/${user.screen_name}` : undefined,
-            ),
-          )
-        : undefined,
-      follow && validHandle
-        ? el(
-            'span',
-            { 'data-follow': '' },
-            renderLink(
-              'Follow',
-              `https://x.com/intent/follow?screen_name=${user.screen_name}`,
             ),
           )
         : undefined,
