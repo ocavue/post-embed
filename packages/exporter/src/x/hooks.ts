@@ -7,7 +7,7 @@ export interface ObservedResponse {
 
 export interface ResponseHookOptions {
   /**
-   * The realm whose `fetch` and `XMLHttpRequest` to wrap.
+   * The realm whose `fetch` or `XMLHttpRequest` to wrap.
    */
   target: typeof globalThis
   /**
@@ -18,33 +18,16 @@ export interface ResponseHookOptions {
   onError?: (error: unknown) => void
 }
 
-function requestURL(input: RequestInfo | URL): string {
-  if (typeof input === 'string') return input
-  if (input instanceof URL) return input.href
-  return input.url
+interface Guarded {
+  resolve: (url: string) => string | undefined
+  deliver: (response: ObservedResponse) => void
+  report: (error: unknown) => void
 }
 
 /**
- * `responseText` throws unless `responseType` is `''` or `'text'`; a `json`
- * response is re-serialized so every transport hands over a string.
+ * Wrap the consumer callbacks so nothing they throw can reach the page.
  */
-function readXHRBody(xhr: XMLHttpRequest): string | undefined {
-  if (xhr.responseType === '' || xhr.responseType === 'text') {
-    return xhr.responseText
-  }
-  if (xhr.responseType === 'json') return JSON.stringify(xhr.response)
-  return undefined
-}
-
-/**
- * Wrap `fetch` and `XMLHttpRequest.prototype.open` so matching responses are
- * copied to `onResponse` after the page has received them. Requests and
- * responses are never altered; a failure inside the hook is reported to
- * `onError` and otherwise invisible to the page. Returns an uninstaller that
- * restores the originals only if nothing else replaced them since.
- */
-export function installResponseHooks(options: ResponseHookOptions): () => void {
-  const { target, resolveOperation, onResponse } = options
+function guard(options: ResponseHookOptions): Guarded {
   const report = (error: unknown) => {
     try {
       options.onError?.(error)
@@ -52,23 +35,43 @@ export function installResponseHooks(options: ResponseHookOptions): () => void {
       // A broken error reporter must not break the page either.
     }
   }
-  const resolve = (url: string): string | undefined => {
-    try {
-      return resolveOperation(url)
-    } catch (error) {
-      report(error)
-      return undefined
-    }
+  return {
+    report,
+    resolve: (url) => {
+      try {
+        return options.resolveOperation(url)
+      } catch (error) {
+        report(error)
+        return
+      }
+    },
+    deliver: (response) => {
+      try {
+        options.onResponse(response)
+      } catch (error) {
+        report(error)
+      }
+    },
   }
-  const deliver = (response: ObservedResponse) => {
-    try {
-      onResponse(response)
-    } catch (error) {
-      report(error)
-    }
-  }
+}
 
+function requestURL(input: RequestInfo | URL): string {
+  if (typeof input === 'string') return input
+  if (input instanceof URL) return input.href
+  return input.url
+}
+
+/**
+ * Wrap `fetch` so matching responses are copied to `onResponse` after the
+ * page has received them. The page's request and response are never altered;
+ * a rejected fetch rejects exactly as before. Returns an uninstaller that
+ * restores the original only if nothing else replaced it since.
+ */
+export function installFetchHook(options: ResponseHookOptions): () => void {
+  const { target } = options
+  const { resolve, deliver, report } = guard(options)
   const originalFetch = target.fetch
+
   const wrappedFetch = function (
     this: unknown,
     input: RequestInfo | URL,
@@ -104,9 +107,36 @@ export function installResponseHooks(options: ResponseHookOptions): () => void {
   }
   target.fetch = wrappedFetch
 
-  const xhrPrototype = target.XMLHttpRequest.prototype
+  return () => {
+    if (target.fetch === wrappedFetch) target.fetch = originalFetch
+  }
+}
+
+/**
+ * `responseText` throws unless `responseType` is `''` or `'text'`; a `json`
+ * response is re-serialized so every transport hands over a string.
+ */
+function readXHRBody(xhr: XMLHttpRequest): string | undefined {
+  if (xhr.responseType === '' || xhr.responseType === 'text') {
+    return xhr.responseText
+  }
+  if (xhr.responseType === 'json') return JSON.stringify(xhr.response)
+  return undefined
+}
+
+/**
+ * Wrap `XMLHttpRequest.prototype.open` so a matching request gets a `load`
+ * listener that copies its body to `onResponse`. `send` and the event order
+ * are untouched, so other wrappers of `XMLHttpRequest` compose with this
+ * one. Returns an uninstaller that restores the original only if nothing
+ * else replaced it since.
+ */
+export function installXHRHook(options: ResponseHookOptions): () => void {
+  const { resolve, deliver, report } = guard(options)
+  const xhrPrototype = options.target.XMLHttpRequest.prototype
   // eslint-disable-next-line @typescript-eslint/unbound-method -- called with an explicit `this`
   const originalOpen = xhrPrototype.open
+
   const wrappedOpen = function (
     this: XMLHttpRequest,
     method: string,
@@ -144,7 +174,18 @@ export function installResponseHooks(options: ResponseHookOptions): () => void {
   xhrPrototype.open = wrappedOpen
 
   return () => {
-    if (target.fetch === wrappedFetch) target.fetch = originalFetch
     if (xhrPrototype.open === wrappedOpen) xhrPrototype.open = originalOpen
+  }
+}
+
+/**
+ * Install both hooks; the returned function uninstalls both.
+ */
+export function installResponseHooks(options: ResponseHookOptions): () => void {
+  const uninstallFetch = installFetchHook(options)
+  const uninstallXHR = installXHRHook(options)
+  return () => {
+    uninstallFetch()
+    uninstallXHR()
   }
 }
