@@ -59,6 +59,6 @@ export function showVideo(container: HTMLElement, url: string) {
 }
 ```
 
-The snapshot is the YouTube oEmbed response plus the video `url`; YouTube's oEmbed endpoint allows cross-origin requests, so `resolver` can call it directly, or assign a saved snapshot to `element.data` instead. The element renders a card with the poster, title, channel, and a "Watch on YouTube" link, and never creates an iframe unless you set `playback="inline"` (as an attribute or `element.playback = 'inline'`). In inline mode the poster becomes a play button, and clicking it swaps in the `youtube-nocookie.com` player. The poster loads from the saved `thumbnail_url`; point it at your own copy if the page must not contact Google's image CDN.
+The snapshot is the YouTube oEmbed response plus the video `url`; YouTube's oEmbed endpoint allows cross-origin requests, so `resolver` can call it directly, or assign a saved snapshot to `element.data` instead. The element renders the poster as a card with the title and channel over its top edge, and never creates an iframe unless you set `playback="inline"` (as an attribute or `element.playback = 'inline'`). In inline mode the poster becomes a play button, and clicking it swaps in the `youtube-nocookie.com` player. The poster loads from the saved `thumbnail_url`; point it at your own copy if the page must not contact Google's image CDN.
 
 See the [playground](../../apps/playground) for examples.

@@ -44,6 +44,8 @@
       color-mix(in srgb, currentColor 58%, transparent)
     );
     --_link: var(--post-embed-link-color, #1d9bf0);
+    --_radius: var(--post-embed-radius, 1rem);
+    --_page: var(--post-embed-background, Canvas);
     --_play: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M8 5v14l11-7z'/%3E%3C/svg%3E");
 
     display: block;
@@ -51,12 +53,8 @@
     color: var(--post-embed-color, inherit);
 
     :where([data-root]) {
-      background: var(--post-embed-background, transparent);
-      border: 1px solid var(--_hairline);
-      border-radius: var(--post-embed-radius, 1rem);
-      padding: var(--post-embed-padding, 1rem);
       overflow-wrap: anywhere;
-      line-height: 1.4;
+      line-height: 1.35;
     }
     :where([hidden]) {
       display: none !important;
@@ -75,15 +73,23 @@
       border-radius: 4px;
     }
 
-    /* Poster: a 16:9 box (9:16 for Shorts) that crops the letterbox bars of
-     * YouTube's 4:3 `hqdefault.jpg` thumbnails. */
+    /* The card is the poster. The article is the positioned box that the
+     * details overlay hangs from. */
+    :where(article) {
+      position: relative;
+      max-width: 100%;
+    }
+    :where([data-orientation='portrait']) {
+      max-width: 22rem;
+      margin-inline: auto;
+    }
     :where([data-poster], iframe) {
       position: relative;
       display: block;
       width: 100%;
       aspect-ratio: 16 / 9;
       border: 0;
-      border-radius: 0.75rem;
+      border-radius: var(--_radius);
       overflow: hidden;
       background: color-mix(in srgb, currentColor 6%, transparent);
     }
@@ -91,8 +97,6 @@
       [data-orientation='portrait'] [data-poster],
       [data-orientation='portrait'] iframe
     ) {
-      max-width: 22rem;
-      margin-inline: auto;
       aspect-ratio: 9 / 16;
     }
     :where(button[data-poster]) {
@@ -131,36 +135,57 @@
       background: #f00;
     }
 
-    /* Details */
+    /* Details: absolutely positioned over the top of the poster by default.
+     * Variants move or restyle it. */
     :where([data-details]) {
+      position: absolute;
+      inset: 0 0 auto 0;
       display: flex;
       flex-direction: column;
       align-items: flex-start;
       gap: 0.125rem;
-      margin-block-start: 0.75rem;
+      pointer-events: none;
+    }
+    :where([data-details] a, [data-details] span) {
+      pointer-events: auto;
     }
     :where([data-title]) {
       font-size: 1.0625em;
       font-weight: 700;
-      color: var(--post-embed-color, inherit);
+      color: inherit;
     }
     :where([data-details] > a:has([data-author]), [data-author]) {
-      font-size: 0.9375em;
-      color: var(--_muted);
+      font-size: 0.875em;
+      color: inherit;
+    }
+    /* Fallback and pending states keep a plain bordered box. */
+    :where([data-fallback]) {
+      border: 1px solid var(--_hairline);
+      border-radius: var(--_radius);
+      padding: var(--post-embed-padding, 1rem);
+    }
+    :where([data-fallback] [data-details]) {
+      position: static;
     }
     :where([data-body]) {
       margin-block: 0.5rem 0;
       color: var(--_muted);
     }
-
-    /* Footer */
     :where([data-footer]) {
+      display: block;
       margin-block-start: 0.75rem;
       font-size: 0.9375em;
       color: var(--_muted);
     }
-    :where([data-footer] > a) {
-      color: inherit;
+
+    :where([data-details]) {
+      padding: 0.875rem 1rem 2.5rem;
+      border-radius: var(--_radius) var(--_radius) 0 0;
+      background: linear-gradient(rgb(0 0 0 / 0.72), rgb(0 0 0 / 0));
+      color: #fff;
+    }
+    :where([data-details] > a:has([data-author]), [data-author]) {
+      color: rgb(255 255 255 / 0.82);
     }
   }
 }

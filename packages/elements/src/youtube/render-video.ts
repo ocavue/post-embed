@@ -77,10 +77,5 @@ export function renderVideo(
           )
         : undefined,
     ),
-    el(
-      'footer',
-      { 'data-footer': '' },
-      renderLink('Watch on YouTube', watchUrl),
-    ),
   )
 }

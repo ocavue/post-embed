@@ -37,9 +37,6 @@ describe('YouTube video', () => {
     await expect
       .element(video.getByRole('link', { name: 'Blender' }))
       .toHaveAttribute('href', 'https://www.youtube.com/@BlenderOfficial')
-    await expect
-      .element(video.getByRole('link', { name: 'Watch on YouTube' }))
-      .toHaveAttribute('href', watchUrl)
     const poster = element.querySelector('[data-poster]')
     expect(poster?.tagName).toBe('A')
     expect(poster?.getAttribute('href')).toBe(watchUrl)
@@ -73,7 +70,7 @@ describe('YouTube video', () => {
     expect(element.querySelector('button')).toBeNull()
     expect(document.activeElement).toBe(element.querySelector('iframe'))
     await expect
-      .element(video.getByRole('link', { name: 'Watch on YouTube' }))
+      .element(video.getByRole('link', { name: 'Big Buck Bunny' }))
       .toBeVisible()
   })
 
@@ -91,7 +88,7 @@ describe('YouTube video', () => {
       .element(video.getByRole('button', { name: 'Play: Big Buck Bunny' }))
       .not.toBeInTheDocument()
     await expect
-      .element(video.getByRole('link', { name: 'Watch on YouTube' }))
+      .element(video.getByRole('link', { name: 'Big Buck Bunny' }))
       .toBeVisible()
   })
 
@@ -104,7 +101,7 @@ describe('YouTube video', () => {
     // the only signal.
     element.data = createVideo('https://www.youtube.com/shorts/aqz-KE-bpKQ')
     await expect
-      .element(video.getByRole('link', { name: 'Watch on YouTube' }))
+      .element(video.getByRole('link', { name: 'Big Buck Bunny' }))
       .toHaveAttribute('href', 'https://www.youtube.com/watch?v=aqz-KE-bpKQ')
     expect(
       element.querySelector('article')?.getAttribute('data-orientation'),
@@ -194,17 +191,17 @@ describe('YouTube video', () => {
 
   it('applies the theme and inherits custom properties', async () => {
     const wrapper = document.createElement('div')
-    wrapper.style.setProperty('--post-embed-padding', '24px')
+    wrapper.style.setProperty('--post-embed-radius', '24px')
     document.body.append(wrapper)
     const element = mount()
     wrapper.append(element)
     await expect
       .element(video.getByRole('link', { name: 'Big Buck Bunny' }))
       .toBeVisible()
-    const root = element.querySelector('[data-root]')
+    const poster = element.querySelector('[data-poster]')
     const image = element.querySelector('[data-poster] img')
-    if (!root || !image) throw new Error('Missing rendered video parts')
-    expect(getComputedStyle(root).padding).toBe('24px')
+    if (!poster || !image) throw new Error('Missing rendered video parts')
+    expect(getComputedStyle(poster).borderRadius).toBe('24px')
     expect(getComputedStyle(image).objectFit).toBe('cover')
   })
 })
@@ -225,7 +222,7 @@ describe('YouTube video fetch', () => {
     await expect.element(video.getByText('Loading this video…')).toBeVisible()
     resolve()
     await expect
-      .element(video.getByRole('link', { name: 'Watch on YouTube' }))
+      .element(video.getByRole('link', { name: 'Big Buck Bunny' }))
       .toHaveAttribute('href', watchUrl)
     expect(resolver).toHaveBeenCalledWith(watchUrl)
     expect(element.data).toBeNull()
