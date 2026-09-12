@@ -1,0 +1,205 @@
+---
+import '@post-embed/elements/youtube/theme.css'
+import type { YouTubeSnapshot } from '../youtube-snapshots.ts'
+interface Props {
+  snapshot: YouTubeSnapshot
+  inline?: boolean
+  remote?: boolean
+  dark?: boolean
+  narrow?: boolean
+}
+const {
+  snapshot,
+  inline = false,
+  remote = false,
+  dark = false,
+  narrow = false,
+} = Astro.props
+---
+
+<post-embed-youtube-demo
+  data-snapshot={snapshot}
+  data-inline={inline ? '' : undefined}
+  class:list={[{ dark, narrow }]}
+>
+  {
+    remote && (
+      <form>
+        <label>
+          Video URL
+          <input
+            name="url"
+            type="text"
+            value="https://www.youtube.com/watch?v=aqz-KE-bpKQ"
+            spellcheck="false"
+          />
+        </label>
+        <button type="submit">Load</button>
+      </form>
+    )
+  }
+  <p data-status role="status"></p>
+  <nav aria-label="Debug controls">
+    <button data-action="clear">Clear</button>
+    <button data-action="restore">Restore</button>
+    <button data-action="playback">Toggle inline playback</button>
+    <button data-action="reconnect">Remove / reinsert</button>
+    <button data-action="theme">Toggle dark theme</button>
+  </nav>
+  <div data-preview></div>
+  <details><summary>Raw snapshot</summary><pre></pre></details>
+</post-embed-youtube-demo>
+
+<script>
+  import { registerYouTubeVideo } from '@post-embed/elements/youtube'
+  import type { YouTubeVideo } from '@post-embed/types'
+
+  import {
+    createYouTubeSnapshot,
+    type YouTubeSnapshot,
+  } from '../youtube-snapshots.ts'
+
+  registerYouTubeVideo()
+
+  const OEMBED_URL = 'https://www.youtube.com/oembed'
+
+  // A custom wrapper initializes each new story during Astro client navigation.
+  class PostEmbedYouTubeDemo extends HTMLElement {
+    connectedCallback() {
+      if (this.querySelector('post-embed-youtube-video')) return
+      const preview = this.querySelector('[data-preview]')!
+      const raw = this.querySelector('pre')!
+      const status = this.querySelector<HTMLElement>('[data-status]')!
+      const form = this.querySelector('form')
+      const element = document.createElement('post-embed-youtube-video')
+      element.playback = 'inline' in this.dataset ? 'inline' : 'link'
+      const setData = (data: YouTubeVideo | null) => {
+        element.data = data
+        raw.textContent = data ? JSON.stringify(data, null, 2) : ''
+      }
+      const update = (snapshot: YouTubeSnapshot) => {
+        setData(createYouTubeSnapshot(snapshot))
+      }
+      const load = async () => {
+        const input = form!.elements.namedItem('url') as HTMLInputElement
+        const url = input.value.trim()
+        status.textContent = `Loading ${url}…`
+        setData(null)
+        try {
+          const response = await fetch(
+            `${OEMBED_URL}?url=${encodeURIComponent(url)}&format=json`,
+          )
+          if (!response.ok) {
+            status.textContent = `Video was not found (HTTP ${response.status}).`
+            return
+          }
+          const json = (await response.json()) as Omit<YouTubeVideo, 'url'>
+          setData({ url, ...json })
+          status.textContent = `Loaded from ${OEMBED_URL}`
+        } catch (error) {
+          status.textContent = `Failed to load ${url}: ${String(error)}`
+        }
+      }
+      const restore = () => {
+        if (form) void load()
+        else update(this.dataset.snapshot as YouTubeSnapshot)
+      }
+      preview.append(element)
+      restore()
+      form?.addEventListener('submit', (event) => {
+        event.preventDefault()
+        void load()
+      })
+      this.addEventListener('click', (event) => {
+        if (!(event.target instanceof HTMLButtonElement)) return
+        switch (event.target.dataset.action) {
+          case 'clear':
+            update('missing')
+            break
+          case 'restore':
+            restore()
+            break
+          case 'playback':
+            element.playback = element.playback === 'inline' ? 'link' : 'inline'
+            break
+          case 'reconnect':
+            element.remove()
+            preview.append(element)
+            break
+          case 'theme':
+            this.classList.toggle('dark')
+            break
+        }
+      })
+    }
+  }
+  if (!customElements.get('post-embed-youtube-demo'))
+    customElements.define('post-embed-youtube-demo', PostEmbedYouTubeDemo)
+</script>
+
+<style>
+  post-embed-youtube-demo {
+    display: block;
+    max-width: 42rem;
+    margin: 2rem auto;
+    padding: 1rem;
+    font: 16px/1.5 system-ui;
+    color: #253044;
+    background: #fff;
+    --post-embed-border-color: #cbd5e1;
+    --post-embed-muted-color: #526074;
+  }
+  .narrow {
+    max-width: 20rem;
+  }
+  .dark {
+    color: #edf4ff;
+    background: #172237;
+    --post-embed-background: #172237;
+    --post-embed-border-color: #475a75;
+    --post-embed-muted-color: #bac8dc;
+    --post-embed-link-color: #9cc4ff;
+  }
+  form {
+    display: flex;
+    gap: 0.5rem;
+    align-items: end;
+    margin-bottom: 1rem;
+  }
+  label {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 0.25rem;
+    font-size: 0.9rem;
+  }
+  input {
+    font: inherit;
+  }
+  [data-status] {
+    margin: 0 0 1rem;
+    font-size: 0.9rem;
+    color: var(--post-embed-muted-color);
+  }
+  [data-status]:empty {
+    display: none;
+  }
+  nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+  button {
+    font: inherit;
+    cursor: pointer;
+  }
+  details {
+    margin-top: 1rem;
+  }
+  pre {
+    overflow: auto;
+    max-height: 24rem;
+    font-size: 0.8rem;
+  }
+</style>

@@ -1,6 +1,6 @@
 # Post Embed playground
 
-Astrobook stories for the local `@post-embed/elements/x` implementation.
+Astrobook stories for the local `@post-embed/elements/x` and `@post-embed/elements/youtube` implementations.
 
 ```sh
 pnpm install
@@ -16,6 +16,8 @@ Use the controls to clear, restore, replace, or reconnect a post and switch them
 Media assets are original synthetic fixtures in `public/media/`. The two-second MP4 is a silent animation of a moving square. Valid media examples load entirely from the playground origin; BrokenMedia intentionally returns a missing-image error. Videos start with native controls and never autoplay.
 
 Add fixtures in `src/snapshots.ts` or `src/media-snapshots.ts` and stories in `src/stories/XPost.stories.ts`.
+
+The YouTubeVideo stories render `@post-embed/elements/youtube` from synthetic oEmbed snapshots with a local poster. Basic, LongTitle, Short, StartTime, NoAuthor, DarkTheme, Narrow, MissingData, and InvalidData never contact YouTube. Inline reaches YouTube only after you click the poster, and Remote fetches `https://www.youtube.com/oembed` for the URL you enter. Add fixtures in `src/youtube-snapshots.ts` and stories in `src/stories/YouTubeVideo.stories.ts`.
 
 ```sh
 pnpm --filter @post-embed/playground build

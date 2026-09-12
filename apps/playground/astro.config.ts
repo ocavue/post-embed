@@ -7,7 +7,8 @@ const config: unknown = defineConfig({
       directory: 'src/stories',
       title: 'Post Embed',
       homeContent: {
-        subtitle: 'Local X post snapshots for debugging and testing',
+        subtitle:
+          'Local X post and YouTube video snapshots for debugging and testing',
       },
     }),
   ],
