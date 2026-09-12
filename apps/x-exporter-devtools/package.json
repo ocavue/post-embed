@@ -1,0 +1,24 @@
+{
+  "name": "@post-embed/x-exporter-devtools",
+  "type": "module",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Browser extension that verifies @post-embed/exporter on x.com. Not for distribution.",
+  "scripts": {
+    "build": "wxt build",
+    "dev": "wxt",
+    "postinstall": "wxt prepare",
+    "typecheck": "wxt prepare && tsc -b"
+  },
+  "dependencies": {
+    "@post-embed/elements": "workspace:*",
+    "@post-embed/exporter": "workspace:*",
+    "@post-embed/types": "workspace:*",
+    "crelt": "^1.0.7"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.3",
+    "vite": "^8.2.2",
+    "wxt": "^0.21.4"
+  }
+}

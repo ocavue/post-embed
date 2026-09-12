@@ -1,0 +1,343 @@
+{
+  "data": {
+    "threaded_conversation_with_injections_v2": {
+      "instructions": [
+        {
+          "type": "TimelineAddEntries",
+          "entries": [
+            {
+              "entryId": "tweet-2000000000000000001",
+              "sortIndex": "2000000000000000009",
+              "content": {
+                "entryType": "TimelineTimelineItem",
+                "__typename": "TimelineTimelineItem",
+                "itemContent": {
+                  "itemType": "TimelineTweet",
+                  "__typename": "TimelineTweet",
+                  "tweet_results": {
+                    "result": {
+                      "__typename": "Tweet",
+                      "rest_id": "2000000000000000001",
+                      "core": {
+                        "user_results": {
+                          "result": {
+                            "__typename": "User",
+                            "rest_id": "11",
+                            "is_blue_verified": true,
+                            "core": {
+                              "name": "Ada Example",
+                              "screen_name": "ada"
+                            },
+                            "avatar": {
+                              "image_url": "https://pbs.twimg.com/profile_images/11/ada_normal.jpg"
+                            },
+                            "verification": { "verified": false },
+                            "privacy": { "protected": false }
+                          }
+                        }
+                      },
+                      "edit_control": {
+                        "initial_tweet_id": "2000000000000000000",
+                        "edit_control_initial": {
+                          "edit_tweet_ids": [
+                            "2000000000000000000",
+                            "2000000000000000001"
+                          ],
+                          "editable_until_msecs": "1704100000000",
+                          "is_edit_eligible": true,
+                          "edits_remaining": "4"
+                        }
+                      },
+                      "note_tweet": {
+                        "is_expandable": true,
+                        "note_tweet_results": {
+                          "result": {
+                            "id": "Tm90ZVR3ZWV0OjIwMDAwMDAwMDAwMDAwMDAwMDE=",
+                            "text": "A long post keeps every paragraph in the note text, well past the two hundred and eighty character limit that the legacy full_text field still enforces. The exporter must render this whole body, keep the link https://example.com/long readable, and never cut it at the media entity. 😀 Done.",
+                            "entity_set": {
+                              "hashtags": [],
+                              "urls": [
+                                {
+                                  "display_url": "example.com/long",
+                                  "expanded_url": "https://example.com/long",
+                                  "indices": [212, 236],
+                                  "url": "https://example.com/long"
+                                }
+                              ],
+                              "user_mentions": [],
+                              "symbols": []
+                            }
+                          }
+                        }
+                      },
+                      "legacy": {
+                        "created_at": "Mon Jan 01 10:00:00 +0000 2024",
+                        "conversation_id_str": "2000000000000000001",
+                        "display_text_range": [0, 275],
+                        "entities": {
+                          "hashtags": [],
+                          "urls": [],
+                          "user_mentions": [],
+                          "symbols": [],
+                          "media": [
+                            {
+                              "type": "photo",
+                              "id_str": "2000000000000000010",
+                              "media_key": "3_2000000000000000010",
+                              "display_url": "pic.x.com/long1",
+                              "expanded_url": "https://x.com/ada/status/2000000000000000001/photo/1",
+                              "indices": [276, 299],
+                              "media_url_https": "https://pbs.twimg.com/media/long1.jpg",
+                              "url": "https://t.co/long1",
+                              "original_info": {
+                                "height": 1000,
+                                "width": 1500
+                              },
+                              "sizes": {
+                                "large": {
+                                  "h": 1000,
+                                  "w": 1500,
+                                  "resize": "fit"
+                                },
+                                "medium": {
+                                  "h": 800,
+                                  "w": 1200,
+                                  "resize": "fit"
+                                },
+                                "small": {
+                                  "h": 453,
+                                  "w": 680,
+                                  "resize": "fit"
+                                },
+                                "thumb": {
+                                  "h": 150,
+                                  "w": 150,
+                                  "resize": "crop"
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        "extended_entities": {
+                          "media": [
+                            {
+                              "type": "photo",
+                              "id_str": "2000000000000000010",
+                              "media_key": "3_2000000000000000010",
+                              "display_url": "pic.x.com/long1",
+                              "expanded_url": "https://x.com/ada/status/2000000000000000001/photo/1",
+                              "indices": [276, 299],
+                              "media_url_https": "https://pbs.twimg.com/media/long1.jpg",
+                              "url": "https://t.co/long1",
+                              "ext_alt_text": "A photo under a long post",
+                              "ext_media_availability": {
+                                "status": "Available"
+                              },
+                              "original_info": {
+                                "height": 1000,
+                                "width": 1500,
+                                "focus_rects": []
+                              },
+                              "sizes": {
+                                "large": {
+                                  "h": 1000,
+                                  "w": 1500,
+                                  "resize": "fit"
+                                },
+                                "medium": {
+                                  "h": 800,
+                                  "w": 1200,
+                                  "resize": "fit"
+                                },
+                                "small": {
+                                  "h": 453,
+                                  "w": 680,
+                                  "resize": "fit"
+                                },
+                                "thumb": {
+                                  "h": 150,
+                                  "w": 150,
+                                  "resize": "crop"
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        "favorite_count": 40,
+                        "full_text": "A long post keeps every paragraph in the note text, well past the two hundred and eighty character limit that the legacy full_text field still enforces. The exporter must render this whole body, keep the link https://t.co/long readable, and never cut it at… https://t.co/long1",
+                        "lang": "en",
+                        "possibly_sensitive": false,
+                        "reply_count": 6,
+                        "retweet_count": 3
+                      }
+                    }
+                  },
+                  "tweetDisplayType": "Tweet"
+                }
+              }
+            },
+            {
+              "entryId": "conversationthread-2000000000000000001",
+              "sortIndex": "2000000000000000008",
+              "content": {
+                "entryType": "TimelineTimelineModule",
+                "__typename": "TimelineTimelineModule",
+                "displayType": "VerticalConversation",
+                "items": [
+                  {
+                    "entryId": "conversationthread-2000000000000000001-tweet-2000000000000000002",
+                    "item": {
+                      "itemContent": {
+                        "itemType": "TimelineTweet",
+                        "__typename": "TimelineTweet",
+                        "tweet_results": {
+                          "result": {
+                            "__typename": "TweetWithVisibilityResults",
+                            "limitedActionResults": { "limited_actions": [] },
+                            "tweet": {
+                              "__typename": "Tweet",
+                              "rest_id": "2000000000000000002",
+                              "core": {
+                                "user_results": {
+                                  "result": {
+                                    "__typename": "User",
+                                    "rest_id": "12",
+                                    "is_blue_verified": false,
+                                    "core": {
+                                      "name": "Legacy Shape",
+                                      "screen_name": "legacy"
+                                    },
+                                    "avatar": {
+                                      "image_url": "https://pbs.twimg.com/profile_images/12/legacy_normal.jpg"
+                                    },
+                                    "verification": { "verified": false },
+                                    "privacy": { "protected": false }
+                                  }
+                                }
+                              },
+                              "legacy": {
+                                "created_at": "Mon Jan 01 11:00:00 +0000 2024",
+                                "conversation_id_str": "2000000000000000001",
+                                "display_text_range": [5, 20],
+                                "entities": {
+                                  "hashtags": [],
+                                  "urls": [],
+                                  "user_mentions": [
+                                    {
+                                      "id_str": "11",
+                                      "indices": [0, 4],
+                                      "name": "Ada Example",
+                                      "screen_name": "ada"
+                                    }
+                                  ],
+                                  "symbols": []
+                                },
+                                "favorite_count": 1,
+                                "full_text": "@ada Nice long post",
+                                "in_reply_to_screen_name": "ada",
+                                "in_reply_to_status_id_str": "2000000000000000001",
+                                "in_reply_to_user_id_str": "11",
+                                "lang": "en",
+                                "reply_count": 0,
+                                "retweet_count": 0
+                              }
+                            }
+                          }
+                        },
+                        "tweetDisplayType": "Tweet"
+                      }
+                    }
+                  },
+                  {
+                    "entryId": "conversationthread-2000000000000000001-cursor-showmore-1",
+                    "item": {
+                      "itemContent": {
+                        "itemType": "TimelineTimelineCursor",
+                        "__typename": "TimelineTimelineCursor",
+                        "value": "DAACCgAB",
+                        "cursorType": "ShowMore"
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "entryId": "tweet-2000000000000000003",
+              "sortIndex": "2000000000000000007",
+              "content": {
+                "entryType": "TimelineTimelineItem",
+                "__typename": "TimelineTimelineItem",
+                "itemContent": {
+                  "itemType": "TimelineTweet",
+                  "__typename": "TimelineTweet",
+                  "tweet_results": {
+                    "result": {
+                      "__typename": "TweetTombstone",
+                      "tombstone": {
+                        "__typename": "TextTombstone",
+                        "text": {
+                          "rtl": false,
+                          "text": "This Post was deleted by the Post author. Learn more",
+                          "entities": []
+                        }
+                      }
+                    }
+                  },
+                  "tweetDisplayType": "Tweet"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "type": "TimelineAddToModule",
+          "moduleEntryId": "conversationthread-2000000000000000001",
+          "prepend": false,
+          "moduleItems": [
+            {
+              "entryId": "conversationthread-2000000000000000001-tweet-2000000000000000004",
+              "item": {
+                "itemContent": {
+                  "itemType": "TimelineTweet",
+                  "__typename": "TimelineTweet",
+                  "tweet_results": {
+                    "result": {
+                      "__typename": "Tweet",
+                      "rest_id": "2000000000000000004",
+                      "core": {
+                        "user_results": {
+                          "result": {
+                            "__typename": "UserUnavailable",
+                            "message": "User is unavailable",
+                            "reason": "Suspended"
+                          }
+                        }
+                      },
+                      "legacy": {
+                        "created_at": "Mon Jan 01 12:00:00 +0000 2024",
+                        "display_text_range": [0, 9],
+                        "entities": {
+                          "hashtags": [],
+                          "urls": [],
+                          "user_mentions": [],
+                          "symbols": []
+                        },
+                        "favorite_count": 0,
+                        "full_text": "Suspended",
+                        "lang": "en",
+                        "reply_count": 0,
+                        "retweet_count": 0
+                      }
+                    }
+                  },
+                  "tweetDisplayType": "Tweet"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
