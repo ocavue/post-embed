@@ -1,0 +1,21 @@
+{
+  "extends": "@ocavue/tsconfig/dom/app.json",
+  "include": [
+    "./lib/**/*",
+    "./entrypoints/**/*",
+    "./.wxt/wxt.d.ts",
+    "./.wxt/types/*",
+    "./*.ts"
+  ],
+  "references": [
+    {
+      "path": "../../packages/elements/tsconfig.json"
+    },
+    {
+      "path": "../../packages/exporter/tsconfig.json"
+    },
+    {
+      "path": "../../packages/types/tsconfig.json"
+    }
+  ]
+}
