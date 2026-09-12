@@ -1,14 +1,7 @@
 import type { TweetBase } from '@post-embed/types/internal/tweet/tweet'
 import el from 'crelt'
 
-import { getSafeUrl } from './safe-url.ts'
-
-export function renderLink(content: string | Node, destination?: string) {
-  const href = destination && getSafeUrl(destination)
-  return href
-    ? el('a', { href, target: '_blank', rel: 'noopener noreferrer' }, content)
-    : content
-}
+import { renderLink } from '../render-link.ts'
 
 export function getPermalink(
   tweet: Pick<TweetBase, 'id_str' | 'user' | 'created_at'>,

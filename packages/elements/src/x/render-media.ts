@@ -3,8 +3,8 @@ import type { TweetPhoto } from '@post-embed/types/internal/tweet/photo'
 import type { TweetVideo } from '@post-embed/types/internal/tweet/video'
 import el from 'crelt'
 
-import { renderLink } from './render-shared.ts'
-import { getSafeUrl } from './safe-url.ts'
+import { renderLink } from '../render-link.ts'
+import { getSafeUrl } from '../safe-url.ts'
 
 interface Media {
   type: 'photo' | 'video' | 'animated_gif'

@@ -11,7 +11,9 @@
   },
   "exports": {
     "./x": "./src/x/index.ts",
-    "./x/theme.css": "./src/x/theme.css"
+    "./x/theme.css": "./src/x/theme.css",
+    "./youtube": "./src/youtube/index.ts",
+    "./youtube/theme.css": "./src/youtube/theme.css"
   },
   "files": [
     "dist"
@@ -40,7 +42,12 @@
         "types": "./dist/x/index.d.ts",
         "default": "./dist/x/index.js"
       },
-      "./x/theme.css": "./dist/x/theme.css"
+      "./x/theme.css": "./dist/x/theme.css",
+      "./youtube": {
+        "types": "./dist/youtube/index.d.ts",
+        "default": "./dist/youtube/index.js"
+      },
+      "./youtube/theme.css": "./dist/youtube/theme.css"
     }
   }
 }
