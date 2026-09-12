@@ -394,8 +394,14 @@ export function toTweet(result: GraphQLTweet): XTweetCapture | undefined {
     possibly_sensitive: legacy.possibly_sensitive,
   }
   const validated = TweetSchema['~standard'].validate(candidate)
-  // FIXME: console.error before return undefined
-  if (validated instanceof Promise || validated.issues) return undefined
+  if (validated instanceof Promise) return undefined
+  if (validated.issues) {
+    console.error(
+      `[post-embed] Post ${result.rest_id} failed TweetSchema:`,
+      validated.issues,
+    )
+    return undefined
+  }
   return {
     tweet: validated.value,
     protected: user.privacy?.protected ?? user.legacy?.protected ?? false,
