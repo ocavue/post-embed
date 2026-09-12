@@ -171,7 +171,7 @@ export function renderMedia(
         height: video.aspectRatio[1] * 100,
         unavailable: Boolean(
           video.mediaAvailability.status &&
-          video.mediaAvailability.status !== 'Available',
+          video.mediaAvailability.status.toLowerCase() !== 'available',
         ),
         sources: video.variants.flatMap((variant) => {
           const url = getSafeUrl(variant.src)
