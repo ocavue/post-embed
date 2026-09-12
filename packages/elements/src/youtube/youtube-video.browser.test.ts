@@ -210,9 +210,9 @@ describe('YouTube video', () => {
 })
 
 describe('YouTube video fetch', () => {
-  it('calls `onFetch` with `url` and renders the resolved snapshot', async () => {
+  it('calls `resolver` with `url` and renders the resolved snapshot', async () => {
     let resolve!: () => void
-    const onFetch = vi.fn((url: string) => {
+    const resolver = vi.fn((url: string) => {
       return new Promise<YouTubeVideo>((r) => {
         resolve = () => r(createVideo(url))
       })
@@ -220,14 +220,14 @@ describe('YouTube video fetch', () => {
     const element = document.createElement('post-embed-youtube-video')
     element.dataset.testid = 'video'
     element.url = watchUrl
-    element.onFetch = onFetch
+    element.resolver = resolver
     document.body.append(element)
     await expect.element(video.getByText('Loading this video…')).toBeVisible()
     resolve()
     await expect
       .element(video.getByRole('link', { name: 'Watch on YouTube' }))
       .toHaveAttribute('href', watchUrl)
-    expect(onFetch).toHaveBeenCalledWith(watchUrl)
+    expect(resolver).toHaveBeenCalledWith(watchUrl)
     expect(element.data).toBeNull()
     element.url = null
     await expect

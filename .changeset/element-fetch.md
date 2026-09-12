@@ -2,4 +2,4 @@
 '@post-embed/elements': minor
 ---
 
-Add `url` and `onFetch` properties so an element can load its own snapshot.
+Add `url` and `resolver` properties so an element can load its own snapshot.

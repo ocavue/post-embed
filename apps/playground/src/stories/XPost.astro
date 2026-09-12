@@ -74,7 +74,7 @@ const { snapshot, remote = false, dark = false, narrow = false } = Astro.props
       const update = (snapshot: Snapshot) => {
         setData(createSnapshot(snapshot))
       }
-      element.onFetch = async (url) => {
+      element.resolver = async (url) => {
         const id = parseTweetId(url)!
         try {
           const response = await fetch(API_URL + id)

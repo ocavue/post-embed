@@ -9,7 +9,7 @@ import {
 /**
  * Loads the snapshot for `url`. Return `undefined` when nothing was found.
  */
-export type FetchHandler<T> = (
+export type Resolver<T> = (
   url: string,
 ) => T | undefined | PromiseLike<T | undefined>
 
@@ -19,13 +19,13 @@ export interface FetchProps<T> {
    */
   data: T | null
   /**
-   * The URL to pass to `onFetch` when `data` is `null`.
+   * The URL to pass to `resolver` when `data` is `null`.
    */
   url: string | null
   /**
    * Called with `url` to load the snapshot when `data` is `null`.
    */
-  onFetch: FetchHandler<T> | null
+  resolver: Resolver<T> | null
 }
 
 /** @internal */
@@ -38,7 +38,7 @@ export interface FetchState<T> {
 }
 
 /**
- * Runs `onFetch(url)` whenever `data` is `null` and both `url` and `onFetch`
+ * Runs `resolver(url)` whenever `data` is `null` and both `url` and `resolver`
  * are set, ignoring results that arrive after the inputs changed or the host
  * disconnected.
  *
@@ -54,10 +54,10 @@ export function useFetch<T>(
 
   useHostEffect(host, () => {
     const url = props.url.get()
-    const onFetch = props.onFetch.get()
+    const resolver = props.resolver.get()
     fetched.set(null)
     pending.set(false)
-    if (props.data.get() != null || !url || !onFetch) return
+    if (props.data.get() != null || !url || !resolver) return
 
     let active = true
     const settle = (value: T | undefined) => {
@@ -71,9 +71,9 @@ export function useFetch<T>(
       settle(undefined)
     }
 
-    let result: ReturnType<FetchHandler<T>>
+    let result: ReturnType<Resolver<T>>
     try {
-      result = onFetch(url)
+      result = resolver(url)
     } catch (error) {
       fail(error)
       return

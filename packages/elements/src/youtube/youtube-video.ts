@@ -89,7 +89,7 @@ export const YouTubeVideoCustomElement = defineCustomElement(
   defineProps<YouTubeVideoProps>({
     data: { default: null, attribute: false },
     url: { default: null, attribute: false },
-    onFetch: { default: null, attribute: false },
+    resolver: { default: null, attribute: false },
     playback: { default: 'link', attribute: 'playback', type: 'string' },
   }),
 )

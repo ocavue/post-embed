@@ -80,7 +80,7 @@ const {
       const update = (snapshot: YouTubeSnapshot) => {
         setData(createYouTubeSnapshot(snapshot))
       }
-      element.onFetch = async (url) => {
+      element.resolver = async (url) => {
         try {
           const response = await fetch(
             `${OEMBED_URL}?url=${encodeURIComponent(url)}&format=json`,

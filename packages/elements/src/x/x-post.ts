@@ -76,6 +76,6 @@ export const XPost = defineCustomElement(
   defineProps<XPostProps>({
     data: { default: null, attribute: false },
     url: { default: null, attribute: false },
-    onFetch: { default: null, attribute: false },
+    resolver: { default: null, attribute: false },
   }),
 )
