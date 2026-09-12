@@ -129,8 +129,14 @@
       color: inherit;
     }
     :where([data-follow])::before {
-      content: '·';
+      content: '';
+      display: inline-block;
+      width: 3px;
+      height: 3px;
       margin-inline: 0.35rem;
+      border-radius: 50%;
+      background: currentColor;
+      vertical-align: middle;
     }
     :where([data-follow] > a) {
       font-weight: 600;
@@ -285,8 +291,14 @@
     :where([data-footer] > a:has(+ [data-actions]))::before,
     :where([data-footer] > [data-edited])::before,
     :where([data-quoted] [data-footer] > a:not(:has(time)))::before {
-      content: '·';
-      margin-inline: 0.4rem;
+      content: '';
+      display: inline-block;
+      width: 3px;
+      height: 3px;
+      margin-inline: 0.45rem;
+      border-radius: 50%;
+      background: currentColor;
+      vertical-align: middle;
     }
     :where([data-edited]) {
       font-style: normal;
