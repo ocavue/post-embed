@@ -32,7 +32,7 @@ describe('X post', () => {
     const element = mount()
     await expect.element(post.getByText(/Hello 😀/)).toBeVisible()
     await expect
-      .element(post.getByRole('link', { name: 'View on X' }))
+      .element(post.getByRole('link', { name: /Sep 10, 2026/ }))
       .toHaveAttribute(
         'href',
         'https://x.com/example/status/1234567890123456789',
@@ -211,7 +211,7 @@ describe('X post', () => {
   it('keeps attribution when the body is empty', async () => {
     mount('')
     await expect
-      .element(post.getByRole('link', { name: 'View on X' }))
+      .element(post.getByRole('link', { name: /Sep 10, 2026/ }))
       .toBeVisible()
     await expect.element(post.getByRole('paragraph')).toHaveTextContent('')
   })

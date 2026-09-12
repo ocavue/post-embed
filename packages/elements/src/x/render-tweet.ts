@@ -7,7 +7,7 @@ import { renderLink } from '../render-link.ts'
 
 import { renderAuthor } from './render-author.ts'
 import { renderMedia } from './render-media.ts'
-import { formatCount, getPermalink, renderDate } from './render-shared.ts'
+import { getPermalink, renderDate } from './render-shared.ts'
 
 type Post = EnrichedTweet | EnrichedQuotedTweet
 
@@ -43,7 +43,7 @@ function renderEdit(tweet: Post) {
         'span',
         { 'data-edited': '' },
         'This is an earlier version. ',
-        renderLink('View latest on X', getPermalink(tweet)),
+        renderLink('View latest', getPermalink(tweet)),
       )
     : tweet.isEdited
       ? el('span', { 'data-edited': '' }, 'Edited')
@@ -58,45 +58,7 @@ function renderQuoted(tweet: EnrichedQuotedTweet) {
     renderAuthor(tweet.user),
     renderBody(tweet),
     renderMedia(tweet, permalink),
-    el(
-      'footer',
-      { 'data-footer': '' },
-      renderDate(tweet),
-      renderEdit(tweet),
-      permalink ? renderLink('View quoted post on X', permalink) : undefined,
-    ),
-  )
-}
-
-async function copyLink(
-  button: HTMLButtonElement,
-  status: HTMLElement,
-  url: string,
-) {
-  try {
-    const clipboard = button.ownerDocument.defaultView?.navigator.clipboard
-    if (!clipboard) throw new Error('Clipboard is unavailable')
-    await clipboard.writeText(url)
-    if (button.isConnected) status.textContent = 'Link copied.'
-  } catch {
-    if (button.isConnected)
-      status.textContent = 'Could not copy. Use the View on X link.'
-  }
-}
-
-function renderActions(tweet: EnrichedTweet, permalink: string) {
-  const button = el('button', { type: 'button' }, 'Copy link')
-  const status = el('span', { role: 'status', 'aria-live': 'polite' })
-  button.addEventListener('click', () => {
-    void copyLink(button, status, permalink)
-  })
-  return el(
-    'div',
-    { 'data-actions': '' },
-    renderLink(`Like · ${formatCount(tweet.favorite_count)}`, tweet.like_url),
-    renderLink('Reply', tweet.reply_url),
-    button,
-    status,
+    el('footer', { 'data-footer': '' }, renderDate(tweet), renderEdit(tweet)),
   )
 }
 
@@ -112,7 +74,7 @@ export function renderTweet(tweet: EnrichedTweet) {
   return el(
     'article',
     {},
-    renderAuthor(tweet.user, true),
+    renderAuthor(tweet.user),
     replyHandle
       ? el(
           'div',
@@ -123,23 +85,6 @@ export function renderTweet(tweet: EnrichedTweet) {
     renderBody(tweet),
     renderMedia(tweet, permalink),
     tweet.quoted_tweet ? renderQuoted(tweet.quoted_tweet) : undefined,
-    el(
-      'footer',
-      { 'data-footer': '' },
-      renderDate(tweet),
-      renderEdit(tweet),
-      permalink
-        ? [
-            renderLink('View on X', permalink),
-            renderActions(tweet, permalink),
-            renderLink(
-              tweet.conversation_count > 0
-                ? `Read ${formatCount(tweet.conversation_count)} ${tweet.conversation_count === 1 ? 'reply' : 'replies'} on X`
-                : 'Read more on X',
-              permalink,
-            ),
-          ]
-        : undefined,
-    ),
+    el('footer', { 'data-footer': '' }, renderDate(tweet), renderEdit(tweet)),
   )
 }

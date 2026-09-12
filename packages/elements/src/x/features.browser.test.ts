@@ -121,7 +121,7 @@ describe('Full tweet snapshots', () => {
       .toBeVisible()
   })
 
-  it('renders badges, UTC dates, edits, follow and engagement links', async () => {
+  it('renders badges, UTC dates, and edits without engagement controls', async () => {
     const tweet = createTweet()
     tweet.user.verified_type = 'Business'
     tweet.user.highlighted_label = {
@@ -143,38 +143,11 @@ describe('Full tweet snapshots', () => {
     await expect
       .element(post.getByText('Edited', { exact: true }))
       .toBeVisible()
+    await expect.element(post.getByRole('button')).not.toBeInTheDocument()
     await expect
-      .element(post.getByRole('link', { name: 'Follow', exact: true }))
-      .toHaveAttribute(
-        'href',
-        'https://x.com/intent/follow?screen_name=example',
-      )
-    await expect
-      .element(post.getByRole('link', { name: 'Like · 1.2K' }))
-      .toHaveAttribute(
-        'href',
-        'https://x.com/intent/like?tweet_id=1234567890123456789',
-      )
-    await expect
-      .element(post.getByRole('link', { name: 'Read 1 reply on X' }))
-      .toBeVisible()
-  })
-
-  it('reports clipboard success and failure without claiming a failed copy worked', async () => {
-    const copy = vi.spyOn(navigator.clipboard, 'writeText').mockResolvedValue()
-    mount()
-    await post.getByRole('button', { name: 'Copy link' }).click()
-    await expect
-      .element(post.getByRole('status'))
-      .toHaveTextContent('Link copied.')
-    expect(copy).toHaveBeenCalledWith(
-      'https://x.com/example/status/1234567890123456789',
-    )
-    copy.mockRejectedValue(new Error('Denied'))
-    await post.getByRole('button', { name: 'Copy link' }).click()
-    await expect
-      .element(post.getByRole('status'))
-      .toHaveTextContent('Could not copy. Use the View on X link.')
+      .element(post.getByRole('link', { name: /Follow|Like|Reply|Read|on X/ }))
+      .not.toBeInTheDocument()
+    expect(element.textContent).not.toMatch(/1\.2K|on X/)
   })
 
   it('rejects unsafe media URLs and survives missing media and invalid dates', async () => {

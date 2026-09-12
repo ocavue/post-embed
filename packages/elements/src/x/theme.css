@@ -44,12 +44,8 @@
       color-mix(in srgb, currentColor 58%, transparent)
     );
     --_link: var(--post-embed-link-color, #1d9bf0);
-    --_x: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z'/%3E%3C/svg%3E");
     --_badge: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 1.5l2.4 2 3.1-.5 1.1 3 2.9 1.3-.5 3.1 2 2.4-2 2.4.5 3.1-2.9 1.3-1.1 3-3.1-.5-2.4 2-2.4-2-3.1.5-1.1-3-2.9-1.3.5-3.1L1 12l2-2.4-.5-3.1 2.9-1.3 1.1-3 3.1.5z'/%3E%3C/svg%3E");
     --_check: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M7.5 12.5l3 3 6-6.5' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-    --_heart: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 20.5s-7.5-4.4-7.5-10A4.3 4.3 0 0 1 12 7.6a4.3 4.3 0 0 1 7.5 2.9c0 5.6-7.5 10-7.5 10z' fill='none' stroke='%23000' stroke-width='1.8' stroke-linejoin='round'/%3E%3C/svg%3E");
-    --_reply: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M3.5 11a8.5 7.5 0 1 1 4.6 6.7L4 20l1.2-3.6A7.4 7.4 0 0 1 3.5 11z' fill='none' stroke='%23000' stroke-width='1.8' stroke-linejoin='round'/%3E%3C/svg%3E");
-    --_linkicon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M10 14.5a4 4 0 0 0 5.7 0l3.3-3.3a4 4 0 0 0-5.7-5.7l-1.6 1.6M14 9.5a4 4 0 0 0-5.7 0L5 12.8a4 4 0 0 0 5.7 5.7l1.6-1.6' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E");
 
     display: block;
     font: inherit;
@@ -63,16 +59,6 @@
       padding: var(--post-embed-padding, 1rem);
       overflow-wrap: anywhere;
       line-height: 1.4;
-    }
-    :where([data-root])::after {
-      content: '';
-      position: absolute;
-      top: var(--post-embed-padding, 1rem);
-      inset-inline-end: var(--post-embed-padding, 1rem);
-      width: 1.375rem;
-      height: 1.375rem;
-      background: currentColor;
-      mask: var(--_x) center / contain no-repeat;
     }
     :where([hidden]) {
       display: none !important;
@@ -96,7 +82,6 @@
       display: flex;
       align-items: center;
       gap: 0.75rem;
-      padding-inline-end: 2rem;
     }
     :where([data-avatar]) {
       flex: none;
@@ -127,19 +112,6 @@
     }
     :where([data-author-details] > bdi > a) {
       color: inherit;
-    }
-    :where([data-follow])::before {
-      content: '';
-      display: inline-block;
-      width: 3px;
-      height: 3px;
-      margin-inline: 0.35rem;
-      border-radius: 50%;
-      background: currentColor;
-      vertical-align: middle;
-    }
-    :where([data-follow] > a) {
-      font-weight: 600;
     }
     :where([data-verified]) {
       position: relative;
@@ -251,7 +223,6 @@
     }
     :where([data-quoted] [data-author]) {
       gap: 0.5rem;
-      padding-inline-end: 0;
     }
     :where([data-quoted] [data-avatar]) {
       width: 1.5rem;
@@ -288,9 +259,7 @@
     :where([data-footer] > a) {
       color: inherit;
     }
-    :where([data-footer] > a:has(+ [data-actions]))::before,
-    :where([data-footer] > [data-edited])::before,
-    :where([data-quoted] [data-footer] > a:not(:has(time)))::before {
+    :where([data-footer] > [data-edited])::before {
       content: '';
       display: inline-block;
       width: 3px;
@@ -303,70 +272,6 @@
     :where([data-edited]) {
       font-style: normal;
     }
-    :where([data-actions]) {
-      flex-basis: 100%;
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 1.25rem;
-      margin-block-start: 0.75rem;
-      padding-block-start: 0.75rem;
-      border-top: 1px solid var(--_hairline);
-    }
-    :where([data-actions] > a, [data-actions] > button) {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      font: inherit;
-      color: inherit;
-      background: none;
-      border: 0;
-      padding: 0;
-      cursor: pointer;
-      text-decoration: none;
-    }
-    :where([data-actions] > a:hover, [data-actions] > button:hover) {
-      color: var(--post-embed-color, inherit);
-      text-decoration: none;
-    }
-    :where([data-actions] > a, [data-actions] > button)::before {
-      content: '';
-      width: 1.25em;
-      height: 1.25em;
-      background: currentColor;
-      mask: var(--_icon) center / contain no-repeat;
-    }
-    :where([data-actions] > a:nth-of-type(1)) {
-      --_icon: var(--_heart);
-    }
-    :where([data-actions] > a:nth-of-type(2)) {
-      --_icon: var(--_reply);
-    }
-    :where([data-actions] > button) {
-      --_icon: var(--_linkicon);
-    }
-    :where([data-actions] > [role='status']) {
-      margin-inline-start: auto;
-      font-size: 0.875em;
-    }
-    :where([data-actions] > [role='status']:empty) {
-      display: none;
-    }
-    :where([data-actions] + a) {
-      flex-basis: 100%;
-      margin-block-start: 0.75rem;
-      padding: 0.5rem 1rem;
-      border: 1px solid var(--_hairline);
-      border-radius: 999px;
-      text-align: center;
-      font-weight: 600;
-      color: var(--_link);
-    }
-    :where([data-actions] + a:hover) {
-      text-decoration: none;
-      background: color-mix(in srgb, var(--_link) 8%, transparent);
-    }
-
     /* Fallback */
     :where([data-fallback] [data-body]) {
       color: var(--_muted);
