@@ -2,16 +2,22 @@
   "extends": "@ocavue/tsconfig/es/root.json",
   "references": [
     {
-      "path": "./packages/schema/tsconfig.json"
+      "path": "./apps/playground/tsconfig.json"
     },
     {
-      "path": "./packages/types/tsconfig.json"
+      "path": "./apps/x-exporter-devtools/tsconfig.json"
     },
     {
       "path": "./packages/elements/tsconfig.json"
     },
     {
-      "path": "./apps/playground/tsconfig.json"
+      "path": "./packages/exporter/tsconfig.json"
+    },
+    {
+      "path": "./packages/schema/tsconfig.json"
+    },
+    {
+      "path": "./packages/types/tsconfig.json"
     }
   ]
 }
