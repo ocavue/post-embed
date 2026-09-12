@@ -171,7 +171,7 @@ describe('fromSyndication', () => {
       ...tweet(),
       id_str: '21',
       text: 'Quoted &amp; saved',
-      display_text_range: [0, 17],
+      display_text_range: [0, 18],
       reply_count: 0,
       retweet_count: 0,
       favorite_count: 0,

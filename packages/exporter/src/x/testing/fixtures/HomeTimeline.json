@@ -47,16 +47,16 @@
                         "legacy": {
                           "created_at": "Wed Oct 10 20:19:24 +0000 2018",
                           "conversation_id_str": "1000000000000000001",
-                          "display_text_range": [0, 43],
+                          "display_text_range": [0, 46],
                           "entities": {
                             "hashtags": [
-                              { "indices": [21, 28], "text": "hooks" }
+                              { "indices": [23, 29], "text": "hooks" }
                             ],
                             "urls": [
                               {
                                 "display_url": "example.com",
                                 "expanded_url": "https://example.com/",
-                                "indices": [29, 43],
+                                "indices": [30, 46],
                                 "url": "https://t.co/ex1"
                               }
                             ],
