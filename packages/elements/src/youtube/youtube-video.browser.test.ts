@@ -1,5 +1,6 @@
 import './theme.css'
 
+import type { YouTubeVideo } from '@post-embed/types'
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
 
@@ -210,13 +211,19 @@ describe('YouTube video', () => {
 
 describe('YouTube video fetch', () => {
   it('calls `onFetch` with `url` and renders the resolved snapshot', async () => {
-    const onFetch = vi.fn((url: string) => Promise.resolve(createVideo(url)))
+    let resolve!: () => void
+    const onFetch = vi.fn((url: string) => {
+      return new Promise<YouTubeVideo>((r) => {
+        resolve = () => r(createVideo(url))
+      })
+    })
     const element = document.createElement('post-embed-youtube-video')
     element.dataset.testid = 'video'
     element.url = watchUrl
     element.onFetch = onFetch
     document.body.append(element)
     await expect.element(video.getByText('Loading this video…')).toBeVisible()
+    resolve()
     await expect
       .element(video.getByRole('link', { name: 'Watch on YouTube' }))
       .toHaveAttribute('href', watchUrl)

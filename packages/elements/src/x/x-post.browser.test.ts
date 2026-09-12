@@ -267,15 +267,19 @@ describe('X post fetch', () => {
   }
 
   it('calls `onFetch` with `url` and renders the resolved snapshot', async () => {
-    const onFetch = vi.fn((value: string) => {
-      return Promise.resolve(createTweet(`Fetched from ${value}`))
+    let resolve!: (tweet: Tweet) => void
+    const onFetch = vi.fn(() => {
+      return new Promise<Tweet>((r) => {
+        resolve = r
+      })
     })
     const element = mountRemote(onFetch)
     await expect.element(post.getByText('Loading this post…')).toBeVisible()
     expect(
       element.querySelector('[data-fallback][data-pending]'),
     ).not.toBeNull()
-    await expect.element(post.getByText(`Fetched from ${url}`)).toBeVisible()
+    resolve(createTweet('Fetched'))
+    await expect.element(post.getByText('Fetched')).toBeVisible()
     expect(onFetch).toHaveBeenCalledTimes(1)
     expect(onFetch).toHaveBeenCalledWith(url)
     expect(element.data).toBeNull()
@@ -329,8 +333,12 @@ describe('X post fetch', () => {
 
   it('prefers `data` and fetches only once `data` is cleared', async () => {
     const onFetch = vi.fn(() => Promise.resolve(createTweet('Fetched')))
-    const element = mountRemote(onFetch)
+    const element = document.createElement('post-embed-x-post')
+    element.dataset.testid = 'post'
     element.data = createTweet('Saved')
+    element.url = url
+    element.onFetch = onFetch
+    document.body.append(element)
     await expect.element(post.getByText('Saved')).toBeVisible()
     expect(onFetch).not.toHaveBeenCalled()
     element.data = null
@@ -344,8 +352,8 @@ describe('X post fetch', () => {
     await expect
       .element(post.getByText('This post is unavailable.'))
       .toBeVisible()
-    element.onFetch = onFetch
     element.url = null
+    element.onFetch = onFetch
     await expect
       .element(post.getByText('This post is unavailable.'))
       .toBeVisible()
