@@ -1,5 +1,11 @@
 # @post-embed/types
 
+## 0.2.0
+
+### Minor Changes
+
+- 842ab03: Replace the react-tweet `Tweet` snapshot with the minimal `XPost` model and add `fromSyndication` to convert syndication API data to it.
+
 ## 0.1.0
 
 ### Minor Changes
