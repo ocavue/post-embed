@@ -154,6 +154,9 @@ importers:
       '@post-embed/elements':
         specifier: workspace:*
         version: link:../../packages/elements
+      '@post-embed/exporter':
+        specifier: workspace:*
+        version: link:../../packages/exporter
     devDependencies:
       '@post-embed/types':
         specifier: workspace:*
@@ -207,9 +210,6 @@ importers:
       crelt:
         specifier: ^1.0.7
         version: 1.0.7
-      entities:
-        specifier: ^8.1.0
-        version: 8.1.0
     devDependencies:
       '@vitest/browser-playwright':
         specifier: ^5.0.0
@@ -238,6 +238,9 @@ importers:
       birpc:
         specifier: ^4.2.0
         version: 4.2.0
+      entities:
+        specifier: ^8.1.0
+        version: 8.1.0
       lru.min:
         specifier: ^1.1.5
         version: 1.1.5

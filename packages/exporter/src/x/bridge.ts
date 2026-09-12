@@ -1,4 +1,4 @@
-import { TweetSchema } from '@post-embed/schema'
+import { XPostSchema } from '@post-embed/schema'
 import { createBirpc, type ChannelOptions } from 'birpc'
 import * as v from 'valibot'
 
@@ -133,7 +133,7 @@ export interface ClientOptions {
 
 export interface XTweetClient {
   /**
-   * One observed post, re-validated with `TweetSchema` because it crossed a
+   * One observed post, re-validated with `XPostSchema` because it crossed a
    * boundary the page itself can write to. `waitMs` asks the MAIN side to
    * wait for the post; keep it below the client's `timeoutMs`.
    */
@@ -173,10 +173,10 @@ export function createXTweetClient(options: ClientOptions = {}): XTweetClient {
         return
       }
       if (!entry) return
-      const validated = TweetSchema['~standard'].validate(entry.tweet)
+      const validated = XPostSchema['~standard'].validate(entry.post)
       if (validated instanceof Promise || validated.issues) return
-      if (validated.value.id_str !== postId) return
-      return { ...entry, tweet: validated.value }
+      if (validated.value.id !== postId) return
+      return { ...entry, post: validated.value }
     },
     close: () => rpc.$close(),
   }

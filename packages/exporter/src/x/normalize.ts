@@ -1,34 +1,25 @@
-import { TweetSchema } from '@post-embed/schema'
-import type { Tweet } from '@post-embed/types'
+import { XPostSchema } from '@post-embed/schema'
 import type {
-  Indices,
-  TweetEntities,
-} from '@post-embed/types/internal/tweet/entities'
-import type {
-  MediaDetails,
-  VideoInfo,
-} from '@post-embed/types/internal/tweet/media'
-import type { TweetPhoto } from '@post-embed/types/internal/tweet/photo'
-import type {
-  QuotedTweet,
-  TweetBase,
-} from '@post-embed/types/internal/tweet/tweet'
-import type { TweetUser } from '@post-embed/types/internal/tweet/user'
-import type { TweetVideo } from '@post-embed/types/internal/tweet/video'
+  XPost,
+  XPostAuthor,
+  XPostBase,
+  XPostMedia,
+  XPostVideoSource,
+} from '@post-embed/types'
+import { decodeHTML } from 'entities'
 import * as v from 'valibot'
 
 import {
   GraphQLTweetResultSchema,
   GraphQLUserSchema,
-  type GraphQLEditControl,
-  type GraphQLEntities,
   type GraphQLMedia,
   type GraphQLTweet,
   type GraphQLUser,
 } from './graphql.ts'
+import { toSegments } from './segments.ts'
 
-export interface XTweetCapture {
-  tweet: Tweet
+export interface XPostCapture {
+  post: XPost
   /**
    * The author limits who can see their posts; the data came from a session that could.
    */
@@ -112,298 +103,146 @@ export function toISODate(value: string | undefined): string {
   return new Date(utc - offset * 60_000).toISOString()
 }
 
-function toIndices(
-  indices: number[] | undefined,
-  fallback: Indices = [0, 0],
-): Indices {
-  const [start, end] = indices ?? []
-  return start !== undefined && end !== undefined ? [start, end] : fallback
-}
-
-function codePointLength(text: string): number {
-  return Array.from(text).length
-}
-
-function toEntities(
-  entities: GraphQLEntities | undefined,
-  media: GraphQLMedia[],
-  mediaIndices: Indices | undefined,
-): TweetEntities {
-  return {
-    hashtags: (entities?.hashtags ?? []).map((item) => ({
-      indices: toIndices(item.indices),
-      text: item.text ?? '',
-    })),
-    urls: (entities?.urls ?? []).map((item) => ({
-      display_url: item.display_url ?? '',
-      expanded_url: item.expanded_url ?? '',
-      indices: toIndices(item.indices),
-      url: item.url ?? '',
-    })),
-    user_mentions: (entities?.user_mentions ?? []).map((item) => ({
-      id_str: item.id_str ?? '',
-      indices: toIndices(item.indices),
-      name: item.name ?? '',
-      screen_name: item.screen_name ?? '',
-    })),
-    symbols: (entities?.symbols ?? []).map((item) => ({
-      indices: toIndices(item.indices),
-      text: item.text ?? '',
-    })),
-    media: media.map((item) => ({
-      display_url: item.display_url ?? '',
-      expanded_url: item.expanded_url ?? '',
-      indices: mediaIndices ?? toIndices(item.indices),
-      url: item.url ?? '',
-    })),
+function toAuthor(user: GraphQLUser): XPostAuthor {
+  const author: XPostAuthor = {
+    name: decodeHTML(user.core?.name ?? user.legacy?.name ?? ''),
+    handle: user.core?.screen_name ?? user.legacy?.screen_name ?? '',
   }
-}
-
-function toVideoInfo(info: GraphQLMedia['video_info']): VideoInfo {
-  const [width, height] = info?.aspect_ratio ?? []
-  return {
-    aspect_ratio:
-      width !== undefined && height !== undefined ? [width, height] : [1, 1],
-    variants: (info?.variants ?? []).map((variant) => ({
-      bitrate: variant.bitrate,
-      content_type:
-        variant.content_type === 'application/x-mpegURL'
-          ? 'application/x-mpegURL'
-          : 'video/mp4',
-      url: variant.url ?? '',
-    })),
-  }
-}
-
-function toMediaDetails(media: GraphQLMedia, indices: Indices): MediaDetails {
-  const size = { h: 0, w: 0, resize: 'fit' }
-  const base = {
-    display_url: media.display_url ?? '',
-    expanded_url: media.expanded_url ?? '',
-    ext_media_availability: {
-      status: media.ext_media_availability?.status ?? 'Available',
-    },
-    ext_media_color: { palette: [] },
-    indices,
-    media_url_https: media.media_url_https ?? '',
-    original_info: {
-      height: media.original_info?.height ?? 0,
-      width: media.original_info?.width ?? 0,
-      focus_rects: media.original_info?.focus_rects ?? [],
-    },
-    sizes: media.sizes ?? {
-      large: size,
-      medium: size,
-      small: size,
-      thumb: size,
-    },
-    url: media.url ?? '',
-  }
-  if (media.type === 'video') {
-    return { ...base, type: 'video', video_info: toVideoInfo(media.video_info) }
-  }
-  if (media.type === 'animated_gif') {
-    return {
-      ...base,
-      type: 'animated_gif',
-      video_info: toVideoInfo(media.video_info),
-    }
-  }
-  return { ...base, type: 'photo', ext_alt_text: media.ext_alt_text }
-}
-
-function toUser(user: GraphQLUser): TweetUser {
-  const label = user.affiliates_highlighted_label?.label
+  const avatar = user.avatar?.image_url ?? user.legacy?.profile_image_url_https
+  if (avatar) author.avatar = avatar
+  if (user.profile_image_shape === 'Square') author.avatarShape = 'square'
+  if (user.profile_image_shape === 'Hexagon') author.avatarShape = 'hexagon'
   const verifiedType =
     user.verification?.verified_type ?? user.legacy?.verified_type
-  const shape = user.profile_image_shape
-  return {
-    id_str: user.rest_id,
-    name: user.core?.name ?? user.legacy?.name ?? '',
-    screen_name: user.core?.screen_name ?? user.legacy?.screen_name ?? '',
-    profile_image_url_https:
-      user.avatar?.image_url ?? user.legacy?.profile_image_url_https ?? '',
-    profile_image_shape:
-      shape === 'Square' || shape === 'Hexagon' ? shape : 'Circle',
-    verified: user.verification?.verified ?? user.legacy?.verified ?? false,
-    verified_type:
-      verifiedType === 'Business' || verifiedType === 'Government'
-        ? verifiedType
-        : undefined,
-    is_blue_verified: user.is_blue_verified ?? false,
-    highlighted_label: label?.badge?.url
-      ? {
-          description: label.description,
-          badge: { url: label.badge.url },
-          url: label.url?.url
-            ? { url: label.url.url, url_type: 'DeepLink' }
-            : undefined,
-          user_label_type: 'BusinessLabel',
-          user_label_display_type: 'Badge',
-        }
-      : undefined,
+  if (verifiedType === 'Business') author.verified = 'business'
+  else if (verifiedType === 'Government') author.verified = 'government'
+  else if (user.is_blue_verified) author.verified = 'blue'
+  else if (user.verification?.verified ?? user.legacy?.verified) {
+    author.verified = 'legacy'
   }
+  const label = user.affiliates_highlighted_label?.label
+  if (label?.badge?.url) {
+    author.label = {
+      text: decodeHTML(label.description ?? ''),
+      badge: label.badge.url,
+    }
+    if (label.url?.url) author.label.url = label.url.url
+  }
+  return author
 }
 
-function toEditControl(
-  control: GraphQLEditControl | undefined,
-  restId: string,
-) {
-  const initial = control?.edit_control_initial ?? control
-  const editTweetIds = initial?.edit_tweet_ids?.length
-    ? initial.edit_tweet_ids
-    : [restId]
-  return {
-    edit_control: {
-      edit_tweet_ids: editTweetIds,
-      editable_until_msecs: initial?.editable_until_msecs ?? '0',
-      is_edit_eligible: initial?.is_edit_eligible ?? false,
-      edits_remaining: initial?.edits_remaining ?? '0',
-    },
-    isEdited: editTweetIds.length > 1,
-    isStaleEdit:
-      editTweetIds.length > 1 &&
-      editTweetIds[editTweetIds.length - 1] !== restId,
+function toSource(
+  variant: NonNullable<
+    NonNullable<GraphQLMedia['video_info']>['variants']
+  >[number],
+): XPostVideoSource | undefined {
+  const url = variant.url
+  if (!url) return undefined
+  if (variant.content_type === 'video/mp4') {
+    return variant.bitrate === undefined
+      ? { url, type: 'video/mp4' }
+      : { url, type: 'video/mp4', bitrate: variant.bitrate }
   }
+  if (variant.content_type === 'application/x-mpegURL') {
+    return { url, type: 'application/x-mpegURL' }
+  }
+  return undefined
 }
 
-interface BaseResult {
-  base: TweetBase
-  media: GraphQLMedia[]
-  mediaDetails: MediaDetails[]
+function toMedia(media: GraphQLMedia): XPostMedia {
+  const width = media.original_info?.width ?? 0
+  const height = media.original_info?.height ?? 0
+  const status = media.ext_media_availability?.status
+  const unavailable = Boolean(status) && status !== 'Available'
+  if (media.type !== 'video' && media.type !== 'animated_gif') {
+    const photo: XPostMedia = {
+      type: 'photo',
+      url: media.media_url_https ?? '',
+      width,
+      height,
+    }
+    if (media.ext_alt_text) photo.alt = media.ext_alt_text
+    if (unavailable) photo.unavailable = true
+    return photo
+  }
+  const video: XPostMedia = {
+    type: media.type === 'animated_gif' ? 'gif' : 'video',
+    width,
+    height,
+    sources: (media.video_info?.variants ?? []).flatMap((variant) => {
+      const source = toSource(variant)
+      return source ? [source] : []
+    }),
+  }
+  if (media.media_url_https) video.poster = media.media_url_https
+  if (unavailable) video.unavailable = true
+  return video
+}
+
+function toEdit(result: GraphQLTweet): XPostBase['edit'] {
+  const control = result.edit_control
+  const ids = (control?.edit_control_initial ?? control)?.edit_tweet_ids ?? []
+  if (ids.length <= 1) return undefined
+  return ids[ids.length - 1] === result.rest_id ? 'edited' : 'stale'
 }
 
 /**
- * Fields shared by a top-level tweet and a quoted tweet. A long post's full
- * text replaces the truncated `full_text`; its media indices then move to the
- * end of the text, because `enrichTweet` cuts the visible text at the first
- * media entity.
+ * Fields shared by a top-level post and a quoted post. A long post's full
+ * note text replaces the truncated `full_text`; the note's entities are
+ * relative to it and it carries no media link.
  */
-function toTweetBase(result: GraphQLTweet, user: GraphQLUser): BaseResult {
+function toBase(result: GraphQLTweet, user: GraphQLUser): XPostBase {
   const legacy = result.legacy
   const note = result.note_tweet?.note_tweet_results?.result
-  const text = note?.text ?? legacy.full_text ?? ''
   const media = legacy.extended_entities?.media ?? legacy.entities?.media ?? []
-  const textLength = codePointLength(text)
-  const mediaIndices: Indices | undefined = note
-    ? [textLength, textLength]
-    : undefined
-  const mediaDetails = media.map((item) => {
-    return toMediaDetails(item, mediaIndices ?? toIndices(item.indices))
-  })
-  return {
-    base: {
-      lang: legacy.lang ?? '',
-      created_at: toISODate(legacy.created_at),
-      display_text_range: note
-        ? [0, textLength]
-        : toIndices(legacy.display_text_range, [0, textLength]),
-      entities: toEntities(
-        note ? note.entity_set : legacy.entities,
-        media,
-        mediaIndices,
-      ),
-      id_str: result.rest_id,
-      text,
-      user: toUser(user),
-      ...toEditControl(result.edit_control, result.rest_id),
-    },
-    media,
-    mediaDetails,
+  const post: XPostBase = {
+    id: result.rest_id,
+    createdAt: toISODate(legacy.created_at),
+    author: toAuthor(user),
+    body: note
+      ? toSegments(note.text ?? '', undefined, note.entity_set)
+      : toSegments(legacy.full_text ?? '', legacy.display_text_range, {
+          ...legacy.entities,
+          media,
+        }),
   }
-}
-
-function toPhotos(mediaDetails: MediaDetails[]): TweetPhoto[] {
-  return mediaDetails
-    .filter((item) => item.type === 'photo')
-    .map((item) => ({
-      backgroundColor: { red: 0, green: 0, blue: 0 },
-      cropCandidates: [],
-      expandedUrl: item.expanded_url,
-      url: item.media_url_https,
-      width: item.original_info.width,
-      height: item.original_info.height,
-    }))
-}
-
-function toVideo(
-  media: GraphQLMedia[],
-  mediaDetails: MediaDetails[],
-): TweetVideo | undefined {
-  const index = mediaDetails.findIndex((item) => item.type !== 'photo')
-  const detail = mediaDetails[index]
-  const raw = media[index]
-  if (!detail || detail.type === 'photo' || !raw) return undefined
-  return {
-    aspectRatio: detail.video_info.aspect_ratio,
-    contentType:
-      detail.type === 'animated_gif' ? 'animated_gif' : 'media_entity',
-    durationMs: raw.video_info?.duration_millis ?? 0,
-    mediaAvailability: { status: detail.ext_media_availability.status },
-    poster: detail.media_url_https,
-    variants: detail.video_info.variants.map((variant) => ({
-      type: variant.content_type,
-      src: variant.url,
-    })),
-    videoId: { type: 'video', id: raw.media_key ?? raw.id_str ?? '' },
-    viewCount: raw.mediaStats?.viewCount ?? 0,
-  }
-}
-
-function toQuotedTweet(result: unknown): QuotedTweet | undefined {
-  const quoted = unwrapTweetResult(result)
-  if (!quoted) return undefined
-  const user = unwrapUser(quoted.core.user_results?.result)
-  if (!user) return undefined
-  const { base, mediaDetails } = toTweetBase(quoted, user)
-  return {
-    ...base,
-    reply_count: quoted.legacy.reply_count ?? 0,
-    retweet_count: quoted.legacy.retweet_count ?? 0,
-    favorite_count: quoted.legacy.favorite_count ?? 0,
-    mediaDetails,
-    self_thread: {
-      id_str: quoted.legacy.conversation_id_str ?? quoted.rest_id,
-    },
-  }
+  if (legacy.lang) post.lang = legacy.lang
+  if (media.length > 0) post.media = media.map(toMedia)
+  const edit = toEdit(result)
+  if (edit) post.edit = edit
+  return post
 }
 
 /**
- * Convert one GraphQL tweet into the syndication-shaped `Tweet` that
- * `@post-embed/elements` renders. Returns `undefined` when the author is
- * unavailable or the result fails `TweetSchema`.
+ * Convert one GraphQL tweet into the `XPost` that `@post-embed/elements`
+ * renders. Returns `undefined` when the author is unavailable or the result
+ * fails `XPostSchema`.
  */
-export function toTweet(result: GraphQLTweet): XTweetCapture | undefined {
+export function toXPost(result: GraphQLTweet): XPostCapture | undefined {
   const user = unwrapUser(result.core.user_results?.result)
   if (!user) return undefined
-  const { base, media, mediaDetails } = toTweetBase(result, user)
+  const candidate: XPost = toBase(result, user)
+  const quoted = unwrapTweetResult(result.quoted_status_result?.result)
+  const quotedUser = quoted && unwrapUser(quoted.core.user_results?.result)
+  if (quoted && quotedUser) candidate.quote = toBase(quoted, quotedUser)
   const legacy = result.legacy
-  const candidate: Tweet = {
-    ...base,
-    __typename: 'Tweet',
-    favorite_count: legacy.favorite_count ?? 0,
-    mediaDetails,
-    photos: toPhotos(mediaDetails),
-    video: toVideo(media, mediaDetails),
-    conversation_count: legacy.reply_count ?? 0,
-    news_action_type: 'conversation',
-    quoted_tweet: toQuotedTweet(result.quoted_status_result?.result),
-    in_reply_to_screen_name: legacy.in_reply_to_screen_name,
-    in_reply_to_status_id_str: legacy.in_reply_to_status_id_str,
-    in_reply_to_user_id_str: legacy.in_reply_to_user_id_str,
-    possibly_sensitive: legacy.possibly_sensitive,
+  if (legacy.in_reply_to_screen_name && legacy.in_reply_to_status_id_str) {
+    candidate.replyTo = {
+      handle: legacy.in_reply_to_screen_name,
+      id: legacy.in_reply_to_status_id_str,
+    }
   }
-  const validated = TweetSchema['~standard'].validate(candidate)
+  const validated = XPostSchema['~standard'].validate(candidate)
   if (validated instanceof Promise) return undefined
   if (validated.issues) {
     console.error(
-      `[post-embed] Post ${result.rest_id} failed TweetSchema:`,
+      `[post-embed] Post ${result.rest_id} failed XPostSchema:`,
       validated.issues,
     )
     return undefined
   }
   return {
-    tweet: validated.value,
+    post: validated.value,
     protected: user.privacy?.protected ?? user.legacy?.protected ?? false,
   }
 }

@@ -1,0 +1,138 @@
+{
+  "__typename": "Tweet",
+  "favorite_count": 51254,
+  "lang": "en",
+  "possibly_sensitive": false,
+  "created_at": "2022-12-06T06:09:44.000Z",
+  "display_text_range": [0, 40],
+  "entities": {
+    "media": [
+      {
+        "display_url": "pic.x.com/cNsA0MoOml",
+        "expanded_url": "https://x.com/MunTheShinobi/status/1600009574919962625/video/1",
+        "indices": [36, 59],
+        "url": "https://t.co/cNsA0MoOml"
+      }
+    ]
+  },
+  "id_str": "1600009574919962625",
+  "text": "This is a genius ad by Apple. 🔥🔥🔥🔥🔥 https://t.co/cNsA0MoOml",
+  "user": {
+    "id_str": "211814412",
+    "name": "S H I N O B I",
+    "screen_name": "MunTheShinobi",
+    "is_blue_verified": true,
+    "profile_image_shape": "Circle",
+    "verified": false,
+    "profile_image_url_https": "https://pbs.twimg.com/profile_images/2029818588333277184/nuBhZ5pt_normal.jpg"
+  },
+  "edit_control": {
+    "edit_tweet_ids": ["1600009574919962625"],
+    "editable_until_msecs": "1670308784000",
+    "edits_remaining": "5",
+    "is_edit_eligible": false
+  },
+  "mediaDetails": [
+    {
+      "additional_media_info": {},
+      "display_url": "pic.x.com/cNsA0MoOml",
+      "expanded_url": "https://x.com/MunTheShinobi/status/1600009574919962625/video/1",
+      "ext_media_availability": {
+        "status": "Available"
+      },
+      "indices": [36, 59],
+      "media_url_https": "https://pbs.twimg.com/ext_tw_video_thumb/1600009362759733248/pu/img/XVhFQivj75H_YxxV.jpg",
+      "original_info": {
+        "focus_rects": [],
+        "height": 720,
+        "width": 1280
+      },
+      "sizes": {
+        "large": {
+          "h": 720,
+          "resize": "fit",
+          "w": 1280
+        },
+        "medium": {
+          "h": 675,
+          "resize": "fit",
+          "w": 1200
+        },
+        "small": {
+          "h": 383,
+          "resize": "fit",
+          "w": 680
+        },
+        "thumb": {
+          "h": 150,
+          "resize": "crop",
+          "w": 150
+        }
+      },
+      "type": "video",
+      "url": "https://t.co/cNsA0MoOml",
+      "video_info": {
+        "aspect_ratio": [16, 9],
+        "duration_millis": 139987,
+        "variants": [
+          {
+            "content_type": "application/x-mpegURL",
+            "url": "https://video.twimg.com/ext_tw_video/1600009362759733248/pu/pl/jDeo2enqjnKfG4Vo.m3u8?tag=12&v=cbe"
+          },
+          {
+            "bitrate": 256000,
+            "content_type": "video/mp4",
+            "url": "https://video.twimg.com/ext_tw_video/1600009362759733248/pu/vid/480x270/6veOyaeeUQKkPJNd.mp4?tag=12"
+          },
+          {
+            "bitrate": 832000,
+            "content_type": "video/mp4",
+            "url": "https://video.twimg.com/ext_tw_video/1600009362759733248/pu/vid/640x360/ZcAmAei-0GTMKxrY.mp4?tag=12"
+          },
+          {
+            "bitrate": 2176000,
+            "content_type": "video/mp4",
+            "url": "https://video.twimg.com/ext_tw_video/1600009362759733248/pu/vid/1280x720/odDbaCXr4zhCUw_n.mp4?tag=12"
+          }
+        ]
+      }
+    }
+  ],
+  "photos": [],
+  "video": {
+    "aspectRatio": [16, 9],
+    "contentType": "media_entity",
+    "durationMs": 139987,
+    "mediaAvailability": {
+      "status": "available"
+    },
+    "poster": "https://pbs.twimg.com/ext_tw_video_thumb/1600009362759733248/pu/img/XVhFQivj75H_YxxV.jpg",
+    "variants": [
+      {
+        "type": "application/x-mpegURL",
+        "src": "https://video.twimg.com/ext_tw_video/1600009362759733248/pu/pl/jDeo2enqjnKfG4Vo.m3u8?tag=12&v=cbe"
+      },
+      {
+        "type": "video/mp4",
+        "src": "https://video.twimg.com/ext_tw_video/1600009362759733248/pu/vid/480x270/6veOyaeeUQKkPJNd.mp4?tag=12"
+      },
+      {
+        "type": "video/mp4",
+        "src": "https://video.twimg.com/ext_tw_video/1600009362759733248/pu/vid/640x360/ZcAmAei-0GTMKxrY.mp4?tag=12"
+      },
+      {
+        "type": "video/mp4",
+        "src": "https://video.twimg.com/ext_tw_video/1600009362759733248/pu/vid/1280x720/odDbaCXr4zhCUw_n.mp4?tag=12"
+      }
+    ],
+    "videoId": {
+      "type": "tweet",
+      "id": "1600009574919962625"
+    },
+    "viewCount": 0
+  },
+  "conversation_count": 442,
+  "news_action_type": "conversation",
+  "isEdited": false,
+  "isStaleEdit": false
+}

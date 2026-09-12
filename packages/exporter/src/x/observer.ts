@@ -1,13 +1,13 @@
-import type { Tweet } from '@post-embed/types'
+import type { XPost } from '@post-embed/types'
 import { createLRU } from 'lru.min'
 
 import { extractTweetResults } from './extract.ts'
 import { installResponseHooks, type ObservedResponse } from './hooks.ts'
-import { toTweet } from './normalize.ts'
+import { toXPost } from './normalize.ts'
 import { matchXOperation } from './operations.ts'
 
 export interface XTweetEntry {
-  tweet: Tweet
+  post: XPost
   protected: boolean
   operation: string
   capturedAt: number
@@ -65,7 +65,7 @@ export function observeXTweets(options: XObserverOptions = {}): XObserver {
   const listeners = new Set<(entry: XTweetEntry) => void>()
 
   const remember = (entry: XTweetEntry) => {
-    entries.set(entry.tweet.id_str, entry)
+    entries.set(entry.post.id, entry)
     for (const listener of listeners) {
       try {
         listener(entry)
@@ -86,7 +86,7 @@ export function observeXTweets(options: XObserverOptions = {}): XObserver {
     for (const result of extractTweetResults(json)) {
       // A retweet wrapper only says "RT @x"; the original is indexed on its own.
       if (result.legacy.retweeted_status_result) continue
-      const capture = toTweet(result)
+      const capture = toXPost(result)
       if (!capture) continue
       remember({
         ...capture,
@@ -134,7 +134,7 @@ export function observeXTweets(options: XObserverOptions = {}): XObserver {
           )
         }
         const unsubscribe = subscribe((entry) => {
-          if (entry.tweet.id_str !== postId) return
+          if (entry.post.id !== postId) return
           finish()
           resolve(entry)
         })

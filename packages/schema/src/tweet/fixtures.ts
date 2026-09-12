@@ -1,4 +1,4 @@
-import type { Tweet, EnrichedTweet } from '@post-embed/types'
+import type { Tweet } from '@post-embed/types'
 const base = {
   lang: 'en',
   created_at: '2026-09-09T00:00:00.000Z',
@@ -78,22 +78,5 @@ export const raw: Tweet = {
     retweet_count: 0,
     favorite_count: 0,
     self_thread: { id_str: '2' },
-  },
-}
-export const enriched: EnrichedTweet = {
-  ...raw,
-  url: 'https://x.com/example/status/1234567890123456789',
-  user: {
-    ...raw.user,
-    url: 'https://x.com/example',
-    follow_url: 'https://x.com/intent/follow?screen_name=example',
-  },
-  like_url: 'https://x.com/intent/like?tweet_id=1234567890123456789',
-  reply_url: 'https://x.com/intent/tweet?in_reply_to=1234567890123456789',
-  entities: [{ type: 'text', text: raw.text, indices: [0, 4] }],
-  quoted_tweet: {
-    ...raw.quoted_tweet!,
-    url: 'https://x.com/example/status/2',
-    entities: [{ type: 'text', text: raw.text, indices: [0, 4] }],
   },
 }

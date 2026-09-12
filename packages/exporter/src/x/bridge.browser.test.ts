@@ -35,7 +35,7 @@ describe('bridge', () => {
     await (await fetch(HOME_URL)).text()
     await observer.waitFor('1000000000000000001', { timeoutMs: 2000 })
     const entry = await requestXTweet('1000000000000000001')
-    expect(entry?.tweet).toEqual(observer.get('1000000000000000001')!.tweet)
+    expect(entry?.post).toEqual(observer.get('1000000000000000001')!.post)
     expect(entry?.operation).toBe('HomeTimeline')
   })
 
@@ -50,7 +50,7 @@ describe('bridge', () => {
     await new Promise((resolve) => setTimeout(resolve, 100))
     await (await fetch(HOME_URL)).text()
     const entry = await pending
-    expect(entry?.tweet.id_str).toBe('1000000000000000002')
+    expect(entry?.post.id).toBe('1000000000000000002')
   })
 
   it('gives up when nothing answers', async () => {
@@ -62,7 +62,7 @@ describe('bridge', () => {
     const seen: string[] = []
     cleanups.push(
       onXTweetBroadcast((entry) => {
-        seen.push(entry.tweet.id_str)
+        seen.push(entry.post.id)
       }),
     )
     await (await fetch(HOME_URL)).text()
@@ -71,7 +71,7 @@ describe('bridge', () => {
     })
   })
 
-  it('drops an answer whose tweet does not match the request', async () => {
+  it('drops an answer whose post does not match the request', async () => {
     const onMessage = (event: MessageEvent) => {
       const envelope = event.data as {
         channel?: string
@@ -87,7 +87,7 @@ describe('bridge', () => {
             t: 's',
             i: envelope.data.i,
             r: {
-              tweet: { id_str: 'someone-else' },
+              post: { id: 'someone-else', author: {} },
               protected: false,
               operation: 'TweetDetail',
               capturedAt: 0,

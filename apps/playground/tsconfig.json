@@ -6,6 +6,9 @@
       "path": "../../packages/elements/tsconfig.json"
     },
     {
+      "path": "../../packages/exporter/tsconfig.json"
+    },
+    {
       "path": "../../packages/types/tsconfig.json"
     }
   ]

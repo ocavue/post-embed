@@ -1,10 +1,10 @@
 import './theme.css'
 
-import type { Tweet } from '@post-embed/types'
+import type { XPost } from '@post-embed/types'
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 import { page, server, userEvent } from 'vitest/browser'
 
-import { createMediaTweet, createTweet } from './testing/fixtures.ts'
+import { createPhoto, createPost } from './testing/fixtures.ts'
 
 import { registerXPost, type XPostElement } from './index.ts'
 
@@ -15,7 +15,7 @@ beforeAll(() => {
 function mount(text = 'Hello 😀\nA saved post.') {
   const element = document.createElement('post-embed-x-post')
   element.dataset.testid = 'post'
-  element.data = createTweet(text)
+  element.data = createPost(text)
   document.body.append(element)
   return element
 }
@@ -49,15 +49,10 @@ describe('X post', () => {
       .toHaveFocus()
   })
 
-  it('decodes HTML character references once', async () => {
-    mount('A &amp; B &amp;lt; C')
-    await expect.element(post.getByText('A & B &lt; C')).toBeVisible()
-  })
-
-  it('renders markup as literal text', async () => {
-    mount('&lt;img src=x onerror=alert(1)&gt;')
+  it('renders markup and character references as literal text', async () => {
+    mount('A &amp; B <img src=x onerror=alert(1)>')
     await expect
-      .element(post.getByText('<img src=x onerror=alert(1)>'))
+      .element(post.getByText('A &amp; B <img src=x onerror=alert(1)>'))
       .toBeVisible()
     await expect.element(post.getByRole('img')).not.toBeInTheDocument()
   })
@@ -65,10 +60,10 @@ describe('X post', () => {
   it('updates the same ID and clears the current view immediately', async () => {
     const element = mount('First')
     await expect.element(post.getByText('First')).toBeVisible()
-    element.data = createTweet('Second')
+    element.data = createPost('Second')
     expect(element.textContent).not.toContain('First')
     await expect.element(post.getByText('Second')).toBeVisible()
-    element.data = createTweet('Late')
+    element.data = createPost('Late')
     element.data = null
     await expect
       .element(post.getByText('This post is unavailable.'))
@@ -88,13 +83,13 @@ describe('X post', () => {
       '[post-embed] Invalid X post data:',
       expect.any(Array),
     )
-    element.data = createTweet('Recovered')
+    element.data = createPost('Recovered')
     await expect.element(post.getByText('Recovered')).toBeVisible()
   })
 
   it('handles schema defaults without inventing attribution', async () => {
     const element = mount()
-    Reflect.set(element, 'data', { user: {}, edit_control: {} })
+    Reflect.set(element, 'data', { author: {} })
     await expect.element(post).toHaveTextContent('')
     await expect.element(post.getByRole('link')).not.toBeInTheDocument()
   })
@@ -105,9 +100,9 @@ describe('X post', () => {
     annotation.textContent = 'Host annotation'
     element.append(annotation)
     await expect.element(post.getByText('First')).toBeVisible()
-    element.data = createTweet('Stale')
+    element.data = createPost('Stale')
     element.remove()
-    element.data = createTweet('Reconnected')
+    element.data = createPost('Reconnected')
     document.body.append(element)
     await expect.element(post.getByText('Reconnected')).toBeVisible()
     await expect.element(post.getByText('Host annotation')).toBeVisible()
@@ -128,14 +123,14 @@ describe('X post', () => {
     container.dataset.root = ''
     container.textContent = 'Server fallback'
     element.append(annotation, container)
-    element.data = createTweet('Saved snapshot')
+    element.data = createPost('Saved snapshot')
     document.body.append(element)
     await expect.element(post.getByText('Saved snapshot')).toBeVisible()
     expect(element.querySelector(':scope > [data-root]')).toBe(container)
     expect(element.children.length).toBe(2)
     expect(container.textContent).not.toContain('Server fallback')
     expect(annotation.textContent).toBe('Host annotation')
-    element.data = createTweet('Updated snapshot')
+    element.data = createPost('Updated snapshot')
     await expect.element(post.getByText('Updated snapshot')).toBeVisible()
     expect(element.querySelector(':scope > [data-root]')).toBe(container)
   })
@@ -191,7 +186,7 @@ describe('X post', () => {
     registerXPost('custom-x-post')
     const element = document.createElement('custom-x-post') as XPostElement
     element.dataset.testid = 'custom-post'
-    element.data = createTweet('Custom name')
+    element.data = createPost('Custom name')
     document.body.append(element)
     await expect
       .element(page.getByTestId('custom-post').getByText('Custom name'))
@@ -201,7 +196,7 @@ describe('X post', () => {
       .toHaveAttribute('data-post-embed', 'x-post')
     const another = document.createElement('another-x-post') as XPostElement
     another.dataset.testid = 'another-post'
-    another.data = createTweet('Another name')
+    another.data = createPost('Another name')
     document.body.append(another)
     await expect
       .element(page.getByTestId('another-post').getByText('Another name'))
@@ -216,37 +211,38 @@ describe('X post', () => {
     await expect.element(post.getByRole('paragraph')).toHaveTextContent('')
   })
 
-  it('does not mutate frozen host ranges, including quotes', async () => {
+  it('does not mutate a frozen snapshot, including its quote', async () => {
     const element = mount()
-    const tweet = createMediaTweet()
-    const original = structuredClone(tweet)
-    Object.freeze(tweet.display_text_range)
-    Object.freeze(tweet.quoted_tweet?.display_text_range)
-    Object.freeze(tweet)
-    element.data = tweet
+    const snapshot: XPost = {
+      ...createPost('Saved text'),
+      media: [createPhoto()],
+      quote: { ...createPost('Quoted text'), id: '2', media: [createPhoto()] },
+    }
+    const original = structuredClone(snapshot)
+    const freeze = (value: unknown) => {
+      if (value && typeof value === 'object') {
+        Object.freeze(value)
+        for (const item of Object.values(value)) freeze(item)
+      }
+    }
+    freeze(snapshot)
+    element.data = snapshot
     await expect
       .element(post.getByText('Saved text', { exact: true }))
       .toBeVisible()
-    expect(tweet).toEqual(original)
+    await expect
+      .element(post.getByText('Quoted text', { exact: true }))
+      .toBeVisible()
+    expect(snapshot).toEqual(original)
   })
 
   it('renders unsafe destinations as text', async () => {
     const element = mount()
-    const tweet = createTweet('https://t.co/a')
-    tweet.entities = {
-      hashtags: [],
-      user_mentions: [],
-      symbols: [],
-      urls: [
-        {
-          indices: [0, 14],
-          url: tweet.text,
-          expanded_url: 'javascript:alert(1)',
-          display_url: 'A link',
-        },
-      ],
-    }
-    element.data = tweet
+    const snapshot = createPost()
+    snapshot.body = [
+      { type: 'link', text: 'A link', url: 'javascript:alert(1)' },
+    ]
+    element.data = snapshot
     await expect.element(post.getByText('A link')).toBeVisible()
     await expect
       .element(post.getByRole('link', { name: 'A link' }))
@@ -267,9 +263,9 @@ describe('X post fetch', () => {
   }
 
   it('calls `resolver` with `url` and renders the resolved snapshot', async () => {
-    let resolve!: (tweet: Tweet) => void
+    let resolve!: (post: XPost) => void
     const resolver = vi.fn(() => {
-      return new Promise<Tweet>((r) => {
+      return new Promise<XPost>((r) => {
         resolve = r
       })
     })
@@ -278,7 +274,7 @@ describe('X post fetch', () => {
     expect(
       element.querySelector('[data-fallback][data-pending]'),
     ).not.toBeNull()
-    resolve(createTweet('Fetched'))
+    resolve(createPost('Fetched'))
     await expect.element(post.getByText('Fetched')).toBeVisible()
     expect(resolver).toHaveBeenCalledTimes(1)
     expect(resolver).toHaveBeenCalledWith(url)
@@ -286,7 +282,7 @@ describe('X post fetch', () => {
   })
 
   it('renders a synchronous result without a pending state', async () => {
-    const element = mountRemote(() => createTweet('Sync'))
+    const element = mountRemote(() => createPost('Sync'))
     expect(element.textContent).toContain('Sync')
     expect(element.textContent).not.toContain('Loading')
     await expect.element(post.getByText('Sync')).toBeVisible()
@@ -315,27 +311,27 @@ describe('X post fetch', () => {
   })
 
   it('refetches when `url` changes and ignores the stale result', async () => {
-    const resolvers = new Map<string, (tweet: Tweet) => void>()
+    const resolvers = new Map<string, (post: XPost) => void>()
     const element = mountRemote((value) => {
-      return new Promise<Tweet>((resolve) => {
+      return new Promise<XPost>((resolve) => {
         resolvers.set(value, resolve)
       })
     })
     await expect.element(post.getByText('Loading this post…')).toBeVisible()
     element.url = 'https://x.com/example/status/2'
-    resolvers.get(url)?.(createTweet('Stale'))
+    resolvers.get(url)?.(createPost('Stale'))
     await new Promise((resolve) => setTimeout(resolve, 20))
     expect(element.textContent).not.toContain('Stale')
     await expect.element(post.getByText('Loading this post…')).toBeVisible()
-    resolvers.get('https://x.com/example/status/2')?.(createTweet('Fresh'))
+    resolvers.get('https://x.com/example/status/2')?.(createPost('Fresh'))
     await expect.element(post.getByText('Fresh')).toBeVisible()
   })
 
   it('prefers `data` and fetches only once `data` is cleared', async () => {
-    const resolver = vi.fn(() => Promise.resolve(createTweet('Fetched')))
+    const resolver = vi.fn(() => Promise.resolve(createPost('Fetched')))
     const element = document.createElement('post-embed-x-post')
     element.dataset.testid = 'post'
-    element.data = createTweet('Saved')
+    element.data = createPost('Saved')
     element.url = url
     element.resolver = resolver
     document.body.append(element)
@@ -347,7 +343,7 @@ describe('X post fetch', () => {
   })
 
   it('does not fetch without both `url` and `resolver`', async () => {
-    const resolver = vi.fn(() => Promise.resolve(createTweet('Fetched')))
+    const resolver = vi.fn(() => Promise.resolve(createPost('Fetched')))
     const element = mountRemote(null)
     await expect
       .element(post.getByText('This post is unavailable.'))

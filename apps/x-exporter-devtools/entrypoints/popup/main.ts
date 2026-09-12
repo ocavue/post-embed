@@ -1,5 +1,5 @@
 import { registerXPost } from '@post-embed/elements/x'
-import type { XTweetEntry } from '@post-embed/exporter/x'
+import { segmentsToText, type XTweetEntry } from '@post-embed/exporter/x'
 import { scrubFixture } from '@post-embed/exporter/x/testing'
 import el from 'crelt'
 import { browser } from 'wxt/browser'
@@ -85,7 +85,7 @@ function renderDetail(entry: XTweetEntry | undefined) {
   detail.replaceChildren()
   if (!entry) return
   const post = document.createElement('post-embed-x-post')
-  post.data = entry.tweet
+  post.data = entry.post
   detail.append(
     el(
       'div',
@@ -94,9 +94,9 @@ function renderDetail(entry: XTweetEntry | undefined) {
         'button',
         {
           type: 'button',
-          onclick: () => void copy('Tweet JSON', entry.tweet),
+          onclick: () => void copy('Post JSON', entry.post),
         },
-        'Copy tweet JSON',
+        'Copy post JSON',
       ),
       el(
         'button',
@@ -105,7 +105,7 @@ function renderDetail(entry: XTweetEntry | undefined) {
           onclick: () => {
             return void copy('Result fixture', {
               operation: entry.operation,
-              postId: entry.tweet.id_str,
+              postId: entry.post.id,
               protected: entry.protected,
               raw: scrubFixture(entry.raw),
             })
@@ -133,18 +133,22 @@ function renderList() {
       return el(
         'li',
         {
-          'data-selected': entry.tweet.id_str === selectedId ? '' : undefined,
+          'data-selected': entry.post.id === selectedId ? '' : undefined,
           onclick: () => {
-            selectedId = entry.tweet.id_str
+            selectedId = entry.post.id
             renderList()
             renderDetail(entry)
           },
         },
-        `${entry.tweet.id_str} @${entry.tweet.user.screen_name}`,
+        `${entry.post.id} @${entry.post.author.handle}`,
         entry.protected
           ? el('span', { 'data-protected': '' }, ' protected')
           : undefined,
-        el('small', {}, `${entry.operation}: ${entry.tweet.text.slice(0, 60)}`),
+        el(
+          'small',
+          {},
+          `${entry.operation}: ${segmentsToText(entry.post.body).slice(0, 60)}`,
+        ),
       )
     }),
   )

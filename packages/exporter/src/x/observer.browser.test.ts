@@ -1,4 +1,4 @@
-import { TweetSchema } from '@post-embed/schema'
+import { XPostSchema } from '@post-embed/schema'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { observeXTweets, type XObserver } from './observer.ts'
@@ -43,7 +43,7 @@ describe('observeXTweets', () => {
     expect(typeof entry.capturedAt).toBe('number')
     expect(entry.raw).toMatchObject({ rest_id: '1000000000000000002' })
     expect(observer.get('1000000000000000005')!.protected).toBe(true)
-    const validated = TweetSchema['~standard'].validate(entry.tweet)
+    const validated = XPostSchema['~standard'].validate(entry.post)
     if (validated instanceof Promise) throw new Error('sync schema expected')
     expect(validated.issues).toBeUndefined()
   })
@@ -62,7 +62,8 @@ describe('observeXTweets', () => {
     const pending = observer.waitFor('2000000000000000001', { timeoutMs: 2000 })
     await (await fetch(DETAIL_URL)).text()
     const entry = await pending
-    expect(entry.tweet.text.startsWith('A long post')).toBe(true)
+    expect(entry.post.body[0]).toMatchObject({ type: 'text' })
+    expect(entry.post.body[0].text.startsWith('A long post')).toBe(true)
   })
 
   it('rejects waitFor on timeout and on abort', async () => {
@@ -83,7 +84,7 @@ describe('observeXTweets', () => {
     const observer = observe({ capacity: 2 })
     const seen: string[] = []
     const unsubscribe = observer.subscribe((entry) => {
-      seen.push(entry.tweet.id_str)
+      seen.push(entry.post.id)
     })
     await (await fetch(HOME_URL)).text()
     await vi.waitFor(() => {
