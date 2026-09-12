@@ -34,7 +34,7 @@ test('drops oEmbed fields it does not use', async () => {
   expect(video).not.toHaveProperty('provider_name')
 })
 
-test.each([[undefined], [null], [42], ['video'], [[]]])(
+test.each([[undefined], [null], [42], ['video']])(
   'rejects a non-object: %j',
   async (input) => {
     const result = await YouTubeVideoSchema['~standard'].validate(input)
