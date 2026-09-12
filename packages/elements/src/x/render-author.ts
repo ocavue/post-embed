@@ -2,8 +2,8 @@ import type { TweetUser } from '@post-embed/types/internal/tweet/user'
 import el from 'crelt'
 import { decodeHTML } from 'entities'
 
-import { renderLink } from './render-shared.ts'
-import { getSafeUrl } from './safe-url.ts'
+import { renderLink } from '../render-link.ts'
+import { getSafeUrl } from '../safe-url.ts'
 
 export function renderAuthor(user: TweetUser, follow = false) {
   if (!user.name && !user.screen_name) return

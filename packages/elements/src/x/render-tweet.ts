@@ -3,14 +3,11 @@ import type { EnrichedQuotedTweet } from '@post-embed/types/internal/tweet/enric
 import el from 'crelt'
 import { decodeHTML } from 'entities'
 
+import { renderLink } from '../render-link.ts'
+
 import { renderAuthor } from './render-author.ts'
 import { renderMedia } from './render-media.ts'
-import {
-  formatCount,
-  getPermalink,
-  renderDate,
-  renderLink,
-} from './render-shared.ts'
+import { formatCount, getPermalink, renderDate } from './render-shared.ts'
 
 type Post = EnrichedTweet | EnrichedQuotedTweet
 

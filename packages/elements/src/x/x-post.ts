@@ -9,6 +9,7 @@ import { TweetSchema } from '@post-embed/schema'
 import type { Tweet } from '@post-embed/types'
 import el from 'crelt'
 
+import { getRootContainer } from '../root.ts'
 import { assumeNotPromise } from '../utils.ts'
 
 import { renderTweet } from './render-tweet.ts'
@@ -22,19 +23,10 @@ export interface XPostElement extends HTMLElement, XPostProps {}
 
 /** @internal */
 export function useXPost(host: HostElement, props: State<XPostProps>): void {
-  let container: HTMLDivElement | undefined
-
   useHostEffect(host, () => {
     host.dataset.postEmbed = 'x-post'
+    const container = getRootContainer(host)
     const data = props.data.get()
-    if (!container) {
-      container =
-        host.querySelector<HTMLDivElement>(':scope > div[data-root]') ??
-        host.ownerDocument.createElement('div')
-      container.dataset.root = ''
-      container.replaceChildren()
-      if (!container.parentNode) host.append(container)
-    }
     const result =
       data == null
         ? undefined
@@ -61,8 +53,7 @@ export function useXPost(host: HostElement, props: State<XPostProps>): void {
           ),
     )
     return () => {
-      for (const video of container?.querySelectorAll('video') || [])
-        video.pause()
+      for (const video of container.querySelectorAll('video')) video.pause()
     }
   })
 }
