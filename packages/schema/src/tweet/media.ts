@@ -44,14 +44,17 @@ const MediaBaseSchema = v.object({
   display_url: StringSchema,
   expanded_url: StringSchema,
   ext_media_availability: v.object({ status: StringSchema }),
-  ext_media_color: v.object({
-    palette: looseArray(
-      v.object({
-        percentage: NumberSchema,
-        rgb: RGBSchema,
-      }),
-    ),
-  }),
+  ext_media_color: v.fallback(
+    v.object({
+      palette: looseArray(
+        v.object({
+          percentage: NumberSchema,
+          rgb: RGBSchema,
+        }),
+      ),
+    }),
+    () => ({ palette: [] }),
+  ),
   indices: IndicesSchema,
   media_url_https: StringSchema,
   original_info: v.object({

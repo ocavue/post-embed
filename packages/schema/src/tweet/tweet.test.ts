@@ -396,6 +396,20 @@ describe('union selection', () => {
     },
   )
 
+  test('keeps a media item without ext_media_color, as the syndication API sends', async () => {
+    const { ext_media_color, ...withoutColor } = mediaObjects
+    const tweet = await parse(TweetSchema, {
+      ...minimal,
+      mediaDetails: [{ ...withoutColor, type: 'photo', media_url_https: 'a' }],
+    })
+    expect(tweet.mediaDetails).toHaveLength(1)
+    expect(tweet.mediaDetails?.[0]).toMatchObject({
+      media_url_https: 'a',
+      ext_media_color: { palette: [] },
+    })
+    expect(ext_media_color).toEqual({})
+  })
+
   test('defaults a containing array when an item lacks a required object', async () => {
     const tweet = await parse(TweetSchema, {
       ...minimal,
