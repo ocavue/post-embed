@@ -197,10 +197,10 @@ describe('toTweet', () => {
 describe('unwrapTweetResult', () => {
   it('accepts a tweet and unwraps a visibility wrapper', () => {
     const tweet = findTweet(homeTimeline, '1000000000000000001')
-    expect(unwrapTweetResult(tweet)).toBe(tweet)
+    expect(unwrapTweetResult(tweet)).toEqual(tweet)
     expect(
       unwrapTweetResult({ __typename: 'TweetWithVisibilityResults', tweet }),
-    ).toBe(tweet)
+    ).toEqual(tweet)
   })
 
   it('rejects tombstones, unavailable posts and partial objects', () => {

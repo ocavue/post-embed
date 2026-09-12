@@ -1,24 +1,18 @@
 import { TweetSchema } from '@post-embed/schema'
 import { createBirpc, type ChannelOptions } from 'birpc'
+import * as v from 'valibot'
 
 import type { XObserver, XTweetEntry } from './observer.ts'
 
 export const X_BRIDGE_CHANNEL = 'post-embed-x-exporter'
 
-interface Envelope {
-  channel: string
-  from: string
-  data: unknown
-}
+const EnvelopeSchema = v.object({
+  channel: v.string(),
+  from: v.string(),
+  data: v.unknown(),
+})
 
-function isEnvelope(value: unknown, channel: string): value is Envelope {
-  return (
-    typeof value === 'object' &&
-    value !== null &&
-    (value as Envelope).channel === channel &&
-    typeof (value as Envelope).from === 'string'
-  )
-}
+type Envelope = v.InferOutput<typeof EnvelopeSchema>
 
 /**
  * A birpc channel over `window.postMessage` between two scripts sharing one
@@ -40,8 +34,14 @@ export function windowChannel(target: Window, channel: string): ChannelOptions {
       const listener = (event: MessageEvent) => {
         if (event.source !== target || event.origin !== target.location.origin)
           return
-        if (!isEnvelope(event.data, channel) || event.data.from === from) return
-        fn(event.data.data)
+        const envelope = v.safeParse(EnvelopeSchema, event.data)
+        if (!envelope.success) return
+        if (
+          envelope.output.channel !== channel ||
+          envelope.output.from === from
+        )
+          return
+        fn(envelope.output.data)
       }
       listeners.set(fn, listener)
       target.addEventListener('message', listener)

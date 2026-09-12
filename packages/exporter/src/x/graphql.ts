@@ -1,136 +1,208 @@
+import * as v from 'valibot'
+
 /**
  * The subset of X's GraphQL tweet shape that the exporter reads. Everything
  * but the fields used to recognize a tweet is optional: responses drift, and
  * a missing field must degrade to a schema fallback, never to a crash.
+ * Objects are loose so a parsed result still carries every unknown field.
  */
 
-export interface GraphQLIndexed {
-  indices?: number[]
-}
+const indices = v.optional(v.array(v.number()))
+const text = v.optional(v.string())
 
-export interface GraphQLUrlEntity extends GraphQLIndexed {
-  display_url?: string
-  expanded_url?: string
-  url?: string
-}
+const SizeSchema = v.object({
+  h: v.number(),
+  w: v.number(),
+  resize: v.string(),
+})
 
-export interface GraphQLEntities {
-  hashtags?: (GraphQLIndexed & { text?: string })[]
-  urls?: GraphQLUrlEntity[]
-  user_mentions?: (GraphQLIndexed & {
-    id_str?: string
-    name?: string
-    screen_name?: string
-  })[]
-  symbols?: (GraphQLIndexed & { text?: string })[]
-  media?: GraphQLMedia[]
-}
+const UrlEntitySchema = v.looseObject({
+  display_url: text,
+  expanded_url: text,
+  indices,
+  url: text,
+})
 
-export interface GraphQLVideoVariant {
-  bitrate?: number
-  content_type?: string
-  url?: string
-}
+export const GraphQLMediaSchema = v.looseObject({
+  type: v.optional(v.picklist(['photo', 'video', 'animated_gif'])),
+  id_str: text,
+  media_key: text,
+  display_url: text,
+  expanded_url: text,
+  indices,
+  media_url_https: text,
+  url: text,
+  ext_alt_text: text,
+  ext_media_availability: v.optional(v.looseObject({ status: text })),
+  original_info: v.optional(
+    v.looseObject({
+      height: v.optional(v.number()),
+      width: v.optional(v.number()),
+      focus_rects: v.optional(
+        v.array(
+          v.object({
+            x: v.number(),
+            y: v.number(),
+            w: v.number(),
+            h: v.number(),
+          }),
+        ),
+      ),
+    }),
+  ),
+  sizes: v.optional(
+    v.object({
+      large: SizeSchema,
+      medium: SizeSchema,
+      small: SizeSchema,
+      thumb: SizeSchema,
+    }),
+  ),
+  video_info: v.optional(
+    v.looseObject({
+      aspect_ratio: v.optional(v.array(v.number())),
+      duration_millis: v.optional(v.number()),
+      variants: v.optional(
+        v.array(
+          v.looseObject({
+            bitrate: v.optional(v.number()),
+            content_type: text,
+            url: text,
+          }),
+        ),
+      ),
+    }),
+  ),
+  mediaStats: v.optional(v.looseObject({ viewCount: v.optional(v.number()) })),
+})
 
-export interface GraphQLMedia extends GraphQLIndexed {
-  type?: 'photo' | 'video' | 'animated_gif'
-  id_str?: string
-  media_key?: string
-  display_url?: string
-  expanded_url?: string
-  media_url_https?: string
-  url?: string
-  ext_alt_text?: string
-  ext_media_availability?: { status?: string }
-  original_info?: {
-    height?: number
-    width?: number
-    focus_rects?: { x: number; y: number; w: number; h: number }[]
-  }
-  sizes?: Record<
-    'large' | 'medium' | 'small' | 'thumb',
-    { h: number; w: number; resize: string }
-  >
-  video_info?: {
-    aspect_ratio?: number[]
-    duration_millis?: number
-    variants?: GraphQLVideoVariant[]
-  }
-  mediaStats?: { viewCount?: number }
-}
+export const GraphQLEntitiesSchema = v.looseObject({
+  hashtags: v.optional(v.array(v.looseObject({ indices, text }))),
+  urls: v.optional(v.array(UrlEntitySchema)),
+  user_mentions: v.optional(
+    v.array(
+      v.looseObject({ id_str: text, indices, name: text, screen_name: text }),
+    ),
+  ),
+  symbols: v.optional(v.array(v.looseObject({ indices, text }))),
+  media: v.optional(v.array(GraphQLMediaSchema)),
+})
 
-export interface GraphQLHighlightedLabel {
-  description?: string
-  badge?: { url?: string }
-  url?: { url?: string; urlType?: string }
-  userLabelType?: string
-  userLabelDisplayType?: string
-}
+export const GraphQLHighlightedLabelSchema = v.looseObject({
+  description: text,
+  badge: v.optional(v.looseObject({ url: text })),
+  url: v.optional(v.looseObject({ url: text, urlType: text })),
+  userLabelType: text,
+  userLabelDisplayType: text,
+})
 
-export interface GraphQLUser {
-  __typename?: 'User'
-  rest_id: string
-  is_blue_verified?: boolean
-  profile_image_shape?: string
-  core?: { name?: string; screen_name?: string }
-  avatar?: { image_url?: string }
-  verification?: { verified?: boolean; verified_type?: string }
-  privacy?: { protected?: boolean }
-  affiliates_highlighted_label?: { label?: GraphQLHighlightedLabel }
+export const GraphQLUserSchema = v.looseObject({
+  __typename: v.optional(v.literal('User')),
+  rest_id: v.string(),
+  is_blue_verified: v.optional(v.boolean()),
+  profile_image_shape: text,
+  core: v.optional(v.looseObject({ name: text, screen_name: text })),
+  avatar: v.optional(v.looseObject({ image_url: text })),
+  verification: v.optional(
+    v.looseObject({ verified: v.optional(v.boolean()), verified_type: text }),
+  ),
+  privacy: v.optional(v.looseObject({ protected: v.optional(v.boolean()) })),
+  affiliates_highlighted_label: v.optional(
+    v.looseObject({ label: v.optional(GraphQLHighlightedLabelSchema) }),
+  ),
   /**
    * Dropped by X in July 2026; kept for responses that still carry it.
    */
-  legacy?: {
-    name?: string
-    screen_name?: string
-    profile_image_url_https?: string
-    verified?: boolean
-    verified_type?: string
-    protected?: boolean
-  }
-}
+  legacy: v.optional(
+    v.looseObject({
+      name: text,
+      screen_name: text,
+      profile_image_url_https: text,
+      verified: v.optional(v.boolean()),
+      verified_type: text,
+      protected: v.optional(v.boolean()),
+    }),
+  ),
+})
 
-export interface GraphQLEditControl {
-  edit_tweet_ids?: string[]
-  editable_until_msecs?: string
-  is_edit_eligible?: boolean
-  edits_remaining?: string
-  initial_tweet_id?: string
-  edit_control_initial?: GraphQLEditControl
-}
+const EditControlFieldsSchema = v.looseObject({
+  edit_tweet_ids: v.optional(v.array(v.string())),
+  editable_until_msecs: text,
+  is_edit_eligible: v.optional(v.boolean()),
+  edits_remaining: text,
+})
 
-export interface GraphQLTweetLegacy {
-  created_at?: string
-  conversation_id_str?: string
-  display_text_range?: number[]
-  entities?: GraphQLEntities
-  extended_entities?: { media?: GraphQLMedia[] }
-  favorite_count?: number
-  full_text?: string
-  in_reply_to_screen_name?: string
-  in_reply_to_status_id_str?: string
-  in_reply_to_user_id_str?: string
-  lang?: string
-  possibly_sensitive?: boolean
-  reply_count?: number
-  retweet_count?: number
-  retweeted_status_result?: { result?: unknown }
-}
+export const GraphQLEditControlSchema = v.looseObject({
+  ...EditControlFieldsSchema.entries,
+  initial_tweet_id: text,
+  edit_control_initial: v.optional(EditControlFieldsSchema),
+})
 
-export interface GraphQLTweet {
-  __typename: 'Tweet'
-  rest_id: string
-  core: {
-    user_results?: {
-      result?: GraphQLUser | { __typename: 'UserUnavailable' }
-    }
-  }
-  legacy: GraphQLTweetLegacy
-  edit_control?: GraphQLEditControl
-  note_tweet?: {
-    note_tweet_results?: {
-      result?: { id?: string; text?: string; entity_set?: GraphQLEntities }
-    }
-  }
-  quoted_status_result?: { result?: unknown }
-}
+export const GraphQLTweetLegacySchema = v.looseObject({
+  created_at: text,
+  conversation_id_str: text,
+  display_text_range: indices,
+  entities: v.optional(GraphQLEntitiesSchema),
+  extended_entities: v.optional(
+    v.looseObject({ media: v.optional(v.array(GraphQLMediaSchema)) }),
+  ),
+  favorite_count: v.optional(v.number()),
+  full_text: text,
+  in_reply_to_screen_name: text,
+  in_reply_to_status_id_str: text,
+  in_reply_to_user_id_str: text,
+  lang: text,
+  possibly_sensitive: v.optional(v.boolean()),
+  reply_count: v.optional(v.number()),
+  retweet_count: v.optional(v.number()),
+  retweeted_status_result: v.optional(
+    v.looseObject({ result: v.optional(v.unknown()) }),
+  ),
+})
+
+export const GraphQLTweetSchema = v.looseObject({
+  __typename: v.literal('Tweet'),
+  rest_id: v.string(),
+  core: v.looseObject({
+    user_results: v.optional(
+      v.looseObject({ result: v.optional(v.unknown()) }),
+    ),
+  }),
+  legacy: GraphQLTweetLegacySchema,
+  edit_control: v.optional(GraphQLEditControlSchema),
+  note_tweet: v.optional(
+    v.looseObject({
+      note_tweet_results: v.optional(
+        v.looseObject({
+          result: v.optional(
+            v.looseObject({
+              id: text,
+              text,
+              entity_set: v.optional(GraphQLEntitiesSchema),
+            }),
+          ),
+        }),
+      ),
+    }),
+  ),
+  quoted_status_result: v.optional(
+    v.looseObject({ result: v.optional(v.unknown()) }),
+  ),
+})
+
+/**
+ * A `tweet_results.result` value: a tweet, or a tweet behind a visibility wrapper.
+ */
+export const GraphQLTweetResultSchema = v.variant('__typename', [
+  v.looseObject({
+    __typename: v.literal('TweetWithVisibilityResults'),
+    tweet: v.unknown(),
+  }),
+  GraphQLTweetSchema,
+])
+
+export type GraphQLMedia = v.InferOutput<typeof GraphQLMediaSchema>
+export type GraphQLEntities = v.InferOutput<typeof GraphQLEntitiesSchema>
+export type GraphQLUser = v.InferOutput<typeof GraphQLUserSchema>
+export type GraphQLEditControl = v.InferOutput<typeof GraphQLEditControlSchema>
+export type GraphQLTweet = v.InferOutput<typeof GraphQLTweetSchema>

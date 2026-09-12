@@ -15,13 +15,16 @@ import type {
 } from '@post-embed/types/internal/tweet/tweet'
 import type { TweetUser } from '@post-embed/types/internal/tweet/user'
 import type { TweetVideo } from '@post-embed/types/internal/tweet/video'
+import * as v from 'valibot'
 
-import type {
-  GraphQLEditControl,
-  GraphQLEntities,
-  GraphQLMedia,
-  GraphQLTweet,
-  GraphQLUser,
+import {
+  GraphQLTweetResultSchema,
+  GraphQLUserSchema,
+  type GraphQLEditControl,
+  type GraphQLEntities,
+  type GraphQLMedia,
+  type GraphQLTweet,
+  type GraphQLUser,
 } from './graphql.ts'
 
 export interface XTweetCapture {
@@ -32,35 +35,27 @@ export interface XTweetCapture {
   protected: boolean
 }
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null
+/**
+ * A `tweet_results.result` value, with the visibility wrapper removed.
+ * Anything that is not a tweet (a tombstone, a cursor, a timeline entry)
+ * fails the schema and yields `undefined`.
+ */
+export function unwrapTweetResult(result: unknown): GraphQLTweet | undefined {
+  const parsed = v.safeParse(GraphQLTweetResultSchema, result, {
+    abortEarly: true,
+  })
+  if (!parsed.success) return undefined
+  return parsed.output.__typename === 'TweetWithVisibilityResults'
+    ? unwrapTweetResult(parsed.output.tweet)
+    : parsed.output
 }
 
 /**
- * A `tweet_results.result` value, with the visibility wrapper removed.
+ * The author, or `undefined` for `UserUnavailable` and other non-user results.
  */
-export function unwrapTweetResult(result: unknown): GraphQLTweet | undefined {
-  if (!isRecord(result)) return undefined
-  if (result['__typename'] === 'TweetWithVisibilityResults') {
-    return unwrapTweetResult(result['tweet'])
-  }
-  if (
-    result['__typename'] === 'Tweet' &&
-    typeof result['rest_id'] === 'string' &&
-    isRecord(result['legacy']) &&
-    isRecord(result['core'])
-  ) {
-    return result as unknown as GraphQLTweet
-  }
-  return undefined
-}
-
-function unwrapUser(
-  results: GraphQLTweet['core']['user_results'],
-): GraphQLUser | undefined {
-  const user = results?.result
-  if (!user || user.__typename === 'UserUnavailable') return undefined
-  return typeof user.rest_id === 'string' ? user : undefined
+function unwrapUser(result: unknown): GraphQLUser | undefined {
+  const parsed = v.safeParse(GraphQLUserSchema, result, { abortEarly: true })
+  return parsed.success ? parsed.output : undefined
 }
 
 const MONTHS = [
@@ -204,10 +199,13 @@ function toMediaDetails(media: GraphQLMedia, indices: Indices): MediaDetails {
     },
     url: media.url ?? '',
   }
-  if (media.type === 'video' || media.type === 'animated_gif') {
+  if (media.type === 'video') {
+    return { ...base, type: 'video', video_info: toVideoInfo(media.video_info) }
+  }
+  if (media.type === 'animated_gif') {
     return {
       ...base,
-      type: media.type,
+      type: 'animated_gif',
       video_info: toVideoInfo(media.video_info),
     }
   }
@@ -355,7 +353,7 @@ function toVideo(
 function toQuotedTweet(result: unknown): QuotedTweet | undefined {
   const quoted = unwrapTweetResult(result)
   if (!quoted) return undefined
-  const user = unwrapUser(quoted.core.user_results)
+  const user = unwrapUser(quoted.core.user_results?.result)
   if (!user) return undefined
   const { base, mediaDetails } = toTweetBase(quoted, user)
   return {
@@ -376,7 +374,7 @@ function toQuotedTweet(result: unknown): QuotedTweet | undefined {
  * unavailable or the result fails `TweetSchema`.
  */
 export function toTweet(result: GraphQLTweet): XTweetCapture | undefined {
-  const user = unwrapUser(result.core.user_results)
+  const user = unwrapUser(result.core.user_results?.result)
   if (!user) return undefined
   const { base, media, mediaDetails } = toTweetBase(result, user)
   const legacy = result.legacy

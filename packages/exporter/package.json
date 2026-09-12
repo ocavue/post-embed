@@ -23,7 +23,8 @@
   "dependencies": {
     "@post-embed/schema": "workspace:^",
     "@post-embed/types": "workspace:^",
-    "birpc": "^4.2.0"
+    "birpc": "^4.2.0",
+    "valibot": "^1.4.2"
   },
   "devDependencies": {
     "@vitest/browser-playwright": "^5.0.0",
