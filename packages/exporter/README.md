@@ -36,4 +36,4 @@ import { requestXTweet } from '@post-embed/exporter/x/bridge'
 const entry = await requestXTweet('20')
 ```
 
-Answers are re-validated on the isolated side.
+`createXTweetClient` keeps one connection open for repeated `get` calls and broadcast entries. The bridge is a [birpc](https://github.com/antfu-collective/birpc) channel over `window.postMessage`, filtered to same-window, same-origin messages; answers are re-validated on the isolated side.

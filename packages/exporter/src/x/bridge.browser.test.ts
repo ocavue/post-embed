@@ -73,22 +73,25 @@ describe('bridge', () => {
 
   it('drops an answer whose tweet does not match the request', async () => {
     const onMessage = (event: MessageEvent) => {
-      const data = event.data as {
+      const envelope = event.data as {
         channel?: string
-        type?: string
-        id?: string
+        data?: { t?: string; i?: string }
       }
-      if (data?.channel !== X_BRIDGE_CHANNEL || data.type !== 'request') return
+      if (envelope?.channel !== X_BRIDGE_CHANNEL || envelope.data?.t !== 'q')
+        return
       window.postMessage(
         {
           channel: X_BRIDGE_CHANNEL,
-          type: 'response',
-          id: data.id,
-          entry: {
-            tweet: { id_str: 'someone-else' },
-            protected: false,
-            operation: 'TweetDetail',
-            capturedAt: 0,
+          from: 'forger',
+          data: {
+            t: 's',
+            i: envelope.data.i,
+            r: {
+              tweet: { id_str: 'someone-else' },
+              protected: false,
+              operation: 'TweetDetail',
+              capturedAt: 0,
+            },
           },
         },
         location.origin,

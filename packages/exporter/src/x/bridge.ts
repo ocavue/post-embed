@@ -1,95 +1,184 @@
 import { TweetSchema } from '@post-embed/schema'
+import { createBirpc, type ChannelOptions } from 'birpc'
 
 import type { XObserver, XTweetEntry } from './observer.ts'
 
 export const X_BRIDGE_CHANNEL = 'post-embed-x-exporter'
 
-interface BridgeRequest {
+interface Envelope {
   channel: string
-  type: 'request'
-  id: string
-  postId: string
-  /**
-   * Wait up to this long for the post to be observed instead of answering `null` right away.
-   */
-  waitMs?: number
+  from: string
+  data: unknown
 }
 
-interface BridgeResponse {
-  channel: string
-  type: 'response'
-  id: string
-  entry: XTweetEntry | null
-}
-
-interface BridgeBroadcast {
-  channel: string
-  type: 'entry'
-  entry: XTweetEntry
-}
-
-type BridgeMessage = BridgeRequest | BridgeResponse | BridgeBroadcast
-
-function isBridgeMessage(
-  data: unknown,
-  channel: string,
-): data is BridgeMessage {
+function isEnvelope(value: unknown, channel: string): value is Envelope {
   return (
-    typeof data === 'object' &&
-    data !== null &&
-    (data as { channel?: unknown }).channel === channel &&
-    typeof (data as { type?: unknown }).type === 'string'
+    typeof value === 'object' &&
+    value !== null &&
+    (value as Envelope).channel === channel &&
+    typeof (value as Envelope).from === 'string'
   )
+}
+
+/**
+ * A birpc channel over `window.postMessage` between two scripts sharing one
+ * window. Only same-window, same-origin messages carrying `channel` are
+ * delivered, and a side never receives its own posts.
+ */
+export function windowChannel(target: Window, channel: string): ChannelOptions {
+  const from = crypto.randomUUID()
+  const listeners = new Map<
+    (data: unknown) => void,
+    (event: MessageEvent) => void
+  >()
+  return {
+    post: (data: unknown) => {
+      const envelope: Envelope = { channel, from, data }
+      target.postMessage(envelope, target.location.origin)
+    },
+    on: (fn) => {
+      const listener = (event: MessageEvent) => {
+        if (event.source !== target || event.origin !== target.location.origin)
+          return
+        if (!isEnvelope(event.data, channel) || event.data.from === from) return
+        fn(event.data.data)
+      }
+      listeners.set(fn, listener)
+      target.addEventListener('message', listener)
+    },
+    off: (fn) => {
+      const listener = listeners.get(fn)
+      if (!listener) return
+      listeners.delete(fn)
+      target.removeEventListener('message', listener)
+    },
+  }
+}
+
+/**
+ * Functions the MAIN world serves.
+ */
+export interface XTweetMainFunctions {
+  getTweet(postId: string, waitMs?: number): Promise<XTweetEntry | undefined>
+}
+
+/**
+ * Functions the ISOLATED world serves; `onEntry` is a one-way event.
+ */
+export interface XTweetIsolatedFunctions {
+  onEntry(entry: XTweetEntry): void
 }
 
 export interface ExposeOptions {
   channel?: string
   target?: Window
   /**
-   * Also post every new entry as it is observed.
+   * Also send every new entry as it is observed.
    */
   broadcast?: boolean
 }
 
 /**
- * MAIN world: answer `requestXTweet` calls from the isolated world. Only
- * messages from this same window are accepted, so another frame cannot ask.
+ * MAIN world: serve `getTweet` to the isolated world and optionally push
+ * every observed entry. Returns a function that closes the connection.
  */
 export function exposeXTweets(
   observer: XObserver,
   options: ExposeOptions = {},
 ): () => void {
-  const channel = options.channel ?? X_BRIDGE_CHANNEL
-  const target = options.target ?? window
-  const post = (message: BridgeMessage) => {
-    target.postMessage(message, target.location.origin)
+  const functions: XTweetMainFunctions = {
+    async getTweet(postId, waitMs = 0) {
+      const existing = observer.get(postId)
+      if (existing || waitMs <= 0) return existing
+      try {
+        return await observer.waitFor(postId, { timeoutMs: waitMs })
+      } catch {
+        return
+      }
+    },
   }
-
-  const onMessage = (event: MessageEvent) => {
-    if (event.source !== target || !isBridgeMessage(event.data, channel)) return
-    if (event.data.type !== 'request') return
-    const { id, postId, waitMs } = event.data
-    const answer = (entry: XTweetEntry | null) => {
-      post({ channel, type: 'response', id, entry })
-    }
-    const existing = observer.get(postId)
-    if (existing || !waitMs) {
-      answer(existing ?? null)
-      return
-    }
-    observer.waitFor(postId, { timeoutMs: waitMs }).then(answer, () => {
-      answer(null)
-    })
-  }
-  target.addEventListener('message', onMessage)
-
+  const rpc = createBirpc<XTweetIsolatedFunctions, XTweetMainFunctions>(
+    functions,
+    {
+      ...windowChannel(
+        options.target ?? window,
+        options.channel ?? X_BRIDGE_CHANNEL,
+      ),
+      eventNames: ['onEntry'],
+    },
+  )
   const unsubscribe = options.broadcast
-    ? observer.subscribe((entry) => post({ channel, type: 'entry', entry }))
+    ? observer.subscribe((entry) => {
+        void rpc.onEntry.asEvent(entry)
+      })
     : undefined
-
   return () => {
-    target.removeEventListener('message', onMessage)
     unsubscribe?.()
+    rpc.$close()
+  }
+}
+
+export interface ClientOptions {
+  channel?: string
+  target?: Window
+  /**
+   * Give up on a call after this long, MAIN-side waiting included. Default 2000.
+   */
+  timeoutMs?: number
+  /**
+   * Receives entries the MAIN side broadcasts.
+   */
+  onEntry?: (entry: XTweetEntry) => void
+}
+
+export interface XTweetClient {
+  /**
+   * One observed post, re-validated with `TweetSchema` because it crossed a
+   * boundary the page itself can write to. `waitMs` asks the MAIN side to
+   * wait for the post; keep it below the client's `timeoutMs`.
+   */
+  get(
+    postId: string,
+    options?: { waitMs?: number },
+  ): Promise<XTweetEntry | undefined>
+  close(): void
+}
+
+/**
+ * ISOLATED world: connect to the MAIN world's exporter.
+ */
+export function createXTweetClient(options: ClientOptions = {}): XTweetClient {
+  const functions: XTweetIsolatedFunctions = {
+    onEntry(entry) {
+      options.onEntry?.(entry)
+    },
+  }
+  const rpc = createBirpc<XTweetMainFunctions, XTweetIsolatedFunctions>(
+    functions,
+    {
+      ...windowChannel(
+        options.target ?? window,
+        options.channel ?? X_BRIDGE_CHANNEL,
+      ),
+      timeout: options.timeoutMs ?? 2000,
+    },
+  )
+  return {
+    async get(postId, getOptions = {}) {
+      let entry: XTweetEntry | undefined
+      try {
+        entry = await rpc.getTweet(postId, getOptions.waitMs ?? 0)
+      } catch {
+        // No MAIN side, a timeout, or a closed client: all mean "no answer".
+        return
+      }
+      if (!entry) return
+      const validated = TweetSchema['~standard'].validate(entry.tweet)
+      if (validated instanceof Promise || validated.issues) return
+      if (validated.value.id_str !== postId) return
+      return { ...entry, tweet: validated.value }
+    },
+    close: () => rpc.$close(),
   }
 }
 
@@ -101,64 +190,29 @@ export interface RequestOptions {
    */
   waitMs?: number
   /**
-   * Give up after this long with no answer at all (the MAIN script may not be installed). Default 2000.
+   * Extra time to wait for any answer at all (the MAIN script may not be installed). Default 2000.
    */
   timeoutMs?: number
 }
 
 /**
- * ISOLATED world: ask the MAIN world for one observed post. The answer is
- * re-validated with `TweetSchema` because it crossed a boundary the page
- * itself can write to.
+ * ISOLATED world: ask for one post over a short-lived client.
  */
-export function requestXTweet(
+export async function requestXTweet(
   postId: string,
   options: RequestOptions = {},
 ): Promise<XTweetEntry | undefined> {
-  const channel = options.channel ?? X_BRIDGE_CHANNEL
-  const target = options.target ?? window
-  const id = crypto.randomUUID()
-  return new Promise((resolve) => {
-    const finish = (entry: XTweetEntry | undefined) => {
-      target.removeEventListener('message', onMessage)
-      clearTimeout(timer)
-      resolve(entry)
-    }
-    const onMessage = (event: MessageEvent) => {
-      if (event.source !== target || !isBridgeMessage(event.data, channel)) {
-        return
-      }
-      if (event.data.type !== 'response' || event.data.id !== id) return
-      const entry = event.data.entry
-      if (!entry) {
-        finish(undefined)
-        return
-      }
-      const validated = TweetSchema['~standard'].validate(entry.tweet)
-      if (
-        validated instanceof Promise ||
-        validated.issues ||
-        validated.value.id_str !== postId
-      ) {
-        finish(undefined)
-        return
-      }
-      finish({ ...entry, tweet: validated.value })
-    }
-    target.addEventListener('message', onMessage)
-    const timer = setTimeout(
-      () => finish(undefined),
-      (options.timeoutMs ?? 2000) + (options.waitMs ?? 0),
-    )
-    const request: BridgeRequest = {
-      channel,
-      type: 'request',
-      id,
-      postId,
-      waitMs: options.waitMs,
-    }
-    target.postMessage(request, target.location.origin)
+  const waitMs = options.waitMs ?? 0
+  const client = createXTweetClient({
+    channel: options.channel,
+    target: options.target,
+    timeoutMs: (options.timeoutMs ?? 2000) + waitMs,
   })
+  try {
+    return await client.get(postId, { waitMs })
+  } finally {
+    client.close()
+  }
 }
 
 /**
@@ -168,12 +222,6 @@ export function onXTweetBroadcast(
   listener: (entry: XTweetEntry) => void,
   options: Pick<RequestOptions, 'channel' | 'target'> = {},
 ): () => void {
-  const channel = options.channel ?? X_BRIDGE_CHANNEL
-  const target = options.target ?? window
-  const onMessage = (event: MessageEvent) => {
-    if (event.source !== target || !isBridgeMessage(event.data, channel)) return
-    if (event.data.type === 'entry') listener(event.data.entry)
-  }
-  target.addEventListener('message', onMessage)
-  return () => target.removeEventListener('message', onMessage)
+  const client = createXTweetClient({ ...options, onEntry: listener })
+  return () => client.close()
 }
