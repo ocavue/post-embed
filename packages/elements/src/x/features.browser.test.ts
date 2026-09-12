@@ -228,4 +228,24 @@ describe('Full tweet snapshots', () => {
       .toBeVisible()
     expect(element.querySelector('video')?.hidden).toBe(true)
   })
+
+  it('treats a lowercase syndication video status as available', async () => {
+    const tweet = createTweet()
+    tweet.video = {
+      aspectRatio: [8, 5],
+      contentType: 'video/mp4',
+      durationMs: 1000,
+      mediaAvailability: { status: 'available' },
+      poster: createPhoto().media_url_https,
+      variants: [{ type: 'video/mp4', src: 'https://example.com/video.mp4' }],
+      videoId: { type: 'tweet', id: '1' },
+      viewCount: 0,
+    }
+    const element = mount(tweet)
+    await expect
+      .element(post.getByText('Hello 😀', { exact: false }))
+      .toBeVisible()
+    expect(element.querySelector('[data-media-unavailable]')).toBeNull()
+    expect(element.querySelector('video')).not.toBeNull()
+  })
 })
