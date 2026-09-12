@@ -216,9 +216,7 @@ describe('YouTube video fetch', () => {
     element.url = watchUrl
     element.onFetch = onFetch
     document.body.append(element)
-    await expect
-      .element(video.getByText('Loading this video…'))
-      .toBeVisible()
+    await expect.element(video.getByText('Loading this video…')).toBeVisible()
     await expect
       .element(video.getByRole('link', { name: 'Watch on YouTube' }))
       .toHaveAttribute('href', watchUrl)

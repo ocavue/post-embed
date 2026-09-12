@@ -61,7 +61,9 @@ export function useYouTubeVideo(
 function renderFallback(pending: boolean): HTMLElement {
   return el(
     'article',
-    pending ? { 'data-fallback': '', 'data-pending': '' } : { 'data-fallback': '' },
+    pending
+      ? { 'data-fallback': '', 'data-pending': '' }
+      : { 'data-fallback': '' },
     el(
       'div',
       { 'data-details': '' },
@@ -74,7 +76,11 @@ function renderFallback(pending: boolean): HTMLElement {
     ),
     pending
       ? null
-      : el('footer', { 'data-footer': '' }, 'No saved video could be displayed.'),
+      : el(
+          'footer',
+          { 'data-footer': '' },
+          'No saved video could be displayed.',
+        ),
   )
 }
 

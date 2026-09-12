@@ -267,16 +267,15 @@ describe('X post fetch', () => {
   }
 
   it('calls `onFetch` with `url` and renders the resolved snapshot', async () => {
-    const onFetch = vi.fn(async (value: string) => { return createTweet(`Fetched from ${value}`) },
-    )
+    const onFetch = vi.fn((value: string) => {
+      return Promise.resolve(createTweet(`Fetched from ${value}`))
+    })
     const element = mountRemote(onFetch)
-    await expect
-      .element(post.getByText('Loading this post…'))
-      .toBeVisible()
-    expect(element.querySelector('[data-fallback][data-pending]')).not.toBeNull()
-    await expect
-      .element(post.getByText(`Fetched from ${url}`))
-      .toBeVisible()
+    await expect.element(post.getByText('Loading this post…')).toBeVisible()
+    expect(
+      element.querySelector('[data-fallback][data-pending]'),
+    ).not.toBeNull()
+    await expect.element(post.getByText(`Fetched from ${url}`)).toBeVisible()
     expect(onFetch).toHaveBeenCalledTimes(1)
     expect(onFetch).toHaveBeenCalledWith(url)
     expect(element.data).toBeNull()
@@ -313,21 +312,17 @@ describe('X post fetch', () => {
 
   it('refetches when `url` changes and ignores the stale result', async () => {
     const resolvers = new Map<string, (tweet: Tweet) => void>()
-    const element = mountRemote(
-      (value) => { return new Promise<Tweet>((resolve) => {
-          resolvers.set(value, resolve)
-        }) },
-    )
-    await expect
-      .element(post.getByText('Loading this post…'))
-      .toBeVisible()
+    const element = mountRemote((value) => {
+      return new Promise<Tweet>((resolve) => {
+        resolvers.set(value, resolve)
+      })
+    })
+    await expect.element(post.getByText('Loading this post…')).toBeVisible()
     element.url = 'https://x.com/example/status/2'
     resolvers.get(url)?.(createTweet('Stale'))
     await new Promise((resolve) => setTimeout(resolve, 20))
     expect(element.textContent).not.toContain('Stale')
-    await expect
-      .element(post.getByText('Loading this post…'))
-      .toBeVisible()
+    await expect.element(post.getByText('Loading this post…')).toBeVisible()
     resolvers.get('https://x.com/example/status/2')?.(createTweet('Fresh'))
     await expect.element(post.getByText('Fresh')).toBeVisible()
   })

@@ -52,7 +52,9 @@ export function useXPost(host: HostElement, props: State<XPostProps>): void {
 function renderFallback(pending: boolean): HTMLElement {
   return el(
     'article',
-    pending ? { 'data-fallback': '', 'data-pending': '' } : { 'data-fallback': '' },
+    pending
+      ? { 'data-fallback': '', 'data-pending': '' }
+      : { 'data-fallback': '' },
     el('header', { 'data-author': '' }, el('bdi', {}, 'X post')),
     el(
       'p',
@@ -61,7 +63,11 @@ function renderFallback(pending: boolean): HTMLElement {
     ),
     pending
       ? null
-      : el('footer', { 'data-footer': '' }, 'No saved post could be displayed.'),
+      : el(
+          'footer',
+          { 'data-footer': '' },
+          'No saved post could be displayed.',
+        ),
   )
 }
 
