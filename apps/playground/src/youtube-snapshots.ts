@@ -28,11 +28,7 @@ export function createYouTubeSnapshot(
   if (name === 'long-title') {
     video.title = `${video.title} `.repeat(4).trim()
   }
-  if (name === 'short') {
-    video.url = 'https://www.youtube.com/shorts/aqz-KE-bpKQ'
-    video.width = 200
-    video.height = 356
-  }
+  if (name === 'short') video.url = 'https://www.youtube.com/shorts/aqz-KE-bpKQ'
   if (name === 'start-time') {
     video.url = 'https://youtu.be/aqz-KE-bpKQ?t=1m30s'
   }

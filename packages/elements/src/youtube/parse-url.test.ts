@@ -7,7 +7,6 @@ it.each([
   'https://youtube.com/watch?v=aqz-KE-bpKQ&list=abc',
   'https://m.youtube.com/watch?v=aqz-KE-bpKQ',
   'https://youtu.be/aqz-KE-bpKQ',
-  'https://www.youtube.com/shorts/aqz-KE-bpKQ',
   'https://www.youtube.com/embed/aqz-KE-bpKQ',
   'https://www.youtube-nocookie.com/embed/aqz-KE-bpKQ',
   'https://www.youtube.com/live/aqz-KE-bpKQ',
@@ -15,7 +14,14 @@ it.each([
   expect(parseYouTubeUrl(url)).toEqual({
     videoId: 'aqz-KE-bpKQ',
     startSeconds: 0,
+    short: false,
   })
+})
+
+it('marks Shorts URLs', () => {
+  expect(parseYouTubeUrl('https://www.youtube.com/shorts/aqz-KE-bpKQ')).toEqual(
+    { videoId: 'aqz-KE-bpKQ', startSeconds: 0, short: true },
+  )
 })
 
 it('parses start offsets', () => {
@@ -47,12 +53,12 @@ it.each([
 })
 
 it('builds canonical watch and embed URLs', () => {
-  const ref = { videoId: 'aqz-KE-bpKQ', startSeconds: 0 }
+  const ref = { videoId: 'aqz-KE-bpKQ', startSeconds: 0, short: false }
   expect(getWatchUrl(ref)).toBe('https://www.youtube.com/watch?v=aqz-KE-bpKQ')
   expect(getEmbedUrl(ref)).toBe(
     'https://www.youtube-nocookie.com/embed/aqz-KE-bpKQ?autoplay=1&playsinline=1',
   )
-  const later = { videoId: 'aqz-KE-bpKQ', startSeconds: 90 }
+  const later = { videoId: 'aqz-KE-bpKQ', startSeconds: 90, short: false }
   expect(getWatchUrl(later)).toBe(
     'https://www.youtube.com/watch?v=aqz-KE-bpKQ&t=90',
   )

@@ -5,6 +5,7 @@ const VIDEO_ID = /^[\w-]{11}$/
 export interface YouTubeVideoRef {
   videoId: string
   startSeconds: number
+  short: boolean
 }
 
 export function parseYouTubeUrl(value: string): YouTubeVideoRef | undefined {
@@ -15,6 +16,7 @@ export function parseYouTubeUrl(value: string): YouTubeVideoRef | undefined {
     return
   }
   let videoId: string | null = null
+  let short = false
   if (YOUTU_BE_HOST.test(url.hostname)) {
     videoId = url.pathname.slice(1)
   } else if (YOUTUBE_HOSTS.test(url.hostname)) {
@@ -23,11 +25,12 @@ export function parseYouTubeUrl(value: string): YouTubeVideoRef | undefined {
       videoId = url.searchParams.get('v')
     } else if (first === 'shorts' || first === 'embed' || first === 'live') {
       videoId = second ?? null
+      short = first === 'shorts'
     }
   }
   if (!videoId || !VIDEO_ID.test(videoId)) return
   const time = url.searchParams.get('start') ?? url.searchParams.get('t') ?? ''
-  return { videoId, startSeconds: parseStartSeconds(time) }
+  return { videoId, startSeconds: parseStartSeconds(time), short }
 }
 
 /**

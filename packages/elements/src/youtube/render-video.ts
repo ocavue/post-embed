@@ -64,9 +64,7 @@ export function renderVideo(
   }
   return el(
     'article',
-    {
-      'data-orientation': video.height > video.width ? 'portrait' : undefined,
-    },
+    { 'data-orientation': ref.short ? 'portrait' : undefined },
     posterElement,
     el(
       'div',

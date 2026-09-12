@@ -94,16 +94,14 @@ describe('YouTube video', () => {
       .toBeVisible()
   })
 
-  it('marks portrait videos', async () => {
+  it('marks Shorts as portrait', async () => {
     const element = mount()
     expect(
       element.querySelector('article')?.hasAttribute('data-orientation'),
     ).toBe(false)
-    element.data = {
-      ...createVideo('https://www.youtube.com/shorts/aqz-KE-bpKQ'),
-      width: 200,
-      height: 356,
-    }
+    // oEmbed reports the same 200x113 player size for Shorts, so the URL is
+    // the only signal.
+    element.data = createVideo('https://www.youtube.com/shorts/aqz-KE-bpKQ')
     await expect
       .element(video.getByRole('link', { name: 'Watch on YouTube' }))
       .toHaveAttribute('href', 'https://www.youtube.com/watch?v=aqz-KE-bpKQ')
