@@ -1,5 +1,6 @@
 import './theme.css'
 
+import type { Tweet } from '@post-embed/types'
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 import { page, server, userEvent } from 'vitest/browser'
 
@@ -250,5 +251,111 @@ describe('X post', () => {
     await expect
       .element(post.getByRole('link', { name: 'A link' }))
       .not.toBeInTheDocument()
+  })
+})
+
+describe('X post fetch', () => {
+  const url = 'https://x.com/example/status/1234567890123456789'
+
+  function mountRemote(onFetch: XPostElement['onFetch'], remote = url) {
+    const element = document.createElement('post-embed-x-post')
+    element.dataset.testid = 'post'
+    element.url = remote
+    element.onFetch = onFetch
+    document.body.append(element)
+    return element
+  }
+
+  it('calls `onFetch` with `url` and renders the resolved snapshot', async () => {
+    const onFetch = vi.fn(async (value: string) => { return createTweet(`Fetched from ${value}`) },
+    )
+    const element = mountRemote(onFetch)
+    await expect
+      .element(post.getByText('Loading this post…'))
+      .toBeVisible()
+    expect(element.querySelector('[data-fallback][data-pending]')).not.toBeNull()
+    await expect
+      .element(post.getByText(`Fetched from ${url}`))
+      .toBeVisible()
+    expect(onFetch).toHaveBeenCalledTimes(1)
+    expect(onFetch).toHaveBeenCalledWith(url)
+    expect(element.data).toBeNull()
+  })
+
+  it('renders a synchronous result without a pending state', async () => {
+    const element = mountRemote(() => createTweet('Sync'))
+    expect(element.textContent).toContain('Sync')
+    expect(element.textContent).not.toContain('Loading')
+    await expect.element(post.getByText('Sync')).toBeVisible()
+  })
+
+  it('shows the fallback when `onFetch` finds nothing', async () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {})
+    mountRemote(() => Promise.resolve(undefined))
+    await expect
+      .element(post.getByText('This post is unavailable.'))
+      .toBeVisible()
+    expect(error).not.toHaveBeenCalled()
+  })
+
+  it('logs a rejected fetch and shows the fallback', async () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const element = mountRemote(() => Promise.reject(new Error('offline')))
+    await expect
+      .element(post.getByText('This post is unavailable.'))
+      .toBeVisible()
+    expect(error).toHaveBeenCalledWith(
+      '[post-embed] Failed to fetch X post:',
+      expect.any(Error),
+    )
+    expect(element.querySelector('[data-pending]')).toBeNull()
+  })
+
+  it('refetches when `url` changes and ignores the stale result', async () => {
+    const resolvers = new Map<string, (tweet: Tweet) => void>()
+    const element = mountRemote(
+      (value) => { return new Promise<Tweet>((resolve) => {
+          resolvers.set(value, resolve)
+        }) },
+    )
+    await expect
+      .element(post.getByText('Loading this post…'))
+      .toBeVisible()
+    element.url = 'https://x.com/example/status/2'
+    resolvers.get(url)?.(createTweet('Stale'))
+    await new Promise((resolve) => setTimeout(resolve, 20))
+    expect(element.textContent).not.toContain('Stale')
+    await expect
+      .element(post.getByText('Loading this post…'))
+      .toBeVisible()
+    resolvers.get('https://x.com/example/status/2')?.(createTweet('Fresh'))
+    await expect.element(post.getByText('Fresh')).toBeVisible()
+  })
+
+  it('prefers `data` and fetches only once `data` is cleared', async () => {
+    const onFetch = vi.fn(() => Promise.resolve(createTweet('Fetched')))
+    const element = mountRemote(onFetch)
+    element.data = createTweet('Saved')
+    await expect.element(post.getByText('Saved')).toBeVisible()
+    expect(onFetch).not.toHaveBeenCalled()
+    element.data = null
+    await expect.element(post.getByText('Fetched')).toBeVisible()
+    expect(onFetch).toHaveBeenCalledTimes(1)
+  })
+
+  it('does not fetch without both `url` and `onFetch`', async () => {
+    const onFetch = vi.fn(() => Promise.resolve(createTweet('Fetched')))
+    const element = mountRemote(null)
+    await expect
+      .element(post.getByText('This post is unavailable.'))
+      .toBeVisible()
+    element.onFetch = onFetch
+    element.url = null
+    await expect
+      .element(post.getByText('This post is unavailable.'))
+      .toBeVisible()
+    expect(onFetch).not.toHaveBeenCalled()
+    element.url = url
+    await expect.element(post.getByText('Fetched')).toBeVisible()
   })
 })

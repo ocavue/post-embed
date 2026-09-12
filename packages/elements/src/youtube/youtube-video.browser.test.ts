@@ -207,3 +207,26 @@ describe('YouTube video', () => {
     expect(getComputedStyle(image).objectFit).toBe('cover')
   })
 })
+
+describe('YouTube video fetch', () => {
+  it('calls `onFetch` with `url` and renders the resolved snapshot', async () => {
+    const onFetch = vi.fn((url: string) => Promise.resolve(createVideo(url)))
+    const element = document.createElement('post-embed-youtube-video')
+    element.dataset.testid = 'video'
+    element.url = watchUrl
+    element.onFetch = onFetch
+    document.body.append(element)
+    await expect
+      .element(video.getByText('Loading this video…'))
+      .toBeVisible()
+    await expect
+      .element(video.getByRole('link', { name: 'Watch on YouTube' }))
+      .toHaveAttribute('href', watchUrl)
+    expect(onFetch).toHaveBeenCalledWith(watchUrl)
+    expect(element.data).toBeNull()
+    element.url = null
+    await expect
+      .element(video.getByText('This video is unavailable.'))
+      .toBeVisible()
+  })
+})
