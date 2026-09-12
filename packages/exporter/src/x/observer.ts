@@ -1,4 +1,5 @@
 import type { Tweet } from '@post-embed/types'
+import { createLRU } from 'lru.min'
 
 import { extractTweetResults } from './extract.ts'
 import { installResponseHooks, type ObservedResponse } from './hooks.ts'
@@ -38,6 +39,9 @@ export interface XObserverOptions {
 
 export interface XObserver {
   get(postId: string): XTweetEntry | undefined
+  /**
+   * Every cached post id, most recently used first.
+   */
   ids(): string[]
   subscribe(listener: (entry: XTweetEntry) => void): () => void
   /**
@@ -57,18 +61,11 @@ export interface XObserver {
 export function observeXTweets(options: XObserverOptions = {}): XObserver {
   const target = options.target ?? globalThis
   const capacity = options.capacity ?? 200
-  const entries = new Map<string, XTweetEntry>()
+  const entries = createLRU<string, XTweetEntry>({ max: capacity })
   const listeners = new Set<(entry: XTweetEntry) => void>()
 
-  // FIXME: use lru.min npm package. do not write your own LRU cache.
   const remember = (entry: XTweetEntry) => {
-    entries.delete(entry.tweet.id_str)
     entries.set(entry.tweet.id_str, entry)
-    while (entries.size > capacity) {
-      const oldest = entries.keys().next().value
-      if (oldest === undefined) break
-      entries.delete(oldest)
-    }
     for (const listener of listeners) {
       try {
         listener(entry)

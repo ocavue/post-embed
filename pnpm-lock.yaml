@@ -238,6 +238,9 @@ importers:
       birpc:
         specifier: ^4.2.0
         version: 4.2.0
+      lru.min:
+        specifier: ^1.1.5
+        version: 1.1.5
       valibot:
         specifier: ^1.4.2
         version: 1.4.2(typescript@6.0.3)
@@ -2798,6 +2801,10 @@ packages:
 
   lru-cache@5.1.1:
     resolution: {integrity: sha512-KpNARQA3Iwv+jTA0utUVVbrh+Jlrr1Fv0e56GGzAFOXN7dk/FviaDW8LHmK52DlcH4WP2n6gI8vN1aesBFgo9w==}
+
+  lru.min@1.1.5:
+    resolution: {integrity: sha512-5J9ysMYUpYIg9RF2vJpy9SinEmSviFSe0GyPpCQ4L5QSkLAgeLXlTAOu2ZwWUU5m+0SBl6gUU1R1ZQB3aKypfA==}
+    engines: {bun: '>=1.0.0', deno: '>=1.30.0', node: '>=8.0.0'}
 
   magic-string@1.2.3:
     resolution: {integrity: sha512-Bpb0W2TbLKOZ7vJnOUnVRGq3WL2p+ISV29M6hYPL1AFCpyKZpdr5ytiXoTSSxRVhg8YW7f65+6gbG8WG6PCa/g==}
@@ -6633,6 +6640,8 @@ snapshots:
   lru-cache@5.1.1:
     dependencies:
       yallist: 3.1.1
+
+  lru.min@1.1.5: {}
 
   magic-string@1.2.3:
     dependencies:

@@ -32,10 +32,10 @@ describe('observeXTweets', () => {
       expect(observer.ids()).toHaveLength(4)
     })
     expect(observer.ids()).toEqual([
-      '1000000000000000001',
-      '1000000000000000002',
-      '1000000000000000003',
       '1000000000000000005',
+      '1000000000000000003',
+      '1000000000000000002',
+      '1000000000000000001',
     ])
     const entry = observer.get('1000000000000000002')!
     expect(entry.operation).toBe('HomeTimeline')
@@ -90,8 +90,8 @@ describe('observeXTweets', () => {
       expect(seen).toHaveLength(4)
     })
     expect(observer.ids()).toEqual([
-      '1000000000000000003',
       '1000000000000000005',
+      '1000000000000000003',
     ])
     unsubscribe()
     await (await fetch(DETAIL_URL)).text()

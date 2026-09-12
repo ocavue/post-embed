@@ -24,6 +24,7 @@
     "@post-embed/schema": "workspace:^",
     "@post-embed/types": "workspace:^",
     "birpc": "^4.2.0",
+    "lru.min": "^1.1.5",
     "valibot": "^1.4.2"
   },
   "devDependencies": {
