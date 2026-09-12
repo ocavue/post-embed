@@ -12,6 +12,7 @@
   "exports": {
     "./x": "./src/x/index.ts",
     "./x/bridge": "./src/x/bridge.ts",
+    "./x/syndication": "./src/x/syndication.ts",
     "./x/testing": "./src/x/testing/scrub.ts"
   },
   "files": [
@@ -24,6 +25,7 @@
     "@post-embed/schema": "workspace:^",
     "@post-embed/types": "workspace:^",
     "birpc": "^4.2.0",
+    "entities": "^8.1.0",
     "lru.min": "^1.1.5",
     "valibot": "^1.5.0"
   },
@@ -44,6 +46,10 @@
       "./x/bridge": {
         "types": "./dist/x/bridge.d.ts",
         "default": "./dist/x/bridge.js"
+      },
+      "./x/syndication": {
+        "types": "./dist/x/syndication.d.ts",
+        "default": "./dist/x/syndication.js"
       }
     }
   }

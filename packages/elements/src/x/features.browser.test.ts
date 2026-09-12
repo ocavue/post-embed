@@ -3,7 +3,7 @@ import './theme.css'
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 import { page } from 'vitest/browser'
 
-import { createPhoto, createTweet } from './testing/fixtures.ts'
+import { createPhoto, createPost, createVideo } from './testing/fixtures.ts'
 
 import { registerXPost } from './index.ts'
 
@@ -13,48 +13,22 @@ afterEach(() => {
   vi.restoreAllMocks()
 })
 
-function mount(tweet = createTweet()) {
-  tweet.user.profile_image_url_https = ''
+function mount(post = createPost()) {
+  delete post.author.avatar
   const element = document.createElement('post-embed-x-post')
   element.dataset.testid = 'feature-post'
-  element.data = tweet
+  element.data = post
   document.body.append(element)
   return element
 }
 const post = page.getByTestId('feature-post')
 
-function video(gif = false) {
-  return {
-    ...createPhoto(),
-    type: gif ? ('animated_gif' as const) : ('video' as const),
-    video_info: {
-      aspect_ratio: [8, 5] as [number, number],
-      variants: [
-        {
-          content_type: 'application/x-mpegURL' as const,
-          url: 'https://example.com/video.m3u8',
-        },
-        {
-          content_type: 'video/mp4' as const,
-          bitrate: 200,
-          url: 'https://example.com/high.mp4',
-        },
-        {
-          content_type: 'video/mp4' as const,
-          bitrate: 100,
-          url: 'https://example.com/low.mp4',
-        },
-      ],
-    },
-  }
-}
-
-describe('Full tweet snapshots', () => {
+describe('Full post snapshots', () => {
   it('renders photos with alt text and preserves native full-image links', async () => {
-    expect(createPhoto().media_url_https).toMatch(/^https?:/u)
-    const tweet = createTweet('Four pictures')
-    tweet.mediaDetails = Array.from({ length: 4 }, createPhoto)
-    const element = mount(tweet)
+    expect(createPhoto().url).toMatch(/^https?:/u)
+    const snapshot = createPost('Four pictures')
+    snapshot.media = Array.from({ length: 4 }, createPhoto)
+    const element = mount(snapshot)
     await expect.element(post.getByText('Four pictures')).toBeVisible()
     const images =
       element.querySelectorAll<HTMLImageElement>('[data-media] img')
@@ -65,9 +39,9 @@ describe('Full tweet snapshots', () => {
   })
 
   it('uses MP4 before HLS, native controls, and opt-in GIF playback', async () => {
-    const tweet = createTweet()
-    tweet.mediaDetails = [video(), video(true)]
-    const element = mount(tweet)
+    const snapshot = createPost()
+    snapshot.media = [createVideo(), createVideo(true)]
+    const element = mount(snapshot)
     await expect
       .element(post.getByText('Hello 😀', { exact: false }))
       .toBeVisible()
@@ -86,26 +60,22 @@ describe('Full tweet snapshots', () => {
     const pause = vi.spyOn(videos[0], 'pause')
     element.remove()
     expect(pause).toHaveBeenCalled()
-    tweet.mediaDetails = [createPhoto()]
-    element.data = { ...tweet }
+    snapshot.media = [createPhoto()]
+    element.data = { ...snapshot }
     document.body.append(element)
     expect(element.querySelector('video')).toBeNull()
   })
 
   it('renders quotes, reply context, and long-post links', async () => {
-    const tweet = createTweet('A reply with a quote')
-    tweet.quoted_tweet = {
-      ...createTweet('Quote body'),
-      id_str: '222',
-      reply_count: 1,
-      retweet_count: 2,
-      self_thread: { id_str: '222' },
-      mediaDetails: [createPhoto()],
+    const snapshot = createPost('A reply with a quote')
+    snapshot.quote = {
+      ...createPost('Quote body'),
+      id: '222',
+      media: [createPhoto()],
     }
-    tweet.in_reply_to_screen_name = 'example'
-    tweet.in_reply_to_status_id_str = '111'
-    tweet.note_tweet = { id: '333' }
-    mount(tweet)
+    snapshot.replyTo = { handle: 'example', id: '111' }
+    snapshot.truncated = true
+    mount(snapshot)
     await expect
       .element(
         post
@@ -122,17 +92,12 @@ describe('Full tweet snapshots', () => {
   })
 
   it('renders badges, UTC dates, and edits without engagement controls', async () => {
-    const tweet = createTweet()
-    tweet.user.verified_type = 'Business'
-    tweet.user.highlighted_label = {
-      description: 'Organization',
-      user_label_type: 'BusinessLabel',
-      user_label_display_type: 'Badge',
-    }
-    tweet.isEdited = true
-    tweet.favorite_count = 1200
-    tweet.conversation_count = 1
-    const element = mount(tweet)
+    const snapshot = createPost()
+    snapshot.author.verified = 'business'
+    snapshot.author.avatarShape = 'square'
+    snapshot.author.label = { text: 'Organization' }
+    snapshot.edit = 'edited'
+    const element = mount(snapshot)
     await expect
       .element(post.getByRole('img', { name: 'Business verified account' }))
       .toBeVisible()
@@ -147,21 +112,33 @@ describe('Full tweet snapshots', () => {
     await expect
       .element(post.getByRole('link', { name: /Follow|Like|Reply|Read|on X/ }))
       .not.toBeInTheDocument()
-    expect(element.textContent).not.toMatch(/1\.2K|on X/)
+    expect(element.textContent).not.toMatch(/on X/)
+  })
+
+  it('links an earlier version of an edited post to the latest one', async () => {
+    const snapshot = createPost()
+    snapshot.edit = 'stale'
+    mount(snapshot)
+    await expect
+      .element(post.getByRole('link', { name: 'View latest' }))
+      .toHaveAttribute(
+        'href',
+        'https://x.com/example/status/1234567890123456789',
+      )
   })
 
   it('rejects unsafe media URLs and survives missing media and invalid dates', async () => {
-    const tweet = createTweet()
-    tweet.created_at = 'bad-date'
-    tweet.mediaDetails = [
-      { ...createPhoto(), media_url_https: 'javascript:alert(1)' },
-      { ...video(), video_info: { aspect_ratio: [1, 1], variants: [] } },
+    const snapshot = createPost()
+    snapshot.createdAt = 'bad-date'
+    snapshot.media = [
+      { ...createPhoto(), url: 'javascript:alert(1)' },
+      { ...createVideo(), sources: [] },
     ]
-    const element = mount(tweet)
+    const element = mount(snapshot)
     expect(element.querySelector('[data-media] img, video, time')).toBeNull()
     expect(element.querySelectorAll('[data-media-unavailable]')).toHaveLength(2)
-    tweet.mediaDetails = [createPhoto()]
-    element.data = { ...tweet }
+    snapshot.media = [createPhoto()]
+    element.data = { ...snapshot }
     const image = element.querySelector<HTMLImageElement>('[data-media] img')!
     image.dispatchEvent(new Event('error'))
     await expect
@@ -169,29 +146,24 @@ describe('Full tweet snapshots', () => {
       .toBeVisible()
   })
 
-  it('handles video source errors and falls back to legacy photo/video fields', async () => {
-    const tweet = createTweet()
-    tweet.photos = [
+  it('shows a placeholder for media the source marked unavailable', () => {
+    const snapshot = createPost()
+    snapshot.media = [{ ...createPhoto(), unavailable: true }, createPhoto()]
+    const element = mount(snapshot)
+    expect(element.querySelectorAll('[data-media-unavailable]')).toHaveLength(1)
+    expect(element.querySelectorAll('[data-media] img')).toHaveLength(1)
+  })
+
+  it('handles video source errors', async () => {
+    const snapshot = createPost()
+    snapshot.media = [
+      createPhoto(),
       {
-        url: createPhoto().media_url_https,
-        expandedUrl: 'https://example.com/',
-        width: 640,
-        height: 400,
-        cropCandidates: [],
-        backgroundColor: { red: 0, green: 0, blue: 0 },
+        ...createVideo(),
+        sources: [{ type: 'video/mp4', url: 'https://example.com/video.mp4' }],
       },
     ]
-    tweet.video = {
-      aspectRatio: [8, 5],
-      contentType: 'video/mp4',
-      durationMs: 1000,
-      mediaAvailability: { status: 'Available' },
-      poster: createPhoto().media_url_https,
-      variants: [{ type: 'video/mp4', src: 'https://example.com/video.mp4' }],
-      videoId: { type: 'tweet', id: '1' },
-      viewCount: 0,
-    }
-    const element = mount(tweet)
+    const element = mount(snapshot)
     expect(element.querySelectorAll('[data-media-item]')).toHaveLength(2)
     element.querySelector('source')!.dispatchEvent(new Event('error'))
     await expect
@@ -200,25 +172,5 @@ describe('Full tweet snapshots', () => {
       )
       .toBeVisible()
     expect(element.querySelector('video')?.hidden).toBe(true)
-  })
-
-  it('treats a lowercase syndication video status as available', async () => {
-    const tweet = createTweet()
-    tweet.video = {
-      aspectRatio: [8, 5],
-      contentType: 'video/mp4',
-      durationMs: 1000,
-      mediaAvailability: { status: 'available' },
-      poster: createPhoto().media_url_https,
-      variants: [{ type: 'video/mp4', src: 'https://example.com/video.mp4' }],
-      videoId: { type: 'tweet', id: '1' },
-      viewCount: 0,
-    }
-    const element = mount(tweet)
-    await expect
-      .element(post.getByText('Hello 😀', { exact: false }))
-      .toBeVisible()
-    expect(element.querySelector('[data-media-unavailable]')).toBeNull()
-    expect(element.querySelector('video')).not.toBeNull()
   })
 })

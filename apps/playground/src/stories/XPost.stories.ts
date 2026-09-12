@@ -14,7 +14,6 @@ export const PlainText = { args: { snapshot: 'plain' } satisfies Props }
 export const LinksAndEmoji = { args: { snapshot: 'links' } satisfies Props }
 export const LongText = { args: { snapshot: 'long' } satisfies Props }
 export const RightToLeft = { args: { snapshot: 'rtl' } satisfies Props }
-export const EncodedText = { args: { snapshot: 'encoded' } satisfies Props }
 export const EmptyText = { args: { snapshot: 'empty' } satisfies Props }
 export const MissingData = { args: { snapshot: 'missing' } satisfies Props }
 export const InvalidData = { args: { snapshot: 'invalid' } satisfies Props }
@@ -34,7 +33,6 @@ export const FourPhotos = { args: { snapshot: 'four-photos' } satisfies Props }
 export const Video = { args: { snapshot: 'video' } satisfies Props }
 export const Gif = { args: { snapshot: 'gif' } satisfies Props }
 export const MixedMedia = { args: { snapshot: 'mixed-media' } satisfies Props }
-export const Sensitive = { args: { snapshot: 'sensitive' } satisfies Props }
 export const Unavailable = { args: { snapshot: 'unavailable' } satisfies Props }
 export const BrokenMedia = {
   args: { snapshot: 'broken-media' } satisfies Props,
@@ -44,11 +42,7 @@ export const Reply = { args: { snapshot: 'reply' } satisfies Props }
 export const Verified = { args: { snapshot: 'verified' } satisfies Props }
 export const Edited = { args: { snapshot: 'edited' } satisfies Props }
 export const StaleEdit = { args: { snapshot: 'stale-edit' } satisfies Props }
-export const Note = { args: { snapshot: 'note' } satisfies Props }
-export const Counts = { args: { snapshot: 'counts' } satisfies Props }
-export const LegacyMedia = {
-  args: { snapshot: 'legacy-media' } satisfies Props,
-}
+export const Truncated = { args: { snapshot: 'truncated' } satisfies Props }
 
 export const Remote = {
   args: { snapshot: 'missing', remote: true } satisfies Props,

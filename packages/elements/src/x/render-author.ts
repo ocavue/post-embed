@@ -1,19 +1,23 @@
-import type { TweetUser } from '@post-embed/types/internal/tweet/user'
+import type { XPostAuthor } from '@post-embed/types'
 import el from 'crelt'
-import { decodeHTML } from 'entities'
 
 import { renderLink } from '../render-link.ts'
 import { getSafeUrl } from '../safe-url.ts'
 
-export function renderAuthor(user: TweetUser) {
-  if (!user.name && !user.screen_name) return
-  const validHandle = /^\w{1,15}$/.test(user.screen_name)
-  const avatar = getSafeUrl(user.profile_image_url_https)
-  const label = user.highlighted_label
-  const badge = label?.badge && getSafeUrl(label.badge.url)
-  const verified =
-    user.verified_type ||
-    (user.is_blue_verified ? 'Blue' : user.verified ? 'Legacy' : undefined)
+const VERIFIED_LABELS = {
+  blue: 'Blue',
+  business: 'Business',
+  government: 'Government',
+  legacy: 'Legacy',
+}
+
+export function renderAuthor(author: XPostAuthor) {
+  if (!author.name && !author.handle) return
+  const validHandle = /^\w{1,15}$/.test(author.handle)
+  const avatar = author.avatar && getSafeUrl(author.avatar)
+  const label = author.label
+  const badge = label?.badge && getSafeUrl(label.badge)
+  const verified = author.verified && VERIFIED_LABELS[author.verified]
 
   return el(
     'header',
@@ -21,7 +25,7 @@ export function renderAuthor(user: TweetUser) {
     avatar
       ? el('img', {
           'data-avatar': '',
-          'data-shape': user.profile_image_shape,
+          'data-shape': author.avatarShape,
           src: avatar,
           alt: '',
           width: 48,
@@ -37,12 +41,12 @@ export function renderAuthor(user: TweetUser) {
       el(
         'div',
         { 'data-author-name': '' },
-        el('bdi', {}, decodeHTML(user.name || user.screen_name)),
+        el('bdi', {}, author.name || author.handle),
         verified
           ? el(
               'span',
               {
-                'data-verified': verified,
+                'data-verified': author.verified,
                 role: 'img',
                 'aria-label': `${verified} verified account`,
                 title: `${verified} verified account`,
@@ -65,19 +69,19 @@ export function renderAuthor(user: TweetUser) {
                       referrerpolicy: 'no-referrer',
                     })
                   : undefined,
-                decodeHTML(label.description || ''),
+                label.text,
               ),
-              label.url?.url,
+              label.url,
             )
           : undefined,
       ),
-      user.screen_name
+      author.handle
         ? el(
             'bdi',
             {},
             renderLink(
-              `@${user.screen_name}`,
-              validHandle ? `https://x.com/${user.screen_name}` : undefined,
+              `@${author.handle}`,
+              validHandle ? `https://x.com/${author.handle}` : undefined,
             ),
           )
         : undefined,

@@ -10,7 +10,8 @@
     "postinstall": "astro sync"
   },
   "dependencies": {
-    "@post-embed/elements": "workspace:*"
+    "@post-embed/elements": "workspace:*",
+    "@post-embed/exporter": "workspace:*"
   },
   "devDependencies": {
     "@post-embed/types": "workspace:*",

@@ -41,7 +41,8 @@ const { snapshot, remote = false, dark = false, narrow = false } = Astro.props
 
 <script>
   import { registerXPost } from '@post-embed/elements/x'
-  import type { Tweet } from '@post-embed/types'
+  import { fromSyndication } from '@post-embed/exporter/x/syndication'
+  import type { XPost } from '@post-embed/types'
 
   import { createSnapshot, type Snapshot } from '../snapshots.ts'
 
@@ -67,7 +68,7 @@ const { snapshot, remote = false, dark = false, narrow = false } = Astro.props
       const status = this.querySelector<HTMLElement>('[data-status]')!
       const form = this.querySelector('form')
       const element = document.createElement('post-embed-x-post')
-      const setData = (data: Tweet | null) => {
+      const setData = (data: XPost | null) => {
         element.data = data
         raw.textContent = data ? JSON.stringify(data, null, 2) : ''
       }
@@ -78,14 +79,15 @@ const { snapshot, remote = false, dark = false, narrow = false } = Astro.props
         const id = parseTweetId(url)!
         try {
           const response = await fetch(API_URL + id)
-          const json = (await response.json()) as { data?: Tweet | null }
-          if (!response.ok || !json.data) {
+          const json = (await response.json()) as { data?: unknown }
+          const post = response.ok ? fromSyndication(json.data) : undefined
+          if (!post) {
             status.textContent = `Post ${id} was not found (HTTP ${response.status}).`
             return
           }
           status.textContent = `Loaded ${id} from ${API_URL}`
-          raw.textContent = JSON.stringify(json.data, null, 2)
-          return json.data
+          raw.textContent = JSON.stringify(post, null, 2)
+          return post
         } catch (error) {
           status.textContent = `Failed to load ${id}: ${String(error)}`
         }

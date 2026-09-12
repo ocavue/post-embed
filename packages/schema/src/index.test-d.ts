@@ -1,12 +1,8 @@
-import type { EnrichedTweet, Tweet, YouTubeVideo } from '@post-embed/types'
+import type { Tweet, XPost, YouTubeVideo } from '@post-embed/types'
 import type { StandardSchemaV1 } from '@standard-schema/spec'
 import { expectTypeOf, test } from 'vitest'
 
-import {
-  EnrichedTweetSchema,
-  TweetSchema,
-  YouTubeVideoSchema,
-} from './index.ts'
+import { TweetSchema, XPostSchema, YouTubeVideoSchema } from './index.ts'
 
 test('TweetSchema', () => {
   expectTypeOf(TweetSchema.async).toEqualTypeOf<false>()
@@ -15,11 +11,11 @@ test('TweetSchema', () => {
   >().toEqualTypeOf<Tweet>()
 })
 
-test('EnrichedTweetSchema', () => {
-  expectTypeOf(EnrichedTweetSchema.async).toEqualTypeOf<false>()
+test('XPostSchema', () => {
+  expectTypeOf(XPostSchema.async).toEqualTypeOf<false>()
   expectTypeOf<
-    StandardSchemaV1.InferOutput<typeof EnrichedTweetSchema>
-  >().toEqualTypeOf<EnrichedTweet>()
+    StandardSchemaV1.InferOutput<typeof XPostSchema>
+  >().toEqualTypeOf<XPost>()
 })
 
 test('YouTubeVideoSchema', () => {

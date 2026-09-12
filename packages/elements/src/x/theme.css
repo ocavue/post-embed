@@ -90,10 +90,10 @@
       object-fit: cover;
       border-radius: 50%;
     }
-    :where([data-avatar][data-shape='Square']) {
+    :where([data-avatar][data-shape='square']) {
       border-radius: 0.5rem;
     }
-    :where([data-avatar][data-shape='Hexagon']) {
+    :where([data-avatar][data-shape='hexagon']) {
       clip-path: polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%);
     }
     :where([data-author-details]) {
@@ -122,10 +122,10 @@
       color: transparent;
       --_badge-color: #1d9bf0;
     }
-    :where([data-verified='Business']) {
+    :where([data-verified='business']) {
       --_badge-color: #e2b719;
     }
-    :where([data-verified='Government']) {
+    :where([data-verified='government']) {
       --_badge-color: #829aab;
     }
     :where([data-verified])::before {

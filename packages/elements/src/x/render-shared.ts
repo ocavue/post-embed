@@ -1,20 +1,20 @@
-import type { TweetBase } from '@post-embed/types/internal/tweet/tweet'
+import type { XPostBase } from '@post-embed/types'
 import el from 'crelt'
 
 import { renderLink } from '../render-link.ts'
 
 export function getPermalink(
-  tweet: Pick<TweetBase, 'id_str' | 'user' | 'created_at'>,
+  post: Pick<XPostBase, 'id' | 'author'>,
 ): string | undefined {
-  return /^\w{1,15}$/.test(tweet.user.screen_name) && /^\d+$/.test(tweet.id_str)
-    ? `https://x.com/${tweet.user.screen_name}/status/${tweet.id_str}`
+  return /^\w{1,15}$/.test(post.author.handle) && /^\d+$/.test(post.id)
+    ? `https://x.com/${post.author.handle}/status/${post.id}`
     : undefined
 }
 
 export function renderDate(
-  tweet: Pick<TweetBase, 'id_str' | 'user' | 'created_at'>,
+  post: Pick<XPostBase, 'id' | 'author' | 'createdAt'>,
 ) {
-  const date = new Date(tweet.created_at)
+  const date = new Date(post.createdAt)
   if (!Number.isFinite(date.getTime())) return
   return renderLink(
     el(
@@ -27,6 +27,6 @@ export function renderDate(
       }).format(date),
       ' UTC',
     ),
-    getPermalink(tweet),
+    getPermalink(post),
   )
 }

@@ -1,8 +1,10 @@
 export { observeXTweets } from './observer.ts'
 export type { XObserver, XObserverOptions, XTweetEntry } from './observer.ts'
 export { extractTweetResults } from './extract.ts'
-export { toISODate, toTweet, unwrapTweetResult } from './normalize.ts'
-export type { XTweetCapture } from './normalize.ts'
+export { toISODate, toXPost, unwrapTweetResult } from './normalize.ts'
+export type { XPostCapture } from './normalize.ts'
+export { segmentsToText, toSegments } from './segments.ts'
+export type { EntityInput } from './segments.ts'
 export { matchXOperation, X_TWEET_OPERATIONS } from './operations.ts'
 export {
   installFetchHook,

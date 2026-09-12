@@ -11,7 +11,7 @@ import {
 async function remember(message: ContentMessage): Promise<void> {
   const stored = await browser.storage.session.get('entries')
   const entries = (stored['entries'] ?? {}) as StoredEntries
-  entries[message.entry.tweet.id_str] = message.entry
+  entries[message.entry.post.id] = message.entry
   const ids = Object.keys(entries).sort(
     (left, right) => entries[right].capturedAt - entries[left].capturedAt,
   )

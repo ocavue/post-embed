@@ -4,9 +4,9 @@ import type { StandardSchemaV1 } from '@standard-schema/spec'
 import * as ts from 'typescript'
 import { describe, expect, test } from 'vitest'
 
-import { EnrichedTweetSchema, TweetSchema } from '../index.ts'
+import { TweetSchema } from '../index.ts'
 
-import { enriched, raw } from './fixtures.ts'
+import { raw } from './fixtures.ts'
 
 const minimal = { user: {}, edit_control: {} }
 const mediaObjects = {
@@ -37,10 +37,8 @@ describe('type defaults', () => {
   test.each([{}, undefined, null, false, 42, 'tweet', []])(
     'rejects missing required objects: %j',
     async (input) => {
-      for (const schema of [TweetSchema, EnrichedTweetSchema]) {
-        const result = await schema['~standard'].validate(input)
-        expect(result.issues?.length).toBeGreaterThan(0)
-      }
+      const result = await TweetSchema['~standard'].validate(input)
+      expect(result.issues?.length).toBeGreaterThan(0)
     },
   )
 
@@ -63,9 +61,6 @@ describe('type defaults', () => {
     })
     expect(tweet.text).toBe('')
     expect(tweet.favorite_count).toBe(0)
-    const normalized = await parse(EnrichedTweetSchema, minimal)
-    expect(normalized.entities).toEqual([])
-    expect(normalized.user).toEqual({ ...tweet.user, url: '', follow_url: '' })
   })
 
   test.each(['user', 'edit_control'])(
@@ -290,13 +285,6 @@ describe('collections and optional fields', () => {
         symbols: [],
       })
       expect(tweet.edit_control.edit_tweet_ids).toEqual([])
-      const normalized = await parse(EnrichedTweetSchema, {
-        ...minimal,
-        entities: value,
-        url: null,
-      })
-      expect(normalized.entities).toEqual([])
-      expect(normalized.url).toBe('')
     },
   )
 
@@ -353,16 +341,14 @@ describe('collections and optional fields', () => {
       { text: '', indices: [0, 0] },
     ])
     expect(tweet.edit_control.edit_tweet_ids).toEqual(['123', ''])
-    const normalized = await parse(EnrichedTweetSchema, {
+    const quoted = await parse(TweetSchema, {
       ...minimal,
       text: 'Keep raw text',
       quoted_tweet: { ...minimal, self_thread: {} },
     })
-    expect(normalized.text).toBe('Keep raw text')
-    expect(normalized.entities).toEqual([])
-    expect(normalized.quoted_tweet).toMatchObject({
-      entities: [],
-      url: '',
+    expect(quoted.text).toBe('Keep raw text')
+    expect(quoted.quoted_tweet).toMatchObject({
+      self_thread: { id_str: '' },
       user: { name: '' },
     })
   })
@@ -399,24 +385,6 @@ describe('union selection', () => {
     },
   )
 
-  test.each(['text', 'hashtag', 'mention', 'url', 'media', 'symbol'])(
-    'retains enriched entity type %s',
-    async (type) => {
-      const tweet = await parse(EnrichedTweetSchema, {
-        ...minimal,
-        entities: [{ type, text: 'existing', href: 'link' }],
-      })
-      expect(tweet.entities).toHaveLength(1)
-      expect(tweet.entities[0]).toMatchObject({
-        type,
-        text: 'existing',
-        indices: [0, 0],
-      })
-      if (type !== 'text')
-        expect(tweet.entities[0]).toHaveProperty('href', 'link')
-    },
-  )
-
   test.each([{}, null, { type: 'unknown' }])(
     'defaults the whole array for an unrecognized branch: %j',
     async (invalid) => {
@@ -425,13 +393,22 @@ describe('union selection', () => {
         mediaDetails: [{ ...mediaObjects, type: 'photo' }, invalid],
       })
       expect(tweet.mediaDetails).toEqual([])
-      const normalized = await parse(EnrichedTweetSchema, {
-        ...minimal,
-        entities: [{ type: 'text', text: 'original' }, invalid],
-      })
-      expect(normalized.entities).toEqual([])
     },
   )
+
+  test('keeps a media item without ext_media_color, as the syndication API sends', async () => {
+    const { ext_media_color, ...withoutColor } = mediaObjects
+    const tweet = await parse(TweetSchema, {
+      ...minimal,
+      mediaDetails: [{ ...withoutColor, type: 'photo', media_url_https: 'a' }],
+    })
+    expect(tweet.mediaDetails).toHaveLength(1)
+    expect(tweet.mediaDetails?.[0]).toMatchObject({
+      media_url_https: 'a',
+      ext_media_color: { palette: [] },
+    })
+    expect(ext_media_color).toEqual({})
+  })
 
   test('defaults a containing array when an item lacks a required object', async () => {
     const tweet = await parse(TweetSchema, {
@@ -474,56 +451,45 @@ describe('union selection', () => {
 
 test('preserves valid fixtures and returns independent output without mutating input', async () => {
   freeze(raw)
-  freeze(enriched)
   const tweet = await parse(TweetSchema, raw)
-  const normalized = await parse(EnrichedTweetSchema, enriched)
   expect(tweet).toEqual(raw)
-  expect(normalized).toEqual(enriched)
   expect(tweet.user).not.toBe(raw.user)
   expect(tweet.mediaDetails?.[0]).not.toBe(raw.mediaDetails?.[0])
-  expect(normalized.entities[0]).not.toBe(enriched.entities[0])
   expect(await parse(TweetSchema, tweet)).toEqual(tweet)
-  expect(await parse(EnrichedTweetSchema, normalized)).toEqual(normalized)
 })
 
 test('defaults are fresh across calls and parsing is idempotent', async () => {
-  const first = await parse(EnrichedTweetSchema, { ...minimal })
-  const second = await parse(EnrichedTweetSchema, { ...minimal })
-  expect(await parse(EnrichedTweetSchema, first)).toEqual(first)
-  first.entities.push({ type: 'text', text: 'changed', indices: [0, 0] })
+  const first = await parse(TweetSchema, { ...minimal })
+  const second = await parse(TweetSchema, { ...minimal })
+  expect(await parse(TweetSchema, first)).toEqual(first)
   first.edit_control.edit_tweet_ids.push('changed')
   first.display_text_range[0] = 1
   first.user.name = 'changed'
-  expect(second.entities).toEqual([])
   expect(second.edit_control.edit_tweet_ids).toEqual([])
   expect(second.display_text_range).toEqual([0, 0])
   expect(second.user.name).toBe('')
 })
 
 test('strips unknown keys while preserving known nested values', async () => {
-  const tweet = await parse(EnrichedTweetSchema, {
+  const tweet = await parse(TweetSchema, {
     ...minimal,
     extra: true,
-    user: { extra: true, name: 'author', url: 'profile' },
-    entities: [
-      { type: 'url', extra: true, text: 'link', url: 'target', href: 'href' },
-    ],
+    user: { extra: true, name: 'author' },
+    entities: { hashtags: [{ extra: true, text: 'tag' }] },
   })
   expect(tweet).not.toHaveProperty('extra')
   expect(tweet.user).not.toHaveProperty('extra')
-  expect(tweet.entities[0]).not.toHaveProperty('extra')
-  expect(tweet.user).toMatchObject({ name: 'author', url: 'profile' })
-  expect(tweet.entities[0]).toMatchObject({ url: 'target', href: 'href' })
+  expect(tweet.entities?.hashtags[0]).not.toHaveProperty('extra')
+  expect(tweet.user).toMatchObject({ name: 'author' })
+  expect(tweet.entities?.hashtags[0]).toMatchObject({ text: 'tag' })
 })
 
 test('exposes native Standard Schema results', async () => {
-  for (const schema of [TweetSchema, EnrichedTweetSchema]) {
-    expect(schema['~standard'].version).toBe(1)
-    expect(schema['~standard'].vendor).toBe('valibot')
-    const result = await schema['~standard'].validate(minimal)
-    expect(result).toHaveProperty('value')
-    expect(result.issues).toBeUndefined()
-  }
+  expect(TweetSchema['~standard'].version).toBe(1)
+  expect(TweetSchema['~standard'].vendor).toBe('valibot')
+  const result = await TweetSchema['~standard'].validate(minimal)
+  expect(result).toHaveProperty('value')
+  expect(result.issues).toBeUndefined()
 })
 
 test('schema definition files and names mirror the type declarations', () => {
