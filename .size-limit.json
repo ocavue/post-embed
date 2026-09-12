@@ -16,5 +16,11 @@
     "path": "packages/schema/dist/index.js",
     "import": "*",
     "gzip": true
+  },
+  {
+    "name": "@post-embed/exporter/x",
+    "path": "packages/exporter/dist/x/index.js",
+    "import": "*",
+    "gzip": true
   }
 ]

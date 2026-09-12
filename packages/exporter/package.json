@@ -1,0 +1,50 @@
+{
+  "name": "@post-embed/exporter",
+  "type": "module",
+  "version": "0.0.0",
+  "description": "Read X post data from the page's own GraphQL responses",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ocavue/post-embed.git",
+    "directory": "packages/exporter"
+  },
+  "exports": {
+    "./x": "./src/x/index.ts",
+    "./x/bridge": "./src/x/bridge.ts",
+    "./x/testing": "./src/x/testing/scrub.ts"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsdown"
+  },
+  "dependencies": {
+    "@post-embed/schema": "workspace:^",
+    "@post-embed/types": "workspace:^",
+    "birpc": "^4.2.0",
+    "lru.min": "^1.1.5",
+    "valibot": "^1.4.2"
+  },
+  "devDependencies": {
+    "@vitest/browser-playwright": "^5.0.0",
+    "playwright": "^1.58.0",
+    "tsdown": "^0.23.0",
+    "typescript": "^6.0.3",
+    "vitest": "^5.0.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "exports": {
+      "./x": {
+        "types": "./dist/x/index.d.ts",
+        "default": "./dist/x/index.js"
+      },
+      "./x/bridge": {
+        "types": "./dist/x/bridge.d.ts",
+        "default": "./dist/x/bridge.js"
+      }
+    }
+  }
+}

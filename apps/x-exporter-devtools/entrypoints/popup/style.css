@@ -1,0 +1,94 @@
+@import '@post-embed/elements/x/theme.css';
+
+body {
+  width: 720px;
+  min-height: 480px;
+  margin: 0;
+  font:
+    13px/1.4 system-ui,
+    sans-serif;
+  color: #111;
+  background: #fff;
+}
+
+#app {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 12px;
+  padding: 12px;
+}
+
+h1 {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-size: 14px;
+}
+
+form {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 6px;
+}
+
+input {
+  flex: 1;
+  font: inherit;
+  padding: 4px 6px;
+}
+
+button {
+  font: inherit;
+  padding: 4px 8px;
+}
+
+ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  max-height: 400px;
+  overflow: auto;
+  border: 1px solid #ddd;
+}
+
+li {
+  padding: 6px 8px;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+}
+
+li[data-selected] {
+  background: #eef4ff;
+}
+
+li small {
+  display: block;
+  color: #666;
+}
+
+li [data-protected] {
+  color: #b00;
+  font-weight: 600;
+}
+
+[data-detail] {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+[data-actions] {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+[data-status] {
+  color: #666;
+  min-height: 1.4em;
+}
+
+post-embed-x-post {
+  display: block;
+  max-width: 400px;
+}
