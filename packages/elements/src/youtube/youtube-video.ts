@@ -9,14 +9,14 @@ import { YouTubeVideoSchema } from '@post-embed/schema'
 import type { YouTubeVideo } from '@post-embed/types'
 import el from 'crelt'
 
+import { type FetchProps, useFetch } from '../fetch.ts'
 import { getRootContainer } from '../root.ts'
 import { assumeNotPromise } from '../utils.ts'
 
 import { parseYouTubeUrl } from './parse-url.ts'
 import { renderVideo } from './render-video.ts'
 
-export interface YouTubeVideoProps {
-  data: YouTubeVideo | null
+export interface YouTubeVideoProps extends FetchProps<YouTubeVideo> {
   /**
    * `link` (default) opens the watch page; `inline` swaps in the YouTube
    * player after a click on the poster.
@@ -31,10 +31,12 @@ export function useYouTubeVideo(
   host: HostElement,
   props: State<YouTubeVideoProps>,
 ): void {
+  const { fetched, pending } = useFetch(host, props, 'YouTube video')
+
   useHostEffect(host, () => {
     host.dataset.postEmbed = 'youtube-video'
     const container = getRootContainer(host)
-    const data = props.data.get()
+    const data = props.data.get() ?? fetched.get()
     const playback = props.playback.get() === 'inline' ? 'inline' : 'link'
     const result =
       data == null
@@ -51,29 +53,43 @@ export function useYouTubeVideo(
     container.replaceChildren(
       result && !result.issues && ref
         ? renderVideo(result.value, ref, playback)
-        : el(
-            'article',
-            { 'data-fallback': '' },
-            el(
-              'div',
-              { 'data-details': '' },
-              el('span', { 'data-title': '' }, 'YouTube video'),
-            ),
-            el('p', { 'data-body': '' }, 'This video is unavailable.'),
-            el(
-              'footer',
-              { 'data-footer': '' },
-              'No saved video could be displayed.',
-            ),
-          ),
+        : renderFallback(pending.get()),
     )
   })
+}
+
+function renderFallback(pending: boolean): HTMLElement {
+  return el(
+    'article',
+    pending
+      ? { 'data-fallback': '', 'data-pending': '' }
+      : { 'data-fallback': '' },
+    el(
+      'div',
+      { 'data-details': '' },
+      el('span', { 'data-title': '' }, 'YouTube video'),
+    ),
+    el(
+      'p',
+      { 'data-body': '' },
+      pending ? 'Loading this video…' : 'This video is unavailable.',
+    ),
+    pending
+      ? null
+      : el(
+          'footer',
+          { 'data-footer': '' },
+          'No saved video could be displayed.',
+        ),
+  )
 }
 
 export const YouTubeVideoCustomElement = defineCustomElement(
   useYouTubeVideo,
   defineProps<YouTubeVideoProps>({
     data: { default: null, attribute: false },
+    url: { default: null, attribute: false },
+    resolver: { default: null, attribute: false },
     playback: { default: 'link', attribute: 'playback', type: 'string' },
   }),
 )

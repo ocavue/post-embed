@@ -1,5 +1,6 @@
 import './theme.css'
 
+import type { YouTubeVideo } from '@post-embed/types'
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
 
@@ -205,5 +206,32 @@ describe('YouTube video', () => {
     if (!root || !image) throw new Error('Missing rendered video parts')
     expect(getComputedStyle(root).padding).toBe('24px')
     expect(getComputedStyle(image).objectFit).toBe('cover')
+  })
+})
+
+describe('YouTube video fetch', () => {
+  it('calls `resolver` with `url` and renders the resolved snapshot', async () => {
+    let resolve!: () => void
+    const resolver = vi.fn((url: string) => {
+      return new Promise<YouTubeVideo>((r) => {
+        resolve = () => r(createVideo(url))
+      })
+    })
+    const element = document.createElement('post-embed-youtube-video')
+    element.dataset.testid = 'video'
+    element.url = watchUrl
+    element.resolver = resolver
+    document.body.append(element)
+    await expect.element(video.getByText('Loading this video…')).toBeVisible()
+    resolve()
+    await expect
+      .element(video.getByRole('link', { name: 'Watch on YouTube' }))
+      .toHaveAttribute('href', watchUrl)
+    expect(resolver).toHaveBeenCalledWith(watchUrl)
+    expect(element.data).toBeNull()
+    element.url = null
+    await expect
+      .element(video.getByText('This video is unavailable.'))
+      .toBeVisible()
   })
 })

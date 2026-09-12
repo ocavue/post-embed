@@ -1,5 +1,6 @@
 import './theme.css'
 
+import type { Tweet } from '@post-embed/types'
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 import { page, server, userEvent } from 'vitest/browser'
 
@@ -250,5 +251,114 @@ describe('X post', () => {
     await expect
       .element(post.getByRole('link', { name: 'A link' }))
       .not.toBeInTheDocument()
+  })
+})
+
+describe('X post fetch', () => {
+  const url = 'https://x.com/example/status/1234567890123456789'
+
+  function mountRemote(resolver: XPostElement['resolver'], remote = url) {
+    const element = document.createElement('post-embed-x-post')
+    element.dataset.testid = 'post'
+    element.url = remote
+    element.resolver = resolver
+    document.body.append(element)
+    return element
+  }
+
+  it('calls `resolver` with `url` and renders the resolved snapshot', async () => {
+    let resolve!: (tweet: Tweet) => void
+    const resolver = vi.fn(() => {
+      return new Promise<Tweet>((r) => {
+        resolve = r
+      })
+    })
+    const element = mountRemote(resolver)
+    await expect.element(post.getByText('Loading this post…')).toBeVisible()
+    expect(
+      element.querySelector('[data-fallback][data-pending]'),
+    ).not.toBeNull()
+    resolve(createTweet('Fetched'))
+    await expect.element(post.getByText('Fetched')).toBeVisible()
+    expect(resolver).toHaveBeenCalledTimes(1)
+    expect(resolver).toHaveBeenCalledWith(url)
+    expect(element.data).toBeNull()
+  })
+
+  it('renders a synchronous result without a pending state', async () => {
+    const element = mountRemote(() => createTweet('Sync'))
+    expect(element.textContent).toContain('Sync')
+    expect(element.textContent).not.toContain('Loading')
+    await expect.element(post.getByText('Sync')).toBeVisible()
+  })
+
+  it('shows the fallback when `resolver` finds nothing', async () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {})
+    mountRemote(() => Promise.resolve(undefined))
+    await expect
+      .element(post.getByText('This post is unavailable.'))
+      .toBeVisible()
+    expect(error).not.toHaveBeenCalled()
+  })
+
+  it('logs a rejected fetch and shows the fallback', async () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const element = mountRemote(() => Promise.reject(new Error('offline')))
+    await expect
+      .element(post.getByText('This post is unavailable.'))
+      .toBeVisible()
+    expect(error).toHaveBeenCalledWith(
+      '[post-embed] Failed to fetch X post:',
+      expect.any(Error),
+    )
+    expect(element.querySelector('[data-pending]')).toBeNull()
+  })
+
+  it('refetches when `url` changes and ignores the stale result', async () => {
+    const resolvers = new Map<string, (tweet: Tweet) => void>()
+    const element = mountRemote((value) => {
+      return new Promise<Tweet>((resolve) => {
+        resolvers.set(value, resolve)
+      })
+    })
+    await expect.element(post.getByText('Loading this post…')).toBeVisible()
+    element.url = 'https://x.com/example/status/2'
+    resolvers.get(url)?.(createTweet('Stale'))
+    await new Promise((resolve) => setTimeout(resolve, 20))
+    expect(element.textContent).not.toContain('Stale')
+    await expect.element(post.getByText('Loading this post…')).toBeVisible()
+    resolvers.get('https://x.com/example/status/2')?.(createTweet('Fresh'))
+    await expect.element(post.getByText('Fresh')).toBeVisible()
+  })
+
+  it('prefers `data` and fetches only once `data` is cleared', async () => {
+    const resolver = vi.fn(() => Promise.resolve(createTweet('Fetched')))
+    const element = document.createElement('post-embed-x-post')
+    element.dataset.testid = 'post'
+    element.data = createTweet('Saved')
+    element.url = url
+    element.resolver = resolver
+    document.body.append(element)
+    await expect.element(post.getByText('Saved')).toBeVisible()
+    expect(resolver).not.toHaveBeenCalled()
+    element.data = null
+    await expect.element(post.getByText('Fetched')).toBeVisible()
+    expect(resolver).toHaveBeenCalledTimes(1)
+  })
+
+  it('does not fetch without both `url` and `resolver`', async () => {
+    const resolver = vi.fn(() => Promise.resolve(createTweet('Fetched')))
+    const element = mountRemote(null)
+    await expect
+      .element(post.getByText('This post is unavailable.'))
+      .toBeVisible()
+    element.url = null
+    element.resolver = resolver
+    await expect
+      .element(post.getByText('This post is unavailable.'))
+      .toBeVisible()
+    expect(resolver).not.toHaveBeenCalled()
+    element.url = url
+    await expect.element(post.getByText('Fetched')).toBeVisible()
   })
 })

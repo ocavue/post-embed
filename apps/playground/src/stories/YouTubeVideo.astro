@@ -80,11 +80,7 @@ const {
       const update = (snapshot: YouTubeSnapshot) => {
         setData(createYouTubeSnapshot(snapshot))
       }
-      const load = async () => {
-        const input = form!.elements.namedItem('url') as HTMLInputElement
-        const url = input.value.trim()
-        status.textContent = `Loading ${url}…`
-        setData(null)
+      element.resolver = async (url) => {
         try {
           const response = await fetch(
             `${OEMBED_URL}?url=${encodeURIComponent(url)}&format=json`,
@@ -94,21 +90,31 @@ const {
             return
           }
           const json = (await response.json()) as Omit<YouTubeVideo, 'url'>
-          setData({ url, ...json })
+          const data = { url, ...json }
           status.textContent = `Loaded from ${OEMBED_URL}`
+          raw.textContent = JSON.stringify(data, null, 2)
+          return data
         } catch (error) {
           status.textContent = `Failed to load ${url}: ${String(error)}`
         }
       }
+      const load = () => {
+        const input = form!.elements.namedItem('url') as HTMLInputElement
+        const url = input.value.trim()
+        status.textContent = `Loading ${url}…`
+        setData(null)
+        element.url = null
+        element.url = url
+      }
       const restore = () => {
-        if (form) void load()
+        if (form) load()
         else update(this.dataset.snapshot as YouTubeSnapshot)
       }
       preview.append(element)
       restore()
       form?.addEventListener('submit', (event) => {
         event.preventDefault()
-        void load()
+        load()
       })
       this.addEventListener('click', (event) => {
         if (!(event.target instanceof HTMLButtonElement)) return

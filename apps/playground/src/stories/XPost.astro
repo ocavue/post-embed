@@ -74,7 +74,23 @@ const { snapshot, remote = false, dark = false, narrow = false } = Astro.props
       const update = (snapshot: Snapshot) => {
         setData(createSnapshot(snapshot))
       }
-      const load = async () => {
+      element.resolver = async (url) => {
+        const id = parseTweetId(url)!
+        try {
+          const response = await fetch(API_URL + id)
+          const json = (await response.json()) as { data?: Tweet | null }
+          if (!response.ok || !json.data) {
+            status.textContent = `Post ${id} was not found (HTTP ${response.status}).`
+            return
+          }
+          status.textContent = `Loaded ${id} from ${API_URL}`
+          raw.textContent = JSON.stringify(json.data, null, 2)
+          return json.data
+        } catch (error) {
+          status.textContent = `Failed to load ${id}: ${String(error)}`
+        }
+      }
+      const load = () => {
         const input = form!.elements.namedItem('url') as HTMLInputElement
         const id = parseTweetId(input.value)
         if (!id) {
@@ -84,28 +100,18 @@ const { snapshot, remote = false, dark = false, narrow = false } = Astro.props
         }
         status.textContent = `Loading ${id}…`
         setData(null)
-        try {
-          const response = await fetch(API_URL + id)
-          const json = (await response.json()) as { data?: Tweet | null }
-          if (!response.ok || !json.data) {
-            status.textContent = `Post ${id} was not found (HTTP ${response.status}).`
-            return
-          }
-          setData(json.data)
-          status.textContent = `Loaded ${id} from ${API_URL}`
-        } catch (error) {
-          status.textContent = `Failed to load ${id}: ${String(error)}`
-        }
+        element.url = null
+        element.url = input.value.trim()
       }
       const restore = () => {
-        if (form) void load()
+        if (form) load()
         else update(this.dataset.snapshot as Snapshot)
       }
       preview.append(element)
       restore()
       form?.addEventListener('submit', (event) => {
         event.preventDefault()
-        void load()
+        load()
       })
       this.addEventListener('click', (event) => {
         if (!(event.target instanceof HTMLButtonElement)) return
