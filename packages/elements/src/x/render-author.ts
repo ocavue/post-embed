@@ -5,10 +5,7 @@ import { renderLink } from '../render-link.ts'
 
 import { getMediaUrl } from './media-url.ts'
 
-export function renderAuthor(
-  author: XPostAuthor,
-  policy: UrlMapper | null,
-) {
+export function renderAuthor(author: XPostAuthor, policy: UrlMapper | null) {
   if (!author.name && !author.handle) return
   const validHandle = /^\w{1,15}$/.test(author.handle)
   const avatar = author.avatar && getMediaUrl(author.avatar, policy)
