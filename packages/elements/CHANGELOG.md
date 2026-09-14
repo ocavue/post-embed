@@ -1,5 +1,13 @@
 # @post-embed/elements
 
+## 0.4.1
+
+### Patch Changes
+
+- 256748d: Add `parseXPost`, `parseYouTubeVideo`, and `parseTweet` to return synchronous validation results. Use the helpers in elements and the exporter to remove Promise assertions.
+- Updated dependencies [256748d]
+  - @post-embed/schema@0.5.0
+
 ## 0.4.0
 
 ### Minor Changes
