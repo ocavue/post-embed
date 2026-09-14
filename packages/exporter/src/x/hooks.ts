@@ -18,44 +18,11 @@ export interface ResponseHookOptions {
   onError?: (error: unknown) => void
 }
 
-interface Guarded {
-  resolve: (url: string) => string | undefined
-  deliver: (response: ObservedResponse) => void
-  report: (error: unknown) => void
+function defaultErrorReporter(error: unknown): void {
+  console.error('[post-embed]', error)
 }
 
-/**
- * Wrap the consumer callbacks so nothing they throw can reach the page.
- */
-function guard(options: ResponseHookOptions): Guarded {
-  const report = (error: unknown) => {
-    try {
-      options.onError?.(error)
-    } catch {
-      // A broken error reporter must not break the page either.
-    }
-  }
-  return {
-    report,
-    resolve: (url) => {
-      try {
-        return options.resolveOperation(url)
-      } catch (error) {
-        report(error)
-        return
-      }
-    },
-    deliver: (response) => {
-      try {
-        options.onResponse(response)
-      } catch (error) {
-        report(error)
-      }
-    },
-  }
-}
-
-function requestURL(input: RequestInfo | URL): string {
+function getRequestURL(input: RequestInfo | URL): string {
   if (typeof input === 'string') return input
   if (input instanceof URL) return input.href
   return input.url
@@ -69,7 +36,7 @@ function requestURL(input: RequestInfo | URL): string {
  */
 export function installFetchHook(options: ResponseHookOptions): () => void {
   const { target } = options
-  const { resolve, deliver, report } = guard(options)
+  const onError = options.onError ?? defaultErrorReporter
   const originalFetch = target.fetch
 
   const wrappedFetch = function (
@@ -80,8 +47,9 @@ export function installFetchHook(options: ResponseHookOptions): () => void {
     const promise = originalFetch.call(target, input, init)
     let operation: string | undefined
     try {
-      operation = resolve(requestURL(input))
-    } catch {
+      operation = options.resolveOperation(getRequestURL(input))
+    } catch (error) {
+      onError(error)
       return promise
     }
     if (operation === undefined) return promise
@@ -92,15 +60,16 @@ export function installFetchHook(options: ResponseHookOptions): () => void {
           .clone()
           .text()
           .then((body) => {
-            deliver({
-              url: response.url || requestURL(input),
+            options.onResponse({
+              url: response.url || getRequestURL(input),
               operation: matched,
               transport: 'fetch',
               body,
             })
-          }, report)
+          })
+          .catch(onError)
       } catch (error) {
-        report(error)
+        onError(error)
       }
       return response
     })
@@ -132,7 +101,7 @@ function readXHRBody(xhr: XMLHttpRequest): string | undefined {
  * else replaced it since.
  */
 export function installXHRHook(options: ResponseHookOptions): () => void {
-  const { resolve, deliver, report } = guard(options)
+  const onError = options.onError ?? defaultErrorReporter
   const xhrPrototype = options.target.XMLHttpRequest.prototype
   // eslint-disable-next-line @typescript-eslint/unbound-method -- called with an explicit `this`
   const originalOpen = xhrPrototype.open
@@ -148,13 +117,13 @@ export function installXHRHook(options: ResponseHookOptions): () => void {
     ]
   ): void {
     try {
-      const operation = resolve(String(url))
+      const operation = options.resolveOperation(String(url))
       if (operation !== undefined) {
         this.addEventListener('load', () => {
           try {
             const body = readXHRBody(this)
             if (body !== undefined) {
-              deliver({
+              options.onResponse({
                 url: this.responseURL || String(url),
                 operation,
                 transport: 'xhr',
@@ -162,12 +131,12 @@ export function installXHRHook(options: ResponseHookOptions): () => void {
               })
             }
           } catch (error) {
-            report(error)
+            onError(error)
           }
         })
       }
     } catch (error) {
-      report(error)
+      onError(error)
     }
     Reflect.apply(originalOpen, this, [method, url, ...rest])
   }

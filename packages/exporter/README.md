@@ -28,7 +28,7 @@ observer.subscribe((entry) => console.log(entry.post.id, entry.protected))
 const entry = await observer.waitFor('20', { timeoutMs: 5000 })
 ```
 
-`observeXTweets` wraps `fetch` and `XMLHttpRequest.prototype.open`, copies responses of the known tweet operations, finds every tweet object in them, converts each one to `XPost` with `toXPost`, and keeps the newest 200 by id. `entry.protected` is true when the author limits who can see their posts. It only reads: no request is sent, no request or response is changed.
+`observeXTweets` wraps `fetch` and `XMLHttpRequest.prototype.open`, copies responses of the known tweet operations, finds every tweet object in them, converts each one to `XPost` with `toXPost`, and keeps the newest 300 by id. `entry.protected` is true when the author limits who can see their posts. It only reads: no request is sent, no request or response is changed.
 
 ## `@post-embed/exporter/x/bridge`
 

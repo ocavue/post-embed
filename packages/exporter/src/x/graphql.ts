@@ -190,14 +190,16 @@ export const GraphQLTweetSchema = v.looseObject({
   ),
 })
 
+const GraphQLTweetWithVisibilityResults = v.looseObject({
+  __typename: v.literal('TweetWithVisibilityResults'),
+  tweet: v.unknown(),
+})
+
 /**
  * A `tweet_results.result` value: a tweet, or a tweet behind a visibility wrapper.
  */
 export const GraphQLTweetResultSchema = v.variant('__typename', [
-  v.looseObject({
-    __typename: v.literal('TweetWithVisibilityResults'),
-    tweet: v.unknown(),
-  }),
+  GraphQLTweetWithVisibilityResults,
   GraphQLTweetSchema,
 ])
 

@@ -232,6 +232,9 @@ importers:
 
   packages/exporter:
     dependencies:
+      '@ocavue/utils':
+        specifier: ^1.8.0
+        version: 1.8.0
       '@post-embed/schema':
         specifier: workspace:^
         version: link:../schema
@@ -1145,6 +1148,9 @@ packages:
 
   '@ocavue/utils@1.7.0':
     resolution: {integrity: sha512-yEk9ATNBjTZTtuVFMB/MAIF6zJBvJ2+lVNQvK2+O+ggEBGTgx2tp27d4FPgmD5bRsNHHP3D0SleQia/bvIeV8w==}
+
+  '@ocavue/utils@1.8.0':
+    resolution: {integrity: sha512-BD1ro+6Kllkmr/at+o32kvnLrVooUbk9gw3JAPaoAZXx+A5GhZ6Laa+UA38ifhG3vaamx+jcgEwX22BmTSMUVA==}
 
   '@oslojs/encoding@1.1.0':
     resolution: {integrity: sha512-70wQhgYmndg4GCPxPPxPGevRKqTIJ2Nh4OkiMWmDAVYsTQ+Ta7Sq+rPevXyXGdzr30/qZBnyOalCszoMxlyldQ==}
@@ -4973,6 +4979,8 @@ snapshots:
   '@ocavue/tsconfig@0.7.1': {}
 
   '@ocavue/utils@1.7.0': {}
+
+  '@ocavue/utils@1.8.0': {}
 
   '@oslojs/encoding@1.1.0': {}
 
