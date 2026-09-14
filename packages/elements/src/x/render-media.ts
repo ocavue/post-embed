@@ -31,7 +31,7 @@ function renderItem(
   )
   let content: HTMLAnchorElement | HTMLVideoElement
   if (media.type === 'photo') {
-    const url = getMediaUrl(media.url, 'img', policy)
+    const url = getMediaUrl(media.url, policy)
     if (media.unavailable || !url) return renderUnavailable(permalink)
     const image = el('img', {
       src: url,
@@ -56,7 +56,7 @@ function renderItem(
   } else {
     const sources = media.sources
       .flatMap((source) => {
-        const url = getMediaUrl(source.url, 'video', policy)
+        const url = getMediaUrl(source.url, policy)
         return url ? [{ ...source, url }] : []
       })
       .sort((a, b) => {
@@ -75,9 +75,9 @@ function renderItem(
       {
         controls: true,
         playsInline: true,
-        preload: 'metadata',
+        preload: 'none',
         'aria-label': gif ? 'Animated GIF' : 'Post video',
-        poster: media.poster && getMediaUrl(media.poster, 'img', policy),
+        poster: media.poster && getMediaUrl(media.poster, policy),
         width: dimension(media.width),
         height: dimension(media.height),
         loop: gif,

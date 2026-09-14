@@ -89,7 +89,7 @@ describe('X post', () => {
 
   it('handles schema defaults without inventing attribution', async () => {
     const element = mount()
-    Reflect.set(element, 'data', { author: {} })
+    Reflect.set(element, 'data', { id: '123', author: {} })
     await expect.element(post).toHaveTextContent('')
     await expect.element(post.getByRole('link')).not.toBeInTheDocument()
   })
@@ -310,6 +310,24 @@ describe('X post fetch', () => {
     expect(element.querySelector('[data-pending]')).toBeNull()
   })
 
+  it('refreshes the same URL when its host revision changes', async () => {
+    let text = 'Pending archive'
+    const resolver = vi.fn(() => createPost(text))
+    const element = mountRemote(resolver)
+    await expect.element(post.getByText('Pending archive')).toBeVisible()
+    text = 'Saved offline'
+    element.revision = 1
+    await expect.element(post.getByText('Saved offline')).toBeVisible()
+    expect(resolver).toHaveBeenCalledTimes(2)
+  })
+
+  it('rejects a resolver result belonging to another post', async () => {
+    mountRemote(() => ({ ...createPost('Wrong post'), id: '2' }))
+    await expect
+      .element(post.getByText('This post is unavailable.'))
+      .toBeVisible()
+  })
+
   it('refetches when `url` changes and ignores the stale result', async () => {
     const resolvers = new Map<string, (post: XPost) => void>()
     const element = mountRemote((value) => {
@@ -323,7 +341,10 @@ describe('X post fetch', () => {
     await new Promise((resolve) => setTimeout(resolve, 20))
     expect(element.textContent).not.toContain('Stale')
     await expect.element(post.getByText('Loading this post…')).toBeVisible()
-    resolvers.get('https://x.com/example/status/2')?.(createPost('Fresh'))
+    resolvers.get('https://x.com/example/status/2')?.({
+      ...createPost('Fresh'),
+      id: '2',
+    })
     await expect.element(post.getByText('Fresh')).toBeVisible()
   })
 

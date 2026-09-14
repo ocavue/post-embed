@@ -10,5 +10,5 @@ export type {
 export type { YouTubeVideo } from './youtube/index.js'
 
 export { mapXPostMediaUrls, getXPostMediaUrls } from './x/media.js'
-export type { MediaRole, XMediaUrlPolicy } from './x/media.js'
+export type { XMediaUrlPolicy } from './x/media.js'
 export { parseXPostId } from './x/url.js'

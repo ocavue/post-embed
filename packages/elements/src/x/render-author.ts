@@ -11,7 +11,7 @@ export function renderAuthor(
 ) {
   if (!author.name && !author.handle) return
   const validHandle = /^\w{1,15}$/.test(author.handle)
-  const avatar = author.avatar && getMediaUrl(author.avatar, 'img', policy)
+  const avatar = author.avatar && getMediaUrl(author.avatar, policy)
 
   return el(
     'header',

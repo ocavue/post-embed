@@ -8,22 +8,22 @@ import {
 } from '../primitives.ts'
 
 export const XPostSegmentSchema = v.variant('type', [
-  v.looseObject({ type: v.literal('text'), text: StringSchema }),
-  v.looseObject({
+  v.object({ type: v.literal('text'), text: StringSchema }),
+  v.object({
     type: v.literal('link'),
     text: StringSchema,
     url: StringSchema,
   }),
 ])
 
-export const XPostVideoSourceSchema = v.looseObject({
+export const XPostVideoSourceSchema = v.object({
   url: StringSchema,
   type: v.picklist(['video/mp4', 'application/x-mpegURL']),
   bitrate: v.optional(NumberSchema),
 })
 
 export const XPostMediaSchema = v.variant('type', [
-  v.looseObject({
+  v.object({
     type: v.literal('photo'),
     url: StringSchema,
     width: NumberSchema,
@@ -31,7 +31,7 @@ export const XPostMediaSchema = v.variant('type', [
     alt: v.optional(StringSchema),
     unavailable: v.optional(BooleanSchema),
   }),
-  v.looseObject({
+  v.object({
     type: v.picklist(['video', 'gif']),
     poster: v.optional(StringSchema),
     width: NumberSchema,
@@ -41,7 +41,7 @@ export const XPostMediaSchema = v.variant('type', [
   }),
 ])
 
-export const XPostAuthorSchema = v.looseObject({
+export const XPostAuthorSchema = v.object({
   name: StringSchema,
   handle: StringSchema,
   avatar: v.optional(StringSchema),
@@ -51,7 +51,7 @@ export const XPostAuthorSchema = v.looseObject({
   ),
 })
 
-export const XPostBaseSchema = v.looseObject({
+export const XPostBaseSchema = v.object({
   id: v.pipe(v.string(), v.regex(/^[1-9]\d{0,19}$/)),
   createdAt: StringSchema,
   lang: v.optional(StringSchema),
@@ -62,11 +62,11 @@ export const XPostBaseSchema = v.looseObject({
   truncated: v.optional(BooleanSchema),
 })
 
-export const XPostSchema = v.looseObject({
+export const XPostSchema = v.object({
   ...XPostBaseSchema.entries,
-  quote: v.optional(v.fallback(XPostBaseSchema, undefined)),
+  quote: v.fallback(v.optional(XPostBaseSchema), undefined),
   replyTo: v.optional(
-    v.looseObject({
+    v.object({
       handle: StringSchema,
       id: v.pipe(v.string(), v.regex(/^[1-9]\d{0,19}$/)),
     }),

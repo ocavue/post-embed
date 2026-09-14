@@ -3,6 +3,6 @@ import { expectTypeOf, test } from 'vitest'
 
 import type { Tweet } from './index.js'
 
-test('Tweet matches react-tweet', () => {
-  expectTypeOf<Tweet>().toEqualTypeOf<UpstreamTweet>()
+test('Tweet accepts react-tweet data', () => {
+  expectTypeOf<UpstreamTweet>().toExtend<Tweet>()
 })

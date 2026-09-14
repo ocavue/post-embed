@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest'
 
 import { XPostSchema } from './post.ts'
 
-const minimal = { author: {} }
+const minimal = { id: '123', author: {} }
 
 async function parse(input: unknown) {
   const result = await XPostSchema['~standard'].validate(input)
@@ -22,7 +22,7 @@ describe('XPostSchema', () => {
 
   test('defaults every scalar and collection', async () => {
     expect(await parse(minimal)).toEqual({
-      id: '',
+      id: '123',
       createdAt: '',
       author: { name: '', handle: '' },
       body: [],
@@ -76,7 +76,10 @@ describe('XPostSchema', () => {
       ],
       media: [
         { type: 'photo', url: 'https://example.com/a.jpg' },
-        { type: 'gif', sources: [{ url: 'https://example.com/a.mp4' }] },
+        {
+          type: 'gif',
+          sources: [{ url: 'https://example.com/a.mp4', type: 'video/mp4' }],
+        },
       ],
     })
     expect(post.body).toEqual([
@@ -107,11 +110,11 @@ describe('XPostSchema', () => {
   test('validates the quote and the reply target', async () => {
     const post = await parse({
       ...minimal,
-      quote: { author: { name: 'Quoted' } },
+      quote: { id: '123', author: { name: 'Quoted' } },
       replyTo: { handle: 'jack', id: '20' },
     })
     expect(post.quote).toEqual({
-      id: '',
+      id: '123',
       createdAt: '',
       author: { name: 'Quoted', handle: '' },
       body: [],
@@ -121,6 +124,7 @@ describe('XPostSchema', () => {
       ...minimal,
       quote: {},
     })
-    expect(result.issues?.length).toBeGreaterThan(0)
+    expect(result.issues).toBeUndefined()
+    if (!result.issues) expect(result.value.quote).toBeUndefined()
   })
 })

@@ -72,16 +72,18 @@ export function useXPost(host: HostElement, props: State<XPostProps>): void {
     const previousVideos = new Map<string, HTMLVideoElement>()
     for (const video of container.querySelectorAll('video')) {
       if (video.dataset.loadFailed) continue
-      const key = Array.from(video.querySelectorAll('source'))
-        .map((source) => source.src)
-        .join('|')
+      const key = Array.from(
+        video.querySelectorAll('source'),
+        (source) => source.src,
+      ).join('|')
       if (key) previousVideos.set(key, video)
     }
     const resume: HTMLVideoElement[] = []
     for (const video of next.querySelectorAll('video')) {
-      const key = Array.from(video.querySelectorAll('source'))
-        .map((source) => source.src)
-        .join('|')
+      const key = Array.from(
+        video.querySelectorAll('source'),
+        (source) => source.src,
+      ).join('|')
       const previous = sameSource ? previousVideos.get(key) : undefined
       if (previous) {
         if (!previous.paused) resume.push(previous)

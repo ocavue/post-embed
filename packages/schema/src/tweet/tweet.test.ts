@@ -386,13 +386,13 @@ describe('union selection', () => {
   )
 
   test.each([{}, null, { type: 'unknown' }])(
-    'defaults the whole array for an unrecognized branch: %j',
+    'keeps valid media beside an unrecognized branch: %j',
     async (invalid) => {
       const tweet = await parse(TweetSchema, {
         ...minimal,
         mediaDetails: [{ ...mediaObjects, type: 'photo' }, invalid],
       })
-      expect(tweet.mediaDetails).toEqual([])
+      expect(tweet.mediaDetails).toHaveLength(1)
     },
   )
 
@@ -410,19 +410,19 @@ describe('union selection', () => {
     expect(ext_media_color).toEqual({})
   })
 
-  test('defaults a containing array when an item lacks a required object', async () => {
+  test('drops only media items missing required objects', async () => {
     const tweet = await parse(TweetSchema, {
       ...minimal,
       mediaDetails: [{ ...mediaObjects, type: 'photo' }, { type: 'photo' }],
       photos: [{ url: 'missing backgroundColor' }],
       entities: { hashtags: [null] },
     })
-    expect(tweet.mediaDetails).toEqual([])
+    expect(tweet.mediaDetails).toHaveLength(1)
     expect(tweet.photos).toEqual([])
     expect(tweet.entities?.hashtags).toEqual([])
   })
 
-  test('preserves HLS and defaults unsupported video content types', async () => {
+  test('preserves source MIME strings for normalization', async () => {
     const tweet = await parse(TweetSchema, {
       ...minimal,
       mediaDetails: [
@@ -442,7 +442,7 @@ describe('union selection', () => {
       video_info: {
         variants: [
           { content_type: 'application/x-mpegURL', url: 'hls' },
-          { content_type: 'video/mp4', url: '' },
+          { content_type: 'unknown', url: '' },
         ],
       },
     })
@@ -502,7 +502,9 @@ test('schema definition files and names mirror the type declarations', () => {
           path.endsWith('.ts') &&
           !/\.test(?:-d)?\.ts$/.test(path) &&
           !path.endsWith('/fixtures.ts') &&
-          path !== 'primitives.ts'
+          path !== 'primitives.ts' &&
+          path !== 'x/media.ts' &&
+          path !== 'x/url.ts'
         )
       })
       .sort()

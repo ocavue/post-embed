@@ -1,15 +1,11 @@
 import type { XPost, XPostBase, XPostMedia } from './post.js'
-export type MediaRole = 'img' | 'video'
-export type XMediaUrlPolicy = (
-  url: string,
-  role: MediaRole,
-) => string | undefined
+export type XMediaUrlPolicy = (url: string) => string | undefined
 
 export function mapXPostMediaUrls(post: XPost, map: XMediaUrlPolicy): XPost {
   function mapBase(entry: XPostBase): XPostBase {
     const author = { ...entry.author }
     if (author.avatar) {
-      const avatar = map(author.avatar, 'img')
+      const avatar = map(author.avatar)
       if (avatar) author.avatar = avatar
       else delete author.avatar
     }
@@ -17,18 +13,18 @@ export function mapXPostMediaUrls(post: XPost, map: XMediaUrlPolicy): XPost {
     if (entry.media)
       result.media = entry.media.flatMap((media): XPostMedia[] => {
         if (media.type === 'photo') {
-          const url = map(media.url, 'img')
+          const url = map(media.url)
           return url ? [{ ...media, url }] : []
         }
         const next = {
           ...media,
           sources: media.sources.flatMap((source) => {
-            const url = map(source.url, 'video')
+            const url = map(source.url)
             return url ? [{ ...source, url }] : []
           }),
         }
         if (media.poster) {
-          const poster = map(media.poster, 'img')
+          const poster = map(media.poster)
           if (poster) next.poster = poster
           else delete next.poster
         }
@@ -42,12 +38,10 @@ export function mapXPostMediaUrls(post: XPost, map: XMediaUrlPolicy): XPost {
     ...(post.quote ? { quote: mapBase(post.quote) } : {}),
   }
 }
-export function getXPostMediaUrls(
-  post: XPost,
-): Array<{ url: string; role: MediaRole }> {
-  const result: Array<{ url: string; role: MediaRole }> = []
-  mapXPostMediaUrls(post, (url, role) => {
-    result.push({ url, role })
+export function getXPostMediaUrls(post: XPost): string[] {
+  const result: string[] = []
+  mapXPostMediaUrls(post, (url) => {
+    result.push(url)
     return url
   })
   return result
