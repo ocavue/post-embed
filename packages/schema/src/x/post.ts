@@ -77,7 +77,9 @@ export const XPostSchema = v.object({
   ),
 })
 
-/** Validates a snapshot synchronously, returning its value or validation issues. */
+/**
+ * Validates a snapshot synchronously, returning its value or validation issues.
+ */
 export function parseXPostSchema(
   input: unknown,
 ): StandardSchemaV1.Result<XPost> {

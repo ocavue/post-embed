@@ -16,7 +16,9 @@ export const YouTubeVideoSchema = v.object({
   height: NumberSchema,
 })
 
-/** Validates a snapshot synchronously, returning its value or validation issues. */
+/**
+ * Validates a snapshot synchronously, returning its value or validation issues.
+ */
 export function parseYouTubeVideoSchema(
   input: unknown,
 ): StandardSchemaV1.Result<YouTubeVideo> {

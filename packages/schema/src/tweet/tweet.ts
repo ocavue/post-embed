@@ -63,7 +63,9 @@ export const TweetSchema = v.object({
   possibly_sensitive: v.optional(BooleanSchema),
 })
 
-/** Validates a snapshot synchronously, returning its value or validation issues. */
+/**
+ * Validates a snapshot synchronously, returning its value or validation issues.
+ */
 export function parseTweetSchema(
   input: unknown,
 ): StandardSchemaV1.Result<Tweet> {
