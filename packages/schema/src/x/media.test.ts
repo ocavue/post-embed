@@ -65,9 +65,9 @@ it('maps quoted media, avatars and video posters without changing attribution or
   }
   const post: XPost = { ...quoted, id: '123', quote: quoted }
   const original = structuredClone(post)
-  const mapped = mapXPostMediaUrls(post, (url) =>
-    url.replace('https://cdn.test/', 'reflect-asset://'),
-  )
+  const mapped = mapXPostMediaUrls(post, (url) => {
+    return url.replace('https://cdn.test/', 'reflect-asset://')
+  })
   expect(mapped.quote).toEqual({
     ...quoted,
     author: { ...quoted.author, avatar: 'reflect-asset://avatar.png' },
