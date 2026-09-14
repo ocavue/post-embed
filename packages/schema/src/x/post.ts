@@ -48,17 +48,6 @@ export const XPostAuthorSchema = v.object({
     v.optional(v.picklist(['square', 'hexagon'])),
     undefined,
   ),
-  verified: v.fallback(
-    v.optional(v.picklist(['blue', 'business', 'government', 'legacy'])),
-    undefined,
-  ),
-  label: v.optional(
-    v.object({
-      text: StringSchema,
-      badge: v.optional(StringSchema),
-      url: v.optional(StringSchema),
-    }),
-  ),
 })
 
 export const XPostBaseSchema = v.object({

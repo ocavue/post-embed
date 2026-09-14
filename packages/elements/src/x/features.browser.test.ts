@@ -91,17 +91,11 @@ describe('Full post snapshots', () => {
       .toBeVisible()
   })
 
-  it('renders badges, UTC dates, and edits without engagement controls', async () => {
+  it('renders UTC dates and edits without engagement controls', async () => {
     const snapshot = createPost()
-    snapshot.author.verified = 'business'
     snapshot.author.avatarShape = 'square'
-    snapshot.author.label = { text: 'Organization' }
     snapshot.edit = 'edited'
     const element = mount(snapshot)
-    await expect
-      .element(post.getByRole('img', { name: 'Business verified account' }))
-      .toBeVisible()
-    await expect.element(post.getByText('Organization')).toBeVisible()
     expect(element.querySelector('time')?.dateTime).toBe(
       '2026-09-10T00:00:00.000Z',
     )

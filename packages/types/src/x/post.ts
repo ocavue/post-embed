@@ -51,11 +51,6 @@ export interface XPostAuthor {
    * Circle when absent.
    */
   avatarShape?: 'square' | 'hexagon'
-  verified?: 'blue' | 'business' | 'government' | 'legacy'
-  /**
-   * An affiliation badge next to the name.
-   */
-  label?: { text: string; badge?: string; url?: string }
 }
 
 export type XPostSegment =

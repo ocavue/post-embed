@@ -112,22 +112,6 @@ function toAuthor(user: GraphQLUser): XPostAuthor {
   if (avatar) author.avatar = avatar
   if (user.profile_image_shape === 'Square') author.avatarShape = 'square'
   if (user.profile_image_shape === 'Hexagon') author.avatarShape = 'hexagon'
-  const verifiedType =
-    user.verification?.verified_type ?? user.legacy?.verified_type
-  if (verifiedType === 'Business') author.verified = 'business'
-  else if (verifiedType === 'Government') author.verified = 'government'
-  else if (user.is_blue_verified) author.verified = 'blue'
-  else if (user.verification?.verified ?? user.legacy?.verified) {
-    author.verified = 'legacy'
-  }
-  const label = user.affiliates_highlighted_label?.label
-  if (label?.badge?.url) {
-    author.label = {
-      text: decodeHTML(label.description ?? ''),
-      badge: label.badge.url,
-    }
-    if (label.url?.url) author.label.url = label.url.url
-  }
   return author
 }
 

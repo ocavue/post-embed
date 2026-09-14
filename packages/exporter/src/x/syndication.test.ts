@@ -23,13 +23,6 @@ describe('fromSyndication', () => {
         handle: 'jack',
         avatar:
           'https://pbs.twimg.com/profile_images/1661201415899951105/azNjKOSH_normal.jpg',
-        verified: 'blue',
-        label: {
-          text: 'Square',
-          badge:
-            'https://pbs.twimg.com/profile_images/1285655593592791040/HtwPZgej_bigger.jpg',
-          url: 'https://twitter.com/Square',
-        },
       },
       body: [{ type: 'text', text: 'just setting up my twttr' }],
     })
@@ -45,7 +38,6 @@ describe('fromSyndication', () => {
       handle: 'MunTheShinobi',
       avatar:
         'https://pbs.twimg.com/profile_images/2029818588333277184/nuBhZ5pt_normal.jpg',
-      verified: 'blue',
     })
     expect(post.media).toHaveLength(1)
     const media = post.media![0]
@@ -79,7 +71,6 @@ describe('fromSyndication', () => {
       ['photo', 1536, 1920],
       ['video', 720, 900],
     ])
-    expect(post.author.verified).toBeUndefined()
   })
 
   it('decodes character references and keeps the link display text', () => {
@@ -96,7 +87,6 @@ describe('fromSyndication', () => {
     expect(post.author).toMatchObject({
       handle: 'vercel',
       avatarShape: 'square',
-      verified: 'business',
     })
     expect(post).not.toHaveProperty('card')
     expect(post.media).toBeUndefined()
