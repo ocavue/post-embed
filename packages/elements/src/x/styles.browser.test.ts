@@ -32,8 +32,8 @@ it('isolates text, links, avatars, media, and quotes from page CSS', async () =>
   const parts = element.shadowRoot!.querySelectorAll<HTMLElement>(
     '[data-root], [data-body], [data-avatar], [data-media] img, [data-quoted], a',
   )
-  const readStyles = () =>
-    Array.from(parts, (part) => {
+  const readStyles = () => {
+    return Array.from(parts, (part) => {
       const style = getComputedStyle(part)
       return [
         style.font,
@@ -47,6 +47,7 @@ it('isolates text, links, avatars, media, and quotes from page CSS', async () =>
         style.textDecorationLine,
       ]
     })
+  }
   const before = readStyles()
   const stylesheet = document.createElement('style')
   stylesheet.textContent = `
