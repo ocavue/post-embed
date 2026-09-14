@@ -42,7 +42,9 @@ export function useXPost(host: HostElement, props: State<XPostProps>): void {
     const url = props.url.get()
     const value = result && !result.issues ? result.value : undefined
     // Validate that resolver output belongs to the requested permalink.
-    const valid = value && (!url || parseXPostId(url) === value.id)
+    const valid =
+      value &&
+      (props.data.get() != null || !url || parseXPostId(url) === value.id)
     container.replaceChildren(
       valid ? renderPost(value, protocols) : renderFallback(pending.get()),
     )

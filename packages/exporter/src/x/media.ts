@@ -12,7 +12,7 @@ export function toSource(
           label === 'application/vnd.apple.mpegurl'
         ? 'application/x-mpegURL'
         : undefined
-  if (!type) return
+  if (!type || !url.trim()) return
   return {
     url,
     type,

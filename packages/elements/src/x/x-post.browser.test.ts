@@ -28,6 +28,18 @@ afterEach(() => {
 })
 
 describe('X post', () => {
+  it.each(['https://example.com/unrelated', 'https://x.com/other/status/456'])(
+    'renders explicit data without resolving the unrelated URL %s',
+    async (url) => {
+      const element = mount('Explicit snapshot')
+      const resolver = vi.fn()
+      element.resolver = resolver
+      element.url = url
+      await expect.element(post.getByText('Explicit snapshot')).toBeVisible()
+      expect(resolver).not.toHaveBeenCalled()
+    },
+  )
+
   it('renders selectable light DOM text and native attribution links', async () => {
     const element = mount()
     await expect.element(post.getByText(/Hello 😀/)).toBeVisible()
