@@ -26,7 +26,9 @@ export interface FetchProps<T> {
    * Called with `url` to load the snapshot when `data` is `null`.
    */
   resolver: Resolver<T> | null
-  /** Changes invalidate the resolved data even when the URL stays the same. */
+  /**
+   * Changes invalidate the resolved data even when the URL stays the same.
+   */
   revision?: string | number | null
 }
 
