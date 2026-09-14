@@ -40,3 +40,48 @@ it('keeps source URLs when a resolver has no replacement', () => {
     url: 'https://example.com/photo.png',
   })
 })
+
+it('maps quoted media, avatars and video posters without changing attribution or text', () => {
+  const quoted = {
+    id: '456',
+    createdAt: '',
+    author: {
+      name: 'Quoted',
+      handle: 'quoted',
+      avatar: 'https://cdn.test/avatar.png',
+    },
+    body: [{ type: 'text' as const, text: 'Original text' }],
+    media: [
+      {
+        type: 'video' as const,
+        width: 640,
+        height: 360,
+        poster: 'https://cdn.test/poster.jpg',
+        sources: [
+          { url: 'https://cdn.test/movie.mp4', type: 'video/mp4' as const },
+        ],
+      },
+    ],
+  }
+  const post: XPost = { ...quoted, id: '123', quote: quoted }
+  const original = structuredClone(post)
+  const mapped = mapXPostMediaUrls(post, (url) =>
+    url.replace('https://cdn.test/', 'reflect-asset://'),
+  )
+  expect(mapped.quote).toEqual({
+    ...quoted,
+    author: { ...quoted.author, avatar: 'reflect-asset://avatar.png' },
+    media: [
+      {
+        type: 'video',
+        width: 640,
+        height: 360,
+        poster: 'reflect-asset://poster.jpg',
+        sources: [{ url: 'reflect-asset://movie.mp4', type: 'video/mp4' }],
+      },
+    ],
+  })
+  expect(mapped.author).toEqual(mapped.quote?.author)
+  expect(mapped.media).toEqual(mapped.quote?.media)
+  expect(post).toEqual(original)
+})
