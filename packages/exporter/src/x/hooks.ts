@@ -109,6 +109,7 @@ export function installFetchHook(options: ResponseHookOptions): () => void {
             })
           }, report)
       } catch (error) {
+        // DO not use "report" here, just use "onError" directly. FIXME
         report(error)
       }
       return response
