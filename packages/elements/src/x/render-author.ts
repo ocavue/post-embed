@@ -1,16 +1,15 @@
-import type { XPostAuthor, MediaUrlResolver } from '@post-embed/types'
+import type { XPostAuthor } from '@post-embed/types'
 import el from 'crelt'
 
 import { renderLink } from '../render-link.ts'
-
-import { getMediaUrl } from './media-url.ts'
+import { getSafeUrl } from '../safe-url.ts'
 export function renderAuthor(
   author: XPostAuthor,
-  resolver: MediaUrlResolver | null,
+  protocols: readonly string[] | null,
 ) {
   if (!author.name && !author.handle) return
   const validHandle = /^\w{1,15}$/.test(author.handle)
-  const avatar = author.avatar && getMediaUrl(author.avatar, resolver)
+  const avatar = author.avatar && getSafeUrl(author.avatar, protocols)
 
   return el(
     'header',

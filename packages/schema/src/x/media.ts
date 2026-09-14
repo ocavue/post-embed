@@ -1,15 +1,8 @@
-import type { XPost, XPostBase } from './post.js'
+import type { XPost, XPostBase } from '@post-embed/types'
 
-export type MediaUrlResolver = (url: string) => string | undefined
-
-// FIXME: `mapBase(post)` already spreads the whole post (quote/replyTo included, the `XPostBase`
-// annotation is narrower than the runtime value), so the leading `...post` is redundant. Also:
-// `@post-embed/types` was a type-only package; this file and url.ts add runtime code, tests, and an
-// inline `types` vitest project in the root config. Consider hosting these helpers in
-// `@post-embed/schema` (already runtime) instead.
 export function mapXPostMediaUrls(
   post: XPost,
-  resolve: MediaUrlResolver,
+  resolve: (url: string) => string | undefined,
 ): XPost {
   const url = (source: string): string => resolve(source) || source
   function mapBase(entry: XPostBase): XPostBase {
@@ -33,7 +26,6 @@ export function mapXPostMediaUrls(
     return result
   }
   return {
-    ...post,
     ...mapBase(post),
     ...(post.quote ? { quote: mapBase(post.quote) } : {}),
   }

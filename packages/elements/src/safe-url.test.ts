@@ -20,3 +20,15 @@ it('rejects credentials and control characters', () => {
   expect(getSafeUrl('https://user:password@example.com')).toBeUndefined()
   expect(getSafeUrl('https://example.com/\npath')).toBeUndefined()
 })
+
+it('accepts host-approved media protocols without allowing other protocols', () => {
+  expect(
+    getSafeUrl('reflect-asset://localhost/1/x-media/123/hash'),
+  ).toBeUndefined()
+  expect(
+    getSafeUrl('reflect-asset://localhost/1/x-media/123/hash', [
+      'reflect-asset:',
+    ]),
+  ).toBe('reflect-asset://localhost/1/x-media/123/hash')
+  expect(getSafeUrl('javascript:alert(1)', ['reflect-asset:'])).toBeUndefined()
+})

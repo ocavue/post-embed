@@ -1,6 +1,6 @@
 import { expect, it } from 'vitest'
 
-import { parseXPostId } from './url.js'
+import { parseXPostId } from './url.ts'
 
 it.each([
   'https://x.com/jack/status/123',

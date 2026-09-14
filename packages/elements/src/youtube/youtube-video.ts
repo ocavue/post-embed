@@ -90,6 +90,7 @@ export const YouTubeVideoCustomElement = defineCustomElement(
     data: { default: null, attribute: false },
     url: { default: null, attribute: false },
     resolver: { default: null, attribute: false },
+    revision: { default: null, attribute: false },
     playback: { default: 'link', attribute: 'playback', type: 'string' },
   }),
 )

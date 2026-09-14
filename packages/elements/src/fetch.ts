@@ -29,7 +29,7 @@ export interface FetchProps<T> {
   /**
    * Changes invalidate the resolved data even when the URL stays the same.
    */
-  revision?: string | number | null
+  revision: string | number | null
 }
 
 /** @internal */
@@ -57,7 +57,7 @@ export function useFetch<T>(
   const pending = createSignal(false)
 
   useHostEffect(host, () => {
-    props.revision?.get()
+    props.revision.get()
     const url = props.url.get()
     const resolver = props.resolver.get()
     fetched.set(null)

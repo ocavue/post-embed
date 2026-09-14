@@ -10,5 +10,3 @@ declare global {
     'post-embed-x-post': XPostElement
   }
 }
-
-export type { MediaUrlResolver } from '@post-embed/types'

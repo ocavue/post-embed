@@ -1,4 +1,4 @@
-import type { XPost, XPostBase, MediaUrlResolver } from '@post-embed/types'
+import type { XPost, XPostBase } from '@post-embed/types'
 import el from 'crelt'
 
 import { renderLink } from '../render-link.ts'
@@ -42,20 +42,20 @@ function renderEdit(post: XPostBase) {
       : undefined
 }
 
-function renderQuoted(post: XPostBase, resolver: MediaUrlResolver | null) {
+function renderQuoted(post: XPostBase, protocols: readonly string[] | null) {
   return el(
     'article',
     { 'data-quoted': '', 'aria-label': 'Quoted post' },
-    renderAuthor(post.author, resolver),
+    renderAuthor(post.author, protocols),
     renderBody(post),
-    renderMedia(post.media, resolver, getPermalink(post)),
+    renderMedia(post.media, protocols, getPermalink(post)),
     el('footer', { 'data-footer': '' }, renderDate(post), renderEdit(post)),
   )
 }
 
 export function renderPost(
   post: XPost,
-  resolver: MediaUrlResolver | null = null,
+  protocols: readonly string[] | null = null,
 ) {
   const reply = post.replyTo
   const replyUrl =
@@ -65,7 +65,7 @@ export function renderPost(
   return el(
     'article',
     {},
-    renderAuthor(post.author, resolver),
+    renderAuthor(post.author, protocols),
     reply
       ? el(
           'div',
@@ -74,8 +74,8 @@ export function renderPost(
         )
       : undefined,
     renderBody(post),
-    renderMedia(post.media, resolver, getPermalink(post)),
-    post.quote ? renderQuoted(post.quote, resolver) : undefined,
+    renderMedia(post.media, protocols, getPermalink(post)),
+    post.quote ? renderQuoted(post.quote, protocols) : undefined,
     el('footer', { 'data-footer': '' }, renderDate(post), renderEdit(post)),
   )
 }

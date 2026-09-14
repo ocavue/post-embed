@@ -7,6 +7,8 @@ import {
   looseItems,
 } from '../primitives.ts'
 
+import { XPostIdSchema } from './url.ts'
+
 export const XPostSegmentSchema = v.variant('type', [
   v.object({ type: v.literal('text'), text: StringSchema }),
   v.object({
@@ -18,7 +20,7 @@ export const XPostSegmentSchema = v.variant('type', [
 
 export const XPostVideoSourceSchema = v.object({
   url: StringSchema,
-  type: v.string(),
+  type: v.picklist(['video/mp4', 'application/x-mpegURL']),
   bitrate: v.optional(NumberSchema),
 })
 
@@ -52,11 +54,7 @@ export const XPostAuthorSchema = v.object({
 })
 
 export const XPostBaseSchema = v.object({
-  // FIXME: `/^[1-9]\d{0,19}$/` is written here twice, in types/x/url.ts, in reflect core
-  // `postIdSchema` and `x-archive/schema.ts`, in the extension's `x-capture-messages.ts` and
-  // `background.ts`, and as `valid_id` in Rust. Export one `XPostIdSchema` (or the regex) from this
-  // package and reuse it.
-  id: v.pipe(v.string(), v.regex(/^[1-9]\d{0,19}$/)),
+  id: XPostIdSchema,
   createdAt: StringSchema,
   lang: v.optional(StringSchema),
   author: XPostAuthorSchema,
@@ -72,7 +70,7 @@ export const XPostSchema = v.object({
   replyTo: v.optional(
     v.object({
       handle: StringSchema,
-      id: v.pipe(v.string(), v.regex(/^[1-9]\d{0,19}$/)),
+      id: XPostIdSchema,
     }),
   ),
 })
