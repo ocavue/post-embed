@@ -1,4 +1,4 @@
-import { XPostSchema } from '@post-embed/schema'
+import { parseXPost } from '@post-embed/schema'
 import type { Tweet } from '@post-embed/types'
 import { describe, expect, it } from 'vitest'
 
@@ -187,8 +187,7 @@ describe('fromSyndication', () => {
   it('produces output that passes XPostSchema unchanged', () => {
     for (const input of [jack, video, photoAndVideo, vercel]) {
       const post = fromSyndication(input)
-      const validated = XPostSchema['~standard'].validate(post)
-      if (validated instanceof Promise) throw new Error('sync schema expected')
+      const validated = parseXPost(post)
       if (validated.issues) throw new Error('unexpected schema issues')
       expect(validated.value).toEqual(post)
     }

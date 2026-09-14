@@ -1,3 +1,5 @@
+import type { XPost } from '@post-embed/types'
+import type { StandardSchemaV1 } from '@standard-schema/spec'
 import * as v from 'valibot'
 
 import {
@@ -74,3 +76,14 @@ export const XPostSchema = v.object({
     }),
   ),
 })
+
+/**
+ * Validates a snapshot synchronously, returning its value or validation issues.
+ */
+export function parseXPost(input: unknown): StandardSchemaV1.Result<XPost> {
+  const result = XPostSchema['~standard'].validate(input)
+  if (result instanceof Promise) {
+    throw new TypeError('XPostSchema must be synchronous')
+  }
+  return result
+}

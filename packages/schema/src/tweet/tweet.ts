@@ -1,3 +1,5 @@
+import type { Tweet } from '@post-embed/types'
+import type { StandardSchemaV1 } from '@standard-schema/spec'
 import * as v from 'valibot'
 
 import {
@@ -60,3 +62,14 @@ export const TweetSchema = v.object({
   parent: v.optional(TweetParentSchema),
   possibly_sensitive: v.optional(BooleanSchema),
 })
+
+/**
+ * Validates a snapshot synchronously, returning its value or validation issues.
+ */
+export function parseTweet(input: unknown): StandardSchemaV1.Result<Tweet> {
+  const result = TweetSchema['~standard'].validate(input)
+  if (result instanceof Promise) {
+    throw new TypeError('TweetSchema must be synchronous')
+  }
+  return result
+}
