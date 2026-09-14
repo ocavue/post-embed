@@ -5,7 +5,7 @@ import {
   type State,
   useEffect as useHostEffect,
 } from '@aria-ui/core'
-import { parseXPostSchema, parseXPostId } from '@post-embed/schema'
+import { parseXPost, parseXPostId } from '@post-embed/schema'
 import type { XPost as XPostSnapshot } from '@post-embed/types'
 import el from 'crelt'
 
@@ -28,7 +28,7 @@ export function useXPost(host: HostElement, props: State<XPostProps>): void {
     host.dataset.postEmbed = 'x-post'
     const container = getRootContainer(host)
     const data = props.data.get() ?? fetched.get()
-    const result = data == null ? undefined : parseXPostSchema(data)
+    const result = data == null ? undefined : parseXPost(data)
 
     if (result?.issues) {
       console.error('[post-embed] Invalid X post data:', result.issues)

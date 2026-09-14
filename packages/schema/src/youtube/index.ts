@@ -1,1 +1,1 @@
-export { YouTubeVideoSchema, parseYouTubeVideoSchema } from './video.ts'
+export { YouTubeVideoSchema, parseYouTubeVideo } from './video.ts'

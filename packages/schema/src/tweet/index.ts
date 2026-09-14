@@ -1,1 +1,1 @@
-export { TweetSchema, parseTweetSchema } from './tweet.ts'
+export { TweetSchema, parseTweet } from './tweet.ts'

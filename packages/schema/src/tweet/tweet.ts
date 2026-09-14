@@ -66,9 +66,10 @@ export const TweetSchema = v.object({
 /**
  * Validates a snapshot synchronously, returning its value or validation issues.
  */
-export function parseTweetSchema(
-  input: unknown,
-): StandardSchemaV1.Result<Tweet> {
-  const result = v.safeParse(TweetSchema, input)
-  return result.success ? { value: result.output } : { issues: result.issues }
+export function parseTweet(input: unknown): StandardSchemaV1.Result<Tweet> {
+  const result = TweetSchema['~standard'].validate(input)
+  if (result instanceof Promise) {
+    throw new TypeError('TweetSchema must be synchronous')
+  }
+  return result
 }

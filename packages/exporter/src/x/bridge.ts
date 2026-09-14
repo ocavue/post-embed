@@ -1,4 +1,4 @@
-import { parseXPostSchema } from '@post-embed/schema'
+import { parseXPost } from '@post-embed/schema'
 import { createBirpc, type ChannelOptions } from 'birpc'
 import * as v from 'valibot'
 
@@ -173,7 +173,7 @@ export function createXTweetClient(options: ClientOptions = {}): XTweetClient {
         return
       }
       if (!entry) return
-      const validated = parseXPostSchema(entry.post)
+      const validated = parseXPost(entry.post)
       if (validated.issues) return
       if (validated.value.id !== postId) return
       return { ...entry, post: validated.value }

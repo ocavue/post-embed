@@ -6,19 +6,15 @@ import {
   TweetSchema,
   XPostSchema,
   YouTubeVideoSchema,
-  parseTweetSchema,
-  parseXPostSchema,
-  parseYouTubeVideoSchema,
+  parseTweet,
+  parseXPost,
+  parseYouTubeVideo,
 } from './index.ts'
 
 test('parsers return synchronous Standard Schema results', () => {
-  expectTypeOf(parseTweetSchema({})).toEqualTypeOf<
-    StandardSchemaV1.Result<Tweet>
-  >()
-  expectTypeOf(parseXPostSchema({})).toEqualTypeOf<
-    StandardSchemaV1.Result<XPost>
-  >()
-  expectTypeOf(parseYouTubeVideoSchema({})).toEqualTypeOf<
+  expectTypeOf(parseTweet({})).toEqualTypeOf<StandardSchemaV1.Result<Tweet>>()
+  expectTypeOf(parseXPost({})).toEqualTypeOf<StandardSchemaV1.Result<XPost>>()
+  expectTypeOf(parseYouTubeVideo({})).toEqualTypeOf<
     StandardSchemaV1.Result<YouTubeVideo>
   >()
 })
@@ -27,19 +23,19 @@ const cases = [
   {
     name: 'Tweet',
     schema: TweetSchema,
-    parse: parseTweetSchema,
+    parse: parseTweet,
     input: { user: {}, edit_control: {}, unknownField: true },
   },
   {
     name: 'XPost',
     schema: XPostSchema,
-    parse: parseXPostSchema,
+    parse: parseXPost,
     input: { id: '123', author: {}, unknownField: true },
   },
   {
     name: 'YouTubeVideo',
     schema: YouTubeVideoSchema,
-    parse: parseYouTubeVideoSchema,
+    parse: parseYouTubeVideo,
     input: { title: 'Video', unknownField: true },
   },
 ]

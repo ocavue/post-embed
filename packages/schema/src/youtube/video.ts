@@ -19,9 +19,12 @@ export const YouTubeVideoSchema = v.object({
 /**
  * Validates a snapshot synchronously, returning its value or validation issues.
  */
-export function parseYouTubeVideoSchema(
+export function parseYouTubeVideo(
   input: unknown,
 ): StandardSchemaV1.Result<YouTubeVideo> {
-  const result = v.safeParse(YouTubeVideoSchema, input)
-  return result.success ? { value: result.output } : { issues: result.issues }
+  const result = YouTubeVideoSchema['~standard'].validate(input)
+  if (result instanceof Promise) {
+    throw new TypeError('YouTubeVideoSchema must be synchronous')
+  }
+  return result
 }

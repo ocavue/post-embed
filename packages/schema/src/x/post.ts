@@ -80,9 +80,10 @@ export const XPostSchema = v.object({
 /**
  * Validates a snapshot synchronously, returning its value or validation issues.
  */
-export function parseXPostSchema(
-  input: unknown,
-): StandardSchemaV1.Result<XPost> {
-  const result = v.safeParse(XPostSchema, input)
-  return result.success ? { value: result.output } : { issues: result.issues }
+export function parseXPost(input: unknown): StandardSchemaV1.Result<XPost> {
+  const result = XPostSchema['~standard'].validate(input)
+  if (result instanceof Promise) {
+    throw new TypeError('XPostSchema must be synchronous')
+  }
+  return result
 }

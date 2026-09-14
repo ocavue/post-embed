@@ -1,4 +1,4 @@
-import { parseXPostSchema } from '@post-embed/schema'
+import { parseXPost } from '@post-embed/schema'
 import { describe, expect, it } from 'vitest'
 
 import { extractTweetResults } from './extract.ts'
@@ -195,7 +195,7 @@ describe('toXPost', () => {
     for (const result of extractTweetResults(homeTimeline)) {
       const capture = toXPost(result)
       if (!capture) continue
-      const validated = parseXPostSchema(capture.post)
+      const validated = parseXPost(capture.post)
       if (validated.issues) throw new Error('unexpected schema issues')
       expect(validated.value).toEqual(capture.post)
     }
