@@ -1,6 +1,6 @@
+import { isObject } from '@ocavue/utils'
 import type { GraphQLTweet } from './graphql.ts'
 import { unwrapTweetResult } from './normalize.ts'
-import { isObject } from '@ocavue/utils'
 
 const MAX_VISITED_NODES = 200_000
 
@@ -21,26 +21,18 @@ export function extractTweetResults(root: unknown): GraphQLTweet[] {
     if (++visited > MAX_VISITED_NODES) break
 
     if (Array.isArray(node)) {
-      for (let index = node.length - 1; index >= 0; index--) {
-        const child: unknown = node[index]
-        if (child) {
-          stack.push(node[index])
-        }
-      }
+      const children: unknown[] = Array.from(node)
+      stack.push(...children.reverse())
       continue
     }
-
 
     const tweet = unwrapTweetResult(node)
     if (tweet && !seen.has(tweet.rest_id)) {
       seen.add(tweet.rest_id)
       found.push(tweet)
     }
-    const record = node as Record<string, unknown>
-    const keys = Object.keys(record)
-    for (let index = keys.length - 1; index >= 0; index--) {
-      stack.push(record[keys[index]])
-    }
+    const children: unknown[] = Object.values(node)
+    stack.push(...children.reverse())
   }
   return found
 }
