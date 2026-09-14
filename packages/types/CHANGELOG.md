@@ -1,5 +1,11 @@
 # @post-embed/types
 
+## 0.4.0
+
+### Minor Changes
+
+- 4f4a42a: Add host-controlled media protocols. Share X permalink and media mapping helpers through `@post-embed/schema`.
+
 ## 0.3.0
 
 ### Minor Changes
