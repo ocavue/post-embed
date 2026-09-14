@@ -310,17 +310,6 @@ describe('X post fetch', () => {
     expect(element.querySelector('[data-pending]')).toBeNull()
   })
 
-  it('refreshes the same URL when its host revision changes', async () => {
-    let text = 'Pending archive'
-    const resolver = vi.fn(() => createPost(text))
-    const element = mountRemote(resolver)
-    await expect.element(post.getByText('Pending archive')).toBeVisible()
-    text = 'Saved offline'
-    element.revision = 1
-    await expect.element(post.getByText('Saved offline')).toBeVisible()
-    expect(resolver).toHaveBeenCalledTimes(2)
-  })
-
   it('rejects a resolver result belonging to another post', async () => {
     mountRemote(() => ({ ...createPost('Wrong post'), id: '2' }))
     await expect

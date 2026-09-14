@@ -5,4 +5,4 @@
 "@post-embed/elements": minor
 ---
 
-Add host-controlled media protocols and X post refresh notifications. Share X permalink and media mapping helpers through `@post-embed/schema`.
+Add host-controlled media protocols. Share X permalink and media mapping helpers through `@post-embed/schema`.

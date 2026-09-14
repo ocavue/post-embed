@@ -4,6 +4,6 @@ export { YouTubeVideoSchema } from './youtube/index.ts'
 
 export { looseItems } from './primitives.ts'
 
-export { mapXPostMediaUrls, getXPostMediaUrls } from './x/media.ts'
+export { mapXPostMediaUrls } from './x/media.ts'
 export { parseXPostId, X_POST_ID_PATTERN } from './x/url.ts'
 export { XPostIdSchema } from './x/url.ts'

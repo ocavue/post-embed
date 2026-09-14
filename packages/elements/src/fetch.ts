@@ -26,14 +26,6 @@ export interface FetchProps<T> {
    * Called with `url` to load the snapshot when `data` is `null`.
    */
   resolver: Resolver<T> | null
-  /**
-   * Changes invalidate the resolved data even when the URL stays the same.
-   */
-  // FIXME: `revision` exists only so a host can force a refetch of the same URL; the only host
-  // (reflect `XPostResolverHost`) is dropping that mechanism, see the FIXME at the top of
-  // reflect-open `apps/desktop/src/editor/use-x-post-resolver.ts`. Delete `revision` from
-  // `XPostProps`/`FetchProps`, the read in `useFetch`, and the matching browser test.
-  revision: string | number | null
 }
 
 /** @internal */
@@ -61,7 +53,6 @@ export function useFetch<T>(
   const pending = createSignal(false)
 
   useHostEffect(host, () => {
-    props.revision.get()
     const url = props.url.get()
     const resolver = props.resolver.get()
     fetched.set(null)

@@ -90,9 +90,6 @@ export const YouTubeVideoCustomElement = defineCustomElement(
     data: { default: null, attribute: false },
     url: { default: null, attribute: false },
     resolver: { default: null, attribute: false },
-    // FIXME: only here because `FetchProps.revision` became required; goes away with it (see
-    // fetch.ts).
-    revision: { default: null, attribute: false },
     playback: { default: 'link', attribute: 'playback', type: 'string' },
   }),
 )
