@@ -26,6 +26,8 @@ export interface FetchProps<T> {
    * Called with `url` to load the snapshot when `data` is `null`.
    */
   resolver: Resolver<T> | null
+  /** Changes invalidate the resolved data even when the URL stays the same. */
+  revision?: string | number | null
 }
 
 /** @internal */
@@ -48,15 +50,12 @@ export function useFetch<T>(
   host: HostElement,
   props: State<FetchProps<T>>,
   label: string,
-  // FIXME: a callback parameter just to read one signal. Add `revision?: State<...>` to
-  // `FetchProps` (YouTube can leave it null) and read `props.revision?.get()` here.
-  readRevision?: () => string | number | null,
 ): FetchState<T> {
   const fetched = createSignal<T | null>(null)
   const pending = createSignal(false)
 
   useHostEffect(host, () => {
-    readRevision?.()
+    props.revision?.get()
     const url = props.url.get()
     const resolver = props.resolver.get()
     fetched.set(null)

@@ -28,20 +28,8 @@ export interface XPostElement extends HTMLElement, XPostProps {}
 
 /** @internal */
 export function useXPost(host: HostElement, props: State<XPostProps>): void {
-  const { fetched, pending } = useFetch(host, props, 'X post', () => {
-    return props.revision.get()
-  })
+  const { fetched, pending } = useFetch(host, props, 'X post')
 
-  // FIXME: ~35 lines (`renderedUrl`/`renderedMediaResolver`/`renderedResolver`, the early return
-  // while pending, the `previousVideos` map, `resume`, `dataset.loadFailed`) exist to keep a
-  // playing <video> alive across a refetch. A refetch only re-renders a playing video with an
-  // unchanged src when a *sibling* resource of the same post finished downloading; restarting the
-  // video in that edge case is acceptable. Delete all of it and `container.replaceChildren(next)`.
-  // If the real concern is a flash of the pending fallback during a refetch, keep the old children
-  // while `pending` (one line) instead.
-  let renderedUrl: string | null = null
-  let renderedMediaResolver: MediaUrlResolver | null = null
-  let renderedResolver: XPostProps['resolver'] = null
   useHostEffect(host, () => () => {
     for (const video of getRootContainer(host).querySelectorAll('video'))
       video.pause()
@@ -68,44 +56,10 @@ export function useXPost(host: HostElement, props: State<XPostProps>): void {
     // (`post?.id === id`), in reflect `XPostHost`, `lookupCapturedPost`, `saveXPost`,
     // `parseArchivedPost`, and Rust `read_post`/`put_capture`. Delete the duplicates.
     const valid = value && (!url || parseXPostId(url) === value.id)
-    const resolver = props.resolver.get()
-    const sameSource =
-      renderedUrl === url &&
-      renderedMediaResolver === mediaResolver &&
-      renderedResolver === resolver
-    if (pending.get() && sameSource && container.querySelector('video')) return
-    renderedUrl = url
-    renderedMediaResolver = mediaResolver
-    renderedResolver = resolver
-    const next = valid
-      ? renderPost(value, mediaResolver)
-      : renderFallback(pending.get())
-    const previousVideos = new Map<string, HTMLVideoElement>()
-    for (const video of container.querySelectorAll('video')) {
-      if (video.dataset.loadFailed) continue
-      const key = Array.from(
-        video.querySelectorAll('source'),
-        (source) => source.src,
-      ).join('|')
-      if (key) previousVideos.set(key, video)
-    }
-    const resume: HTMLVideoElement[] = []
-    for (const video of next.querySelectorAll('video')) {
-      const key = Array.from(
-        video.querySelectorAll('source'),
-        (source) => source.src,
-      ).join('|')
-      const previous = sameSource ? previousVideos.get(key) : undefined
-      if (previous) {
-        if (!previous.paused) resume.push(previous)
-        previous.poster = video.poster
-        video.replaceWith(previous)
-        previousVideos.delete(key)
-      }
-    }
-    for (const video of previousVideos.values()) video.pause()
-    container.replaceChildren(next)
-    for (const video of resume) void video.play().catch(() => {})
+    for (const video of container.querySelectorAll('video')) video.pause()
+    container.replaceChildren(
+      valid ? renderPost(value, mediaResolver) : renderFallback(pending.get()),
+    )
   })
 }
 

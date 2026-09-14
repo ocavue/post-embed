@@ -386,13 +386,13 @@ describe('union selection', () => {
   )
 
   test.each([{}, null, { type: 'unknown' }])(
-    'keeps valid media beside an unrecognized branch: %j',
+    'defaults the whole array for an unrecognized branch: %j',
     async (invalid) => {
       const tweet = await parse(TweetSchema, {
         ...minimal,
         mediaDetails: [{ ...mediaObjects, type: 'photo' }, invalid],
       })
-      expect(tweet.mediaDetails).toHaveLength(1)
+      expect(tweet.mediaDetails).toEqual([])
     },
   )
 
@@ -410,19 +410,19 @@ describe('union selection', () => {
     expect(ext_media_color).toEqual({})
   })
 
-  test('drops only media items missing required objects', async () => {
+  test('defaults a containing array when an item lacks a required object', async () => {
     const tweet = await parse(TweetSchema, {
       ...minimal,
       mediaDetails: [{ ...mediaObjects, type: 'photo' }, { type: 'photo' }],
       photos: [{ url: 'missing backgroundColor' }],
       entities: { hashtags: [null] },
     })
-    expect(tweet.mediaDetails).toHaveLength(1)
+    expect(tweet.mediaDetails).toEqual([])
     expect(tweet.photos).toEqual([])
     expect(tweet.entities?.hashtags).toEqual([])
   })
 
-  test('keeps supported sources beside an unsupported MIME type', async () => {
+  test('preserves HLS and defaults unsupported video content types', async () => {
     const tweet = await parse(TweetSchema, {
       ...minimal,
       mediaDetails: [
@@ -440,7 +440,10 @@ describe('union selection', () => {
     })
     expect(tweet.mediaDetails?.[0]).toMatchObject({
       video_info: {
-        variants: [{ content_type: 'application/x-mpegURL', url: 'hls' }],
+        variants: [
+          { content_type: 'application/x-mpegURL', url: 'hls' },
+          { content_type: 'video/mp4', url: '' },
+        ],
       },
     })
   })

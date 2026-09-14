@@ -4,7 +4,7 @@ import {
   BooleanSchema,
   NumberSchema,
   StringSchema,
-  looseItems,
+  looseArray,
 } from '../primitives.ts'
 
 import { TweetEditControlSchema } from './edit.ts'
@@ -40,11 +40,7 @@ export const QuotedTweetSchema = v.object({
   reply_count: NumberSchema,
   retweet_count: NumberSchema,
   favorite_count: NumberSchema,
-  // FIXME: switching the legacy `TweetSchema` (and `VideoInfoSchema.content_type` in
-  // tweet/media.ts) from `looseArray`/fallback to `looseItems`/strict is unrelated to host media
-  // resolution and changes `fromSyndication` output for malformed inputs. It may well be a good
-  // fix, but it belongs in its own PR with its own changeset line.
-  mediaDetails: v.optional(looseItems(MediaDetailsSchema)),
+  mediaDetails: v.optional(looseArray(MediaDetailsSchema)),
   self_thread: v.object({ id_str: StringSchema }),
 })
 
@@ -52,8 +48,8 @@ export const TweetSchema = v.object({
   ...TweetBaseSchema.entries,
   __typename: v.fallback(v.literal('Tweet'), 'Tweet'),
   favorite_count: NumberSchema,
-  mediaDetails: v.optional(looseItems(MediaDetailsSchema)),
-  photos: v.optional(looseItems(TweetPhotoSchema)),
+  mediaDetails: v.optional(looseArray(MediaDetailsSchema)),
+  photos: v.optional(looseArray(TweetPhotoSchema)),
   video: v.optional(TweetVideoSchema),
   conversation_count: NumberSchema,
   news_action_type: v.fallback(v.literal('conversation'), 'conversation'),
