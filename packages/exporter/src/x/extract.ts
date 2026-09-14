@@ -16,7 +16,7 @@ export function extractTweetResults(root: unknown): GraphQLTweet[] {
   let visited = 0
   while (stack.length > 0) {
     const node = stack.pop()
-    if (!node) continue
+    if (!node || !isObject(node)) continue
 
     if (++visited > MAX_VISITED_NODES) break
 
@@ -30,7 +30,6 @@ export function extractTweetResults(root: unknown): GraphQLTweet[] {
       continue
     }
 
-    if (!isObject(node)) continue
 
     const tweet = unwrapTweetResult(node)
     if (tweet && !seen.has(tweet.rest_id)) {
