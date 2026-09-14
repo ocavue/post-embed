@@ -6,3 +6,4 @@
 ---
 
 Add host media URL policies and refreshable X resolvers.
+<!--FIXME: "Add host media URL mapper." Just like this, nothing more -->
