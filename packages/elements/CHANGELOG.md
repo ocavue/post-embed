@@ -1,5 +1,11 @@
 # @post-embed/elements
 
+## 0.5.0
+
+### Minor Changes
+
+- 986796c: Harden the X post theme against host stylesheets and refresh its default look.
+
 ## 0.4.1
 
 ### Patch Changes
