@@ -1,5 +1,11 @@
 # @post-embed/types
 
+## 0.3.0
+
+### Minor Changes
+
+- 0952baa: Drop the `verified` check and the affiliation `label` from `XPost` authors; the card no longer shows them.
+
 ## 0.2.0
 
 ### Minor Changes
