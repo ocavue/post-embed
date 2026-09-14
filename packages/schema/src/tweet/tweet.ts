@@ -1,3 +1,5 @@
+import type { Tweet } from '@post-embed/types'
+import type { StandardSchemaV1 } from '@standard-schema/spec'
 import * as v from 'valibot'
 
 import {
@@ -60,3 +62,11 @@ export const TweetSchema = v.object({
   parent: v.optional(TweetParentSchema),
   possibly_sensitive: v.optional(BooleanSchema),
 })
+
+/** Validates a snapshot synchronously, returning its value or validation issues. */
+export function parseTweetSchema(
+  input: unknown,
+): StandardSchemaV1.Result<Tweet> {
+  const result = v.safeParse(TweetSchema, input)
+  return result.success ? { value: result.output } : { issues: result.issues }
+}

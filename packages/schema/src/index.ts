@@ -1,6 +1,6 @@
-export { TweetSchema } from './tweet/index.ts'
-export { XPostSchema } from './x/index.ts'
-export { YouTubeVideoSchema } from './youtube/index.ts'
+export { TweetSchema, parseTweetSchema } from './tweet/index.ts'
+export { XPostSchema, parseXPostSchema } from './x/index.ts'
+export { YouTubeVideoSchema, parseYouTubeVideoSchema } from './youtube/index.ts'
 
 export { looseItems } from './primitives.ts'
 

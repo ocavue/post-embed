@@ -1,1 +1,1 @@
-export { XPostSchema } from './post.ts'
+export { XPostSchema, parseXPostSchema } from './post.ts'

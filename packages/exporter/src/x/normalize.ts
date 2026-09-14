@@ -1,4 +1,4 @@
-import { XPostSchema } from '@post-embed/schema'
+import { parseXPostSchema } from '@post-embed/schema'
 import type {
   XPost,
   XPostAuthor,
@@ -204,8 +204,7 @@ export function toXPost(result: GraphQLTweet): XPostCapture | undefined {
       id: legacy.in_reply_to_status_id_str,
     }
   }
-  const validated = XPostSchema['~standard'].validate(candidate)
-  if (validated instanceof Promise) return undefined
+  const validated = parseXPostSchema(candidate)
   if (validated.issues) {
     console.error(
       `[post-embed] Post ${result.rest_id} failed XPostSchema:`,

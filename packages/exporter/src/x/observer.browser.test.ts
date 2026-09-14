@@ -1,4 +1,4 @@
-import { XPostSchema } from '@post-embed/schema'
+import { parseXPostSchema } from '@post-embed/schema'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { observeXTweets, type XObserver } from './observer.ts'
@@ -43,8 +43,7 @@ describe('observeXTweets', () => {
     expect(typeof entry.capturedAt).toBe('number')
     expect(entry.raw).toMatchObject({ rest_id: '1000000000000000002' })
     expect(observer.get('1000000000000000005')!.protected).toBe(true)
-    const validated = XPostSchema['~standard'].validate(entry.post)
-    if (validated instanceof Promise) throw new Error('sync schema expected')
+    const validated = parseXPostSchema(entry.post)
     expect(validated.issues).toBeUndefined()
   })
 
