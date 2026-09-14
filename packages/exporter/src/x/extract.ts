@@ -6,9 +6,7 @@ import { unwrapTweetResult } from './normalize.ts'
 const MAX_VISITED_NODES = 500_000
 
 /**
- * Every tweet object anywhere in a GraphQL response, deduplicated by
- * `rest_id`. Walks the whole tree instead of the per-operation timeline
- * shapes, so a new operation or a rearranged `instructions` list still works.
+ * Extracts every tweet object anywhere in a GraphQL response.
  */
 export function extractTweetResults(root: unknown): GraphQLTweet[] {
   const found: GraphQLTweet[] = []
