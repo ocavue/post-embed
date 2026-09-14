@@ -34,9 +34,8 @@ function renderItem(
     if (media.unavailable || !url) return renderUnavailable(permalink)
     const image = el('img', {
       src: url,
-      // FIXME: both exporters only set `alt` when it is non-empty, so `??` and the original `||`
-      // never differ; restore `||` to keep this line out of the diff.
-      alt: media.alt ?? 'Post image',
+
+      alt: media.alt || 'Post image',
       width: dimension(media.width),
       height: dimension(media.height),
       loading: 'lazy',
