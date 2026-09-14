@@ -28,6 +28,8 @@ export function extractTweetResults(root: unknown): GraphQLTweet[] {
       continue
     }
 
+    if (!isObject(node)) continue
+
     const tweet = unwrapTweetResult(node)
     if (tweet && !seen.has(tweet.rest_id)) {
       seen.add(tweet.rest_id)
