@@ -10,9 +10,9 @@ import type { XPost as XPostSnapshot } from '@post-embed/types'
 import el from 'crelt'
 
 import { type FetchProps, useFetch } from '../fetch.ts'
-import { getRootContainer } from '../root.ts'
 
 import { renderPost } from './render-post.ts'
+import { getXPostRoot } from './root.ts'
 
 export interface XPostProps extends FetchProps<XPostSnapshot> {
   mediaUrlProtocols: readonly string[] | null
@@ -26,7 +26,7 @@ export function useXPost(host: HostElement, props: State<XPostProps>): void {
 
   useHostEffect(host, () => {
     host.dataset.postEmbed = 'x-post'
-    const container = getRootContainer(host)
+    const container = getXPostRoot(host)
     const data = props.data.get() ?? fetched.get()
     const result = data == null ? undefined : parseXPost(data)
 

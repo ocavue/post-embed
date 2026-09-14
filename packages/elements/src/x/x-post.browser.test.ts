@@ -1,5 +1,3 @@
-import './theme.css'
-
 import type { XPost } from '@post-embed/types'
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 import { page, server, userEvent } from 'vitest/browser'
@@ -40,7 +38,7 @@ describe('X post', () => {
     },
   )
 
-  it('renders selectable light DOM text and native attribution links', async () => {
+  it('renders selectable shadow DOM text and native attribution links', async () => {
     const element = mount()
     await expect.element(post.getByText(/Hello 😀/)).toBeVisible()
     await expect
@@ -49,7 +47,7 @@ describe('X post', () => {
         'href',
         'https://x.com/example/status/1234567890123456789',
       )
-    expect(element.shadowRoot).toBeNull()
+    expect(element.shadowRoot).not.toBeNull()
     expect(element.hasAttribute('data')).toBe(false)
     if (server.browser === 'webkit' && navigator.platform.includes('Mac')) {
       await userEvent.keyboard('{Alt>}{Tab}{/Alt}')
@@ -73,14 +71,18 @@ describe('X post', () => {
     const element = mount('First')
     await expect.element(post.getByText('First')).toBeVisible()
     element.data = createPost('Second')
-    expect(element.textContent).not.toContain('First')
+    expect(
+      element.shadowRoot!.querySelector('[data-root]')!.textContent,
+    ).not.toContain('First')
     await expect.element(post.getByText('Second')).toBeVisible()
     element.data = createPost('Late')
     element.data = null
     await expect
       .element(post.getByText('This post is unavailable.'))
       .toBeVisible()
-    expect(element.textContent).not.toContain('Late')
+    expect(
+      element.shadowRoot!.querySelector('[data-root]')!.textContent,
+    ).not.toContain('Late')
   })
 
   it('shows invalid input and recovers with a valid snapshot', async () => {
@@ -102,7 +104,7 @@ describe('X post', () => {
   it('handles schema defaults without inventing attribution', async () => {
     const element = mount()
     Reflect.set(element, 'data', { id: '123', author: {} })
-    await expect.element(post).toHaveTextContent('')
+    await expect.element(post.getByRole('paragraph')).toHaveTextContent('')
     await expect.element(post.getByRole('link')).not.toBeInTheDocument()
   })
 
@@ -123,7 +125,7 @@ describe('X post', () => {
     await expect
       .element(post.getByText('This post is unavailable.'))
       .toBeVisible()
-    expect(element.children.length).toBe(2)
+    expect(element.children.length).toBe(1)
   })
 
   it('reuses only the direct marked container and replaces server content', async () => {
@@ -138,13 +140,13 @@ describe('X post', () => {
     element.data = createPost('Saved snapshot')
     document.body.append(element)
     await expect.element(post.getByText('Saved snapshot')).toBeVisible()
-    expect(element.querySelector(':scope > [data-root]')).toBe(container)
-    expect(element.children.length).toBe(2)
+    expect(element.shadowRoot!.querySelector('[data-root]')).toBe(container)
+    expect(element.children.length).toBe(1)
     expect(container.textContent).not.toContain('Server fallback')
     expect(annotation.textContent).toBe('Host annotation')
     element.data = createPost('Updated snapshot')
     await expect.element(post.getByText('Updated snapshot')).toBeVisible()
-    expect(element.querySelector(':scope > [data-root]')).toBe(container)
+    expect(element.shadowRoot!.querySelector('[data-root]')).toBe(container)
   })
 
   it('shows a themed fallback for missing data without logging an error', async () => {
@@ -155,7 +157,7 @@ describe('X post', () => {
     await expect
       .element(post.getByText('This post is unavailable.'))
       .toBeVisible()
-    expect(element.querySelector('[data-fallback]')).not.toBeNull()
+    expect(element.shadowRoot!.querySelector('[data-fallback]')).not.toBeNull()
     expect(error).not.toHaveBeenCalled()
   })
 
@@ -167,13 +169,13 @@ describe('X post', () => {
     const element = mount('First  second')
     wrapper.append(element)
     await expect.element(post.getByText('First second')).toBeVisible()
-    const content = element.querySelector('[data-text]')
-    const root = element.querySelector('[data-root]')
+    const content = element.shadowRoot!.querySelector('[data-text]')
+    const root = element.shadowRoot!.querySelector('[data-root]')
     if (!content || !root) throw new Error('Missing rendered post parts')
     expect(getComputedStyle(content).whiteSpace).toBe('pre-wrap')
     expect(getComputedStyle(root).padding).toBe('24px')
     expect(getComputedStyle(content).color).toBe('rgb(12, 34, 56)')
-    expect(element.querySelector('[style]')).toBeNull()
+    expect(element.shadowRoot!.querySelector('[style]')).toBeNull()
   })
 
   it('keeps instances independent and registration idempotent', async () => {
@@ -284,7 +286,7 @@ describe('X post fetch', () => {
     const element = mountRemote(resolver)
     await expect.element(post.getByText('Loading this post…')).toBeVisible()
     expect(
-      element.querySelector('[data-fallback][data-pending]'),
+      element.shadowRoot!.querySelector('[data-fallback][data-pending]'),
     ).not.toBeNull()
     resolve(createPost('Fetched'))
     await expect.element(post.getByText('Fetched')).toBeVisible()
@@ -295,8 +297,12 @@ describe('X post fetch', () => {
 
   it('renders a synchronous result without a pending state', async () => {
     const element = mountRemote(() => createPost('Sync'))
-    expect(element.textContent).toContain('Sync')
-    expect(element.textContent).not.toContain('Loading')
+    expect(
+      element.shadowRoot!.querySelector('[data-root]')!.textContent,
+    ).toContain('Sync')
+    expect(
+      element.shadowRoot!.querySelector('[data-root]')!.textContent,
+    ).not.toContain('Loading')
     await expect.element(post.getByText('Sync')).toBeVisible()
   })
 
@@ -319,7 +325,7 @@ describe('X post fetch', () => {
       '[post-embed] Failed to fetch X post:',
       expect.any(Error),
     )
-    expect(element.querySelector('[data-pending]')).toBeNull()
+    expect(element.shadowRoot!.querySelector('[data-pending]')).toBeNull()
   })
 
   it('rejects a resolver result belonging to another post', async () => {
@@ -340,7 +346,9 @@ describe('X post fetch', () => {
     element.url = 'https://x.com/example/status/2'
     resolvers.get(url)?.(createPost('Stale'))
     await new Promise((resolve) => setTimeout(resolve, 20))
-    expect(element.textContent).not.toContain('Stale')
+    expect(
+      element.shadowRoot!.querySelector('[data-root]')!.textContent,
+    ).not.toContain('Stale')
     await expect.element(post.getByText('Loading this post…')).toBeVisible()
     resolvers.get('https://x.com/example/status/2')?.({
       ...createPost('Fresh'),
