@@ -22,6 +22,7 @@
     "change": "changeset",
     "ci:version": "changeset version && pnpm install --no-frozen-lockfile",
     "ci:publish": "pnpm --filter='./packages/*' publish --access public --no-git-checks --tag latest",
+    "ci:publish:snapshot": "pkg-pr-new publish --pnpm ./packages/elements ./packages/exporter ./packages/schema ./packages/types",
     "size": "pnpm run build:package && size-limit"
   },
   "devDependencies": {
@@ -32,6 +33,7 @@
     "@types/node": "^24.0.0",
     "eslint": "^10.10.0",
     "monorepo-typescript-references": "^1.1.2",
+    "pkg-pr-new": "^0.0.88",
     "prettier": "^3.9.6",
     "prettier-plugin-astro": "^1.0.0",
     "size-limit": "^13.1.1",
