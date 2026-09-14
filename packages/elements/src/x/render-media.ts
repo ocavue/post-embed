@@ -17,7 +17,11 @@ function renderUnavailable(permalink?: string) {
   )
 }
 
-function renderItem(media: XPostMedia, permalink?: string) {
+function renderItem(
+  media: XPostMedia,
+  protocols: readonly string[] | null,
+  permalink?: string,
+) {
   const error = el(
     'div',
     { 'data-media-error': '', hidden: true },
@@ -26,7 +30,7 @@ function renderItem(media: XPostMedia, permalink?: string) {
   )
   let content: HTMLAnchorElement | HTMLVideoElement
   if (media.type === 'photo') {
-    const url = getSafeUrl(media.url)
+    const url = getSafeUrl(media.url, protocols)
     if (media.unavailable || !url) return renderUnavailable(permalink)
     const image = el('img', {
       src: url,
@@ -50,7 +54,7 @@ function renderItem(media: XPostMedia, permalink?: string) {
   } else {
     const sources = media.sources
       .flatMap((source) => {
-        const url = getSafeUrl(source.url)
+        const url = getSafeUrl(source.url, protocols)
         return url ? [{ ...source, url }] : []
       })
       .sort((a, b) => {
@@ -71,7 +75,7 @@ function renderItem(media: XPostMedia, permalink?: string) {
         playsInline: true,
         preload: 'none',
         'aria-label': gif ? 'Animated GIF' : 'Post video',
-        poster: media.poster && getSafeUrl(media.poster),
+        poster: media.poster && getSafeUrl(media.poster, protocols),
         width: dimension(media.width),
         height: dimension(media.height),
         loop: gif,
@@ -103,12 +107,13 @@ function renderItem(media: XPostMedia, permalink?: string) {
 
 export function renderMedia(
   media: XPostMedia[] | undefined,
+  protocols: readonly string[] | null,
   permalink?: string,
 ) {
   if (!media?.length) return
   return el(
     'div',
     { 'data-media': '', 'data-count': String(media.length) },
-    media.map((item) => renderItem(item, permalink)),
+    media.map((item) => renderItem(item, protocols, permalink)),
   )
 }

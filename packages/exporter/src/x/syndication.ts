@@ -5,7 +5,6 @@ import type {
   XPostAuthor,
   XPostBase,
   XPostMedia,
-  XPostVideoSource,
 } from '@post-embed/types'
 import type { MediaDetails } from '@post-embed/types/internal/tweet/media'
 import type { TweetPhoto } from '@post-embed/types/internal/tweet/photo'
@@ -15,6 +14,7 @@ import type { TweetVideo } from '@post-embed/types/internal/tweet/video'
 import { decodeHTML } from 'entities'
 import * as v from 'valibot'
 
+import { toSource } from './media.ts'
 import { toSegments } from './segments.ts'
 
 /**
@@ -67,23 +67,6 @@ function toAuthor(user: TweetUser): XPostAuthor {
 
 function isUnavailable(status: string): boolean {
   return Boolean(status) && status.toLowerCase() !== 'available'
-}
-
-function toSource(
-  url: string,
-  type: string,
-  bitrate?: number,
-): XPostVideoSource | undefined {
-  if (type === 'video/mp4') {
-    return bitrate === undefined ? { url, type } : { url, type, bitrate }
-  }
-  if (
-    type === 'application/x-mpegURL' ||
-    type === 'application/vnd.apple.mpegurl'
-  ) {
-    return { url, type: 'application/x-mpegURL' }
-  }
-  return undefined
 }
 
 function fromMediaDetails(media: MediaDetails): XPostMedia {

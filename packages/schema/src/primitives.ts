@@ -13,3 +13,17 @@ export function looseArray<
 >(item: Item) {
   return v.fallback(v.array(item), getEmptyArray)
 }
+
+export function looseItems<
+  const Item extends v.BaseSchema<unknown, unknown, v.BaseIssue<unknown>>,
+>(item: Item) {
+  return v.pipe(
+    v.fallback(v.array(v.unknown()), () => []),
+    v.transform((items): v.InferOutput<Item>[] => {
+      return items.flatMap((value) => {
+        const result = v.safeParse(item, value)
+        return result.success ? [result.output] : []
+      })
+    }),
+  )
+}

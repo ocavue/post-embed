@@ -42,18 +42,21 @@ function renderEdit(post: XPostBase) {
       : undefined
 }
 
-function renderQuoted(post: XPostBase) {
+function renderQuoted(post: XPostBase, protocols: readonly string[] | null) {
   return el(
     'article',
     { 'data-quoted': '', 'aria-label': 'Quoted post' },
-    renderAuthor(post.author),
+    renderAuthor(post.author, protocols),
     renderBody(post),
-    renderMedia(post.media, getPermalink(post)),
+    renderMedia(post.media, protocols, getPermalink(post)),
     el('footer', { 'data-footer': '' }, renderDate(post), renderEdit(post)),
   )
 }
 
-export function renderPost(post: XPost) {
+export function renderPost(
+  post: XPost,
+  protocols: readonly string[] | null = null,
+) {
   const reply = post.replyTo
   const replyUrl =
     reply && /^\w{1,15}$/.test(reply.handle) && /^\d+$/.test(reply.id)
@@ -62,7 +65,7 @@ export function renderPost(post: XPost) {
   return el(
     'article',
     {},
-    renderAuthor(post.author),
+    renderAuthor(post.author, protocols),
     reply
       ? el(
           'div',
@@ -71,8 +74,8 @@ export function renderPost(post: XPost) {
         )
       : undefined,
     renderBody(post),
-    renderMedia(post.media, getPermalink(post)),
-    post.quote ? renderQuoted(post.quote) : undefined,
+    renderMedia(post.media, protocols, getPermalink(post)),
+    post.quote ? renderQuoted(post.quote, protocols) : undefined,
     el('footer', { 'data-footer': '' }, renderDate(post), renderEdit(post)),
   )
 }

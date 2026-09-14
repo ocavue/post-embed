@@ -4,7 +4,6 @@ import type {
   XPostAuthor,
   XPostBase,
   XPostMedia,
-  XPostVideoSource,
 } from '@post-embed/types'
 import { decodeHTML } from 'entities'
 import * as v from 'valibot'
@@ -16,6 +15,7 @@ import {
   type GraphQLTweet,
   type GraphQLUser,
 } from './graphql.ts'
+import { toSource } from './media.ts'
 import { toSegments } from './segments.ts'
 
 export interface XPostCapture {
@@ -115,24 +115,6 @@ function toAuthor(user: GraphQLUser): XPostAuthor {
   return author
 }
 
-function toSource(
-  variant: NonNullable<
-    NonNullable<GraphQLMedia['video_info']>['variants']
-  >[number],
-): XPostVideoSource | undefined {
-  const url = variant.url
-  if (!url) return undefined
-  if (variant.content_type === 'video/mp4') {
-    return variant.bitrate === undefined
-      ? { url, type: 'video/mp4' }
-      : { url, type: 'video/mp4', bitrate: variant.bitrate }
-  }
-  if (variant.content_type === 'application/x-mpegURL') {
-    return { url, type: 'application/x-mpegURL' }
-  }
-  return undefined
-}
-
 function toMedia(media: GraphQLMedia): XPostMedia {
   const width = media.original_info?.width ?? 0
   const height = media.original_info?.height ?? 0
@@ -154,7 +136,11 @@ function toMedia(media: GraphQLMedia): XPostMedia {
     width,
     height,
     sources: (media.video_info?.variants ?? []).flatMap((variant) => {
-      const source = toSource(variant)
+      const source = toSource(
+        variant.url ?? '',
+        variant.content_type ?? '',
+        variant.bitrate,
+      )
       return source ? [source] : []
     }),
   }

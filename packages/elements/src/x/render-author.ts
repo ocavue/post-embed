@@ -3,11 +3,13 @@ import el from 'crelt'
 
 import { renderLink } from '../render-link.ts'
 import { getSafeUrl } from '../safe-url.ts'
-
-export function renderAuthor(author: XPostAuthor) {
+export function renderAuthor(
+  author: XPostAuthor,
+  protocols: readonly string[] | null,
+) {
   if (!author.name && !author.handle) return
   const validHandle = /^\w{1,15}$/.test(author.handle)
-  const avatar = author.avatar && getSafeUrl(author.avatar)
+  const avatar = author.avatar && getSafeUrl(author.avatar, protocols)
 
   return el(
     'header',

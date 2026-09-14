@@ -28,6 +28,18 @@ afterEach(() => {
 })
 
 describe('X post', () => {
+  it.each(['https://example.com/unrelated', 'https://x.com/other/status/456'])(
+    'renders explicit data without resolving the unrelated URL %s',
+    async (url) => {
+      const element = mount('Explicit snapshot')
+      const resolver = vi.fn()
+      element.resolver = resolver
+      element.url = url
+      await expect.element(post.getByText('Explicit snapshot')).toBeVisible()
+      expect(resolver).not.toHaveBeenCalled()
+    },
+  )
+
   it('renders selectable light DOM text and native attribution links', async () => {
     const element = mount()
     await expect.element(post.getByText(/Hello 😀/)).toBeVisible()
@@ -89,7 +101,7 @@ describe('X post', () => {
 
   it('handles schema defaults without inventing attribution', async () => {
     const element = mount()
-    Reflect.set(element, 'data', { author: {} })
+    Reflect.set(element, 'data', { id: '123', author: {} })
     await expect.element(post).toHaveTextContent('')
     await expect.element(post.getByRole('link')).not.toBeInTheDocument()
   })
@@ -310,6 +322,13 @@ describe('X post fetch', () => {
     expect(element.querySelector('[data-pending]')).toBeNull()
   })
 
+  it('rejects a resolver result belonging to another post', async () => {
+    mountRemote(() => ({ ...createPost('Wrong post'), id: '2' }))
+    await expect
+      .element(post.getByText('This post is unavailable.'))
+      .toBeVisible()
+  })
+
   it('refetches when `url` changes and ignores the stale result', async () => {
     const resolvers = new Map<string, (post: XPost) => void>()
     const element = mountRemote((value) => {
@@ -323,7 +342,10 @@ describe('X post fetch', () => {
     await new Promise((resolve) => setTimeout(resolve, 20))
     expect(element.textContent).not.toContain('Stale')
     await expect.element(post.getByText('Loading this post…')).toBeVisible()
-    resolvers.get('https://x.com/example/status/2')?.(createPost('Fresh'))
+    resolvers.get('https://x.com/example/status/2')?.({
+      ...createPost('Fresh'),
+      id: '2',
+    })
     await expect.element(post.getByText('Fresh')).toBeVisible()
   })
 

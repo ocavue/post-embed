@@ -502,7 +502,9 @@ test('schema definition files and names mirror the type declarations', () => {
           path.endsWith('.ts') &&
           !/\.test(?:-d)?\.ts$/.test(path) &&
           !path.endsWith('/fixtures.ts') &&
-          path !== 'primitives.ts'
+          path !== 'primitives.ts' &&
+          path !== 'x/media.ts' &&
+          path !== 'x/url.ts'
         )
       })
       .sort()
