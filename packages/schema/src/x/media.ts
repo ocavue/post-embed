@@ -17,7 +17,6 @@ export function mapXPostMediaUrls(post: XPost, resolve: ): XPost {
 
 */
 
-
 export function mapXPostMediaUrls(
   post: XPost,
   resolve: (url: string) => string | undefined,
