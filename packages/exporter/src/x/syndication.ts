@@ -1,4 +1,3 @@
-import { toSource } from './media.ts'
 import { TweetSchema } from '@post-embed/schema'
 import type {
   Tweet,
@@ -15,6 +14,7 @@ import type { TweetVideo } from '@post-embed/types/internal/tweet/video'
 import { decodeHTML } from 'entities'
 import * as v from 'valibot'
 
+import { toSource } from './media.ts'
 import { toSegments } from './segments.ts'
 
 /**
@@ -68,7 +68,6 @@ function toAuthor(user: TweetUser): XPostAuthor {
 function isUnavailable(status: string): boolean {
   return Boolean(status) && status.toLowerCase() !== 'available'
 }
-
 
 function fromMediaDetails(media: MediaDetails): XPostMedia {
   const unavailable = isUnavailable(media.ext_media_availability.status)

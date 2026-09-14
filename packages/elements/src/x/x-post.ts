@@ -6,7 +6,11 @@ import {
   useEffect as useHostEffect,
 } from '@aria-ui/core'
 import { XPostSchema } from '@post-embed/schema'
-import { parseXPostId, type XMediaUrlPolicy, type XPost as XPostSnapshot } from '@post-embed/types'
+import {
+  parseXPostId,
+  type XMediaUrlPolicy,
+  type XPost as XPostSnapshot,
+} from '@post-embed/types'
 import el from 'crelt'
 
 import { type FetchProps, useFetch } from '../fetch.ts'
@@ -24,13 +28,16 @@ export interface XPostElement extends HTMLElement, XPostProps {}
 
 /** @internal */
 export function useXPost(host: HostElement, props: State<XPostProps>): void {
-  const { fetched, pending } = useFetch(host, props, 'X post', () => props.revision.get())
+  const { fetched, pending } = useFetch(host, props, 'X post', () =>
+    props.revision.get(),
+  )
 
   let renderedUrl: string | null = null
   let renderedPolicy: XMediaUrlPolicy | null = null
   let renderedResolver: XPostProps['resolver'] = null
   useHostEffect(host, () => () => {
-    for (const video of getRootContainer(host).querySelectorAll('video')) video.pause()
+    for (const video of getRootContainer(host).querySelectorAll('video'))
+      video.pause()
   })
 
   useHostEffect(host, () => {
@@ -51,21 +58,30 @@ export function useXPost(host: HostElement, props: State<XPostProps>): void {
     const value = result && !result.issues ? result.value : undefined
     const valid = value && (!url || parseXPostId(url) === value.id)
     const resolver = props.resolver.get()
-    const sameSource = renderedUrl === url && renderedPolicy === policy && renderedResolver === resolver
+    const sameSource =
+      renderedUrl === url &&
+      renderedPolicy === policy &&
+      renderedResolver === resolver
     if (pending.get() && sameSource && container.querySelector('video')) return
     renderedUrl = url
     renderedPolicy = policy
     renderedResolver = resolver
-    const next = valid ? renderPost(value, policy) : renderFallback(pending.get())
+    const next = valid
+      ? renderPost(value, policy)
+      : renderFallback(pending.get())
     const previousVideos = new Map<string, HTMLVideoElement>()
     for (const video of container.querySelectorAll('video')) {
       if (video.dataset.loadFailed) continue
-      const key = Array.from(video.querySelectorAll('source')).map((source) => source.src).join('|')
+      const key = Array.from(video.querySelectorAll('source'))
+        .map((source) => source.src)
+        .join('|')
       if (key) previousVideos.set(key, video)
     }
     const resume: HTMLVideoElement[] = []
     for (const video of next.querySelectorAll('video')) {
-      const key = Array.from(video.querySelectorAll('source')).map((source) => source.src).join('|')
+      const key = Array.from(video.querySelectorAll('source'))
+        .map((source) => source.src)
+        .join('|')
       const previous = sameSource ? previousVideos.get(key) : undefined
       if (previous) {
         if (!previous.paused) resume.push(previous)

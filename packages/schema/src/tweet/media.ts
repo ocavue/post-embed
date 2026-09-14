@@ -1,6 +1,11 @@
 import * as v from 'valibot'
 
-import { NumberSchema, StringSchema, looseArray, looseItems } from '../primitives.ts'
+import {
+  NumberSchema,
+  StringSchema,
+  looseArray,
+  looseItems,
+} from '../primitives.ts'
 
 import { IndicesSchema } from './entities.ts'
 

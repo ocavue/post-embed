@@ -9,7 +9,11 @@ import {
 
 export const XPostSegmentSchema = v.variant('type', [
   v.looseObject({ type: v.literal('text'), text: StringSchema }),
-  v.looseObject({ type: v.literal('link'), text: StringSchema, url: StringSchema }),
+  v.looseObject({
+    type: v.literal('link'),
+    text: StringSchema,
+    url: StringSchema,
+  }),
 ])
 
 export const XPostVideoSourceSchema = v.looseObject({
@@ -61,5 +65,10 @@ export const XPostBaseSchema = v.looseObject({
 export const XPostSchema = v.looseObject({
   ...XPostBaseSchema.entries,
   quote: v.optional(v.fallback(XPostBaseSchema, undefined)),
-  replyTo: v.optional(v.looseObject({ handle: StringSchema, id: v.pipe(v.string(), v.regex(/^[1-9]\d{0,19}$/)) })),
+  replyTo: v.optional(
+    v.looseObject({
+      handle: StringSchema,
+      id: v.pipe(v.string(), v.regex(/^[1-9]\d{0,19}$/)),
+    }),
+  ),
 })

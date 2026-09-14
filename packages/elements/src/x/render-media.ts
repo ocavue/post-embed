@@ -2,6 +2,7 @@ import type { XPostMedia, XMediaUrlPolicy } from '@post-embed/types'
 import el from 'crelt'
 
 import { renderLink } from '../render-link.ts'
+
 import { getMediaUrl } from './media-url.ts'
 
 function dimension(value: number): number | undefined {
@@ -17,7 +18,11 @@ function renderUnavailable(permalink?: string) {
   )
 }
 
-function renderItem(media: XPostMedia, policy: XMediaUrlPolicy | null, permalink?: string) {
+function renderItem(
+  media: XPostMedia,
+  policy: XMediaUrlPolicy | null,
+  permalink?: string,
+) {
   const error = el(
     'div',
     { 'data-media-error': '', hidden: true },

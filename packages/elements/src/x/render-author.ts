@@ -2,9 +2,13 @@ import type { XPostAuthor, XMediaUrlPolicy } from '@post-embed/types'
 import el from 'crelt'
 
 import { renderLink } from '../render-link.ts'
+
 import { getMediaUrl } from './media-url.ts'
 
-export function renderAuthor(author: XPostAuthor, policy: XMediaUrlPolicy | null) {
+export function renderAuthor(
+  author: XPostAuthor,
+  policy: XMediaUrlPolicy | null,
+) {
   if (!author.name && !author.handle) return
   const validHandle = /^\w{1,15}$/.test(author.handle)
   const avatar = author.avatar && getMediaUrl(author.avatar, 'img', policy)

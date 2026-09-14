@@ -1,4 +1,3 @@
-import { toSource } from './media.ts'
 import { XPostSchema } from '@post-embed/schema'
 import type {
   XPost,
@@ -16,6 +15,7 @@ import {
   type GraphQLTweet,
   type GraphQLUser,
 } from './graphql.ts'
+import { toSource } from './media.ts'
 import { toSegments } from './segments.ts'
 
 export interface XPostCapture {
@@ -115,7 +115,6 @@ function toAuthor(user: GraphQLUser): XPostAuthor {
   return author
 }
 
-
 function toMedia(media: GraphQLMedia): XPostMedia {
   const width = media.original_info?.width ?? 0
   const height = media.original_info?.height ?? 0
@@ -137,7 +136,11 @@ function toMedia(media: GraphQLMedia): XPostMedia {
     width,
     height,
     sources: (media.video_info?.variants ?? []).flatMap((variant) => {
-      const source = toSource(variant.url ?? '', variant.content_type ?? '', variant.bitrate)
+      const source = toSource(
+        variant.url ?? '',
+        variant.content_type ?? '',
+        variant.bitrate,
+      )
       return source ? [source] : []
     }),
   }
