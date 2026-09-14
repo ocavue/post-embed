@@ -53,15 +53,7 @@ export function addMediaSnapshot(post: XPost, name: string): void {
     }
   }
   if (name === 'reply') post.replyTo = { handle: 'example', id: '987654321' }
-  if (name === 'verified') {
-    post.author.verified = 'business'
-    post.author.avatarShape = 'square'
-    post.author.label = {
-      text: 'Post Embed',
-      badge: asset('photo-2.svg'),
-      url: 'https://github.com/ocavue/post-embed',
-    }
-  }
+  if (name === 'square-avatar') post.author.avatarShape = 'square'
   if (name === 'edited') post.edit = 'edited'
   if (name === 'stale-edit') post.edit = 'stale'
   if (name === 'truncated') post.truncated = true

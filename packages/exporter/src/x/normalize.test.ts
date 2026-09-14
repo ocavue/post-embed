@@ -52,7 +52,6 @@ describe('toXPost', () => {
         name: 'Ada Example',
         handle: 'ada',
         avatar: 'https://pbs.twimg.com/profile_images/11/ada_normal.jpg',
-        verified: 'blue',
       },
       body: [
         { type: 'text', text: 'Reading responses with ' },
@@ -70,7 +69,6 @@ describe('toXPost', () => {
       name: 'Legacy Shape',
       handle: 'legacy',
       avatar: 'https://pbs.twimg.com/profile_images/12/legacy_normal.jpg',
-      verified: 'business',
     })
     expect(post.body).toEqual([{ type: 'text', text: 'Quoting with video' }])
     expect(post.media).toEqual([
@@ -106,7 +104,6 @@ describe('toXPost', () => {
         name: 'Ada Example',
         handle: 'ada',
         avatar: 'https://pbs.twimg.com/profile_images/11/ada_normal.jpg',
-        verified: 'blue',
       },
       body: [{ type: 'text', text: 'Quoted photo' }],
       media: [
@@ -121,7 +118,7 @@ describe('toXPost', () => {
     })
   })
 
-  it('reports a protected author and maps the affiliation label', () => {
+  it('reports a protected author', () => {
     const capture = toXPost(findTweet(homeTimeline, '1000000000000000005'))!
     expect(capture.protected).toBe(true)
     expect(capture.post.author).toEqual({
@@ -129,12 +126,6 @@ describe('toXPost', () => {
       handle: 'protected',
       avatar: 'https://pbs.twimg.com/profile_images/13/protected_normal.jpg',
       avatarShape: 'square',
-      verified: 'government',
-      label: {
-        text: 'Example Org',
-        badge: 'https://pbs.twimg.com/profile_images/badge_bigger.jpg',
-        url: 'https://x.com/exampleorg',
-      },
     })
   })
 

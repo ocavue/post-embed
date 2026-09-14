@@ -62,16 +62,6 @@ function toAuthor(user: TweetUser): XPostAuthor {
   if (user.profile_image_url_https) author.avatar = user.profile_image_url_https
   if (user.profile_image_shape === 'Square') author.avatarShape = 'square'
   if (user.profile_image_shape === 'Hexagon') author.avatarShape = 'hexagon'
-  if (user.verified_type === 'Business') author.verified = 'business'
-  else if (user.verified_type === 'Government') author.verified = 'government'
-  else if (user.is_blue_verified) author.verified = 'blue'
-  else if (user.verified) author.verified = 'legacy'
-  const label = user.highlighted_label
-  if (label) {
-    author.label = { text: decodeHTML(label.description ?? '') }
-    if (label.badge?.url) author.label.badge = label.badge.url
-    if (label.url?.url) author.label.url = label.url.url
-  }
   return author
 }
 

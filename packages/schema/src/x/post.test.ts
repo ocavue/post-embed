@@ -38,25 +38,33 @@ describe('XPostSchema', () => {
   test('defaults enums without adding members', async () => {
     const post = await parse({
       ...minimal,
-      author: { avatarShape: 'triangle', verified: 'gold' },
+      author: { avatarShape: 'triangle' },
       edit: 'maybe',
     })
     expect(post.author.avatarShape).toBeUndefined()
-    expect(post.author.verified).toBeUndefined()
     expect(post.edit).toBeUndefined()
   })
 
   test('keeps valid enums', async () => {
     const post = await parse({
       ...minimal,
-      author: { avatarShape: 'hexagon', verified: 'government' },
+      author: { avatarShape: 'hexagon' },
       edit: 'stale',
     })
-    expect(post.author).toMatchObject({
-      avatarShape: 'hexagon',
-      verified: 'government',
-    })
+    expect(post.author).toMatchObject({ avatarShape: 'hexagon' })
     expect(post.edit).toBe('stale')
+  })
+
+  test('drops the verified and label fields of older snapshots', async () => {
+    const post = await parse({
+      ...minimal,
+      author: {
+        verified: 'blue',
+        label: { text: 'Square', badge: 'https://example.com/badge.jpg' },
+      },
+    })
+    expect(post.author).not.toHaveProperty('verified')
+    expect(post.author).not.toHaveProperty('label')
   })
 
   test('selects segment and media variants by type', async () => {

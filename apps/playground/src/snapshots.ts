@@ -35,7 +35,7 @@ export type Snapshot =
   | 'broken-media'
   | 'quote'
   | 'reply'
-  | 'verified'
+  | 'square-avatar'
   | 'edited'
   | 'stale-edit'
   | 'truncated'

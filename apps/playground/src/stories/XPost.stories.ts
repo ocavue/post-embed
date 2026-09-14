@@ -39,7 +39,9 @@ export const BrokenMedia = {
 }
 export const Quote = { args: { snapshot: 'quote' } satisfies Props }
 export const Reply = { args: { snapshot: 'reply' } satisfies Props }
-export const Verified = { args: { snapshot: 'verified' } satisfies Props }
+export const SquareAvatar = {
+  args: { snapshot: 'square-avatar' } satisfies Props,
+}
 export const Edited = { args: { snapshot: 'edited' } satisfies Props }
 export const StaleEdit = { args: { snapshot: 'stale-edit' } satisfies Props }
 export const Truncated = { args: { snapshot: 'truncated' } satisfies Props }
