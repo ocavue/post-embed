@@ -11,4 +11,4 @@ declare global {
   }
 }
 
-export type { UrlMapper } from '@post-embed/types'
+export type { MediaUrlResolver } from '@post-embed/types'

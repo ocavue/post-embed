@@ -18,9 +18,7 @@ export const XPostSegmentSchema = v.variant('type', [
 
 export const XPostVideoSourceSchema = v.object({
   url: StringSchema,
-  // FIXME: WHY DO WE ONLY ALLOW THESE TWO MIME TYPES? How did you know that these are the only two MIME types that exist? For example, is it
-  // something you learned from react-tweet lib? if you cannot knonw that hese are the only two MIME types that exist, let's allow any MIME type.
-  type: v.picklist(['video/mp4', 'application/x-mpegURL']),
+  type: v.string(),
   bitrate: v.optional(NumberSchema),
 })
 

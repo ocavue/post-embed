@@ -18,7 +18,7 @@ export function toSource(
       : label === 'application/x-mpegurl' ||
           label === 'application/vnd.apple.mpegurl'
         ? 'application/x-mpegURL'
-        : undefined
+        : label
   if (!type) return
   return {
     url,

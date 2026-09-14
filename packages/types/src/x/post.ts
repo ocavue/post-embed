@@ -76,6 +76,6 @@ export type XPostMedia =
 
 export interface XPostVideoSource {
   url: string
-  type: 'video/mp4' | 'application/x-mpegURL'
+  type: string
   bitrate?: number | undefined
 }

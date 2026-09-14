@@ -1,10 +1,10 @@
-import type { UrlMapper } from '@post-embed/types'
+import type { MediaUrlResolver } from '@post-embed/types'
 
 import { getSafeUrl } from '../safe-url.ts'
 
 export function getMediaUrl(
   url: string,
-  policy: UrlMapper | null,
+  resolve: MediaUrlResolver | null,
 ): string | undefined {
-  return policy ? policy(url) : getSafeUrl(url)
+  return resolve?.(url) || getSafeUrl(url)
 }

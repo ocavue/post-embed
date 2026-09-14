@@ -1,36 +1,30 @@
-import type { XPost, XPostBase, XPostMedia } from './post.js'
+import type { XPost, XPostBase } from './post.js'
 
-export type UrlMapper = (url: string) => string | undefined
+export type MediaUrlResolver = (url: string) => string | undefined
 
-export function mapXPostMediaUrls(post: XPost, map: UrlMapper): XPost {
+export function mapXPostMediaUrls(
+  post: XPost,
+  resolve: MediaUrlResolver,
+): XPost {
+  const url = (source: string): string => resolve(source) || source
   function mapBase(entry: XPostBase): XPostBase {
     const author = { ...entry.author }
-    if (author.avatar) {
-      const avatar = map(author.avatar)
-      if (avatar) author.avatar = avatar
-      else delete author.avatar
-    }
+    if (author.avatar) author.avatar = url(author.avatar)
     const result: XPostBase = { ...entry, author }
-    if (entry.media)
-      result.media = entry.media.flatMap((media): XPostMedia[] => {
-        if (media.type === 'photo') {
-          const url = map(media.url)
-          return url ? [{ ...media, url }] : []
-        }
+    if (entry.media) {
+      result.media = entry.media.map((media) => {
+        if (media.type === 'photo') return { ...media, url: url(media.url) }
         const next = {
           ...media,
-          sources: media.sources.flatMap((source) => {
-            const url = map(source.url)
-            return url ? [{ ...source, url }] : []
-          }),
+          sources: media.sources.map((source) => ({
+            ...source,
+            url: url(source.url),
+          })),
         }
-        if (media.poster) {
-          const poster = map(media.poster)
-          if (poster) next.poster = poster
-          else delete next.poster
-        }
-        return [next]
+        if (media.poster) next.poster = url(media.poster)
+        return next
       })
+    }
     return result
   }
   return {
@@ -39,6 +33,7 @@ export function mapXPostMediaUrls(post: XPost, map: UrlMapper): XPost {
     ...(post.quote ? { quote: mapBase(post.quote) } : {}),
   }
 }
+
 export function getXPostMediaUrls(post: XPost): string[] {
   const result: string[] = []
   mapXPostMediaUrls(post, (url) => {

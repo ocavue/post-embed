@@ -1,4 +1,4 @@
-import type { XPost, XPostBase, UrlMapper } from '@post-embed/types'
+import type { XPost, XPostBase, MediaUrlResolver } from '@post-embed/types'
 import el from 'crelt'
 
 import { renderLink } from '../render-link.ts'
@@ -42,7 +42,7 @@ function renderEdit(post: XPostBase) {
       : undefined
 }
 
-function renderQuoted(post: XPostBase, policy: UrlMapper | null) {
+function renderQuoted(post: XPostBase, policy: MediaUrlResolver | null) {
   return el(
     'article',
     { 'data-quoted': '', 'aria-label': 'Quoted post' },
@@ -53,7 +53,8 @@ function renderQuoted(post: XPostBase, policy: UrlMapper | null) {
   )
 }
 
-export function renderPost(post: XPost, policy: UrlMapper | null = null) {
+// FIXME: I do not want to see the word "policy" in all your 3 PRs. just use "mapper" or "resolver". Notice that you should only pick one of "mapper" or "resolver" and use it consistently across all your 3 PRs.
+export function renderPost(post: XPost, policy: MediaUrlResolver | null = null) {
   const reply = post.replyTo
   const replyUrl =
     reply && /^\w{1,15}$/.test(reply.handle) && /^\d+$/.test(reply.id)
