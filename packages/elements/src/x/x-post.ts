@@ -27,6 +27,10 @@ export interface XPostElement extends HTMLElement, XPostProps {}
 export function useXPost(host: HostElement, props: State<XPostProps>): void {
   const { fetched, pending } = useFetch(host, props, 'X post')
 
+  // FIXME: this unmount-only effect plus the `video.pause()` loop inside the render effect below
+  // re-implement what the original `return () => { pause all videos }` cleanup of the render effect
+  // did in one place (a cleanup runs before every re-run and on unmount). Restore the cleanup
+  // return and delete both.
   useHostEffect(host, () => () => {
     for (const video of getRootContainer(host).querySelectorAll('video'))
       video.pause()

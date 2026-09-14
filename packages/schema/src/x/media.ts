@@ -31,6 +31,8 @@ export function mapXPostMediaUrls(
   }
 }
 
+// FIXME: unused. No caller in post-embed, meowdown or reflect-open (Rust derives the URL list
+// itself in `media_urls`). Delete it and its export from index.ts.
 export function getXPostMediaUrls(post: XPost): string[] {
   const result: string[] = []
   mapXPostMediaUrls(post, (url) => {
