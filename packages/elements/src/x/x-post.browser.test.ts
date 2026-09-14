@@ -54,9 +54,9 @@ describe('X post', () => {
     } else {
       await userEvent.tab()
     }
-    await expect
-      .element(post.getByRole('link', { name: '@example' }))
-      .toHaveFocus()
+    expect(element.shadowRoot?.activeElement).toBe(
+      post.getByRole('link', { name: '@example' }).element(),
+    )
   })
 
   it('renders markup and character references as literal text', async () => {
