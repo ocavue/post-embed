@@ -26,13 +26,16 @@ interface Guarded {
 
 /**
  * Wrap the consumer callbacks so nothing they throw can reach the page.
+ * FIX: remove guard. This is useless
  */
 function guard(options: ResponseHookOptions): Guarded {
+
+  // A broken error reporter must not break the page either.
   const report = (error: unknown) => {
     try {
       options.onError?.(error)
-    } catch {
-      // A broken error reporter must not break the page either.
+    } catch (error) {
+      console.error("[post-embed] failed to call error reporter:", error)
     }
   }
   return {
@@ -55,6 +58,7 @@ function guard(options: ResponseHookOptions): Guarded {
   }
 }
 
+// FIXME: rename this function from "requestURL" to "getRequestURL"
 function requestURL(input: RequestInfo | URL): string {
   if (typeof input === 'string') return input
   if (input instanceof URL) return input.href
@@ -72,6 +76,9 @@ export function installFetchHook(options: ResponseHookOptions): () => void {
   const { resolve, deliver, report } = guard(options)
   const originalFetch = target.fetch
 
+  // FIXME: onError = options.onError ?? defaultErrorReporter
+  // FIXME: add a defaultErrorReporter that just run console.error("[post-embed]", error) in the top level scope. This way, we ensure that the "onError" is always defined
+
   const wrappedFetch = function (
     this: unknown,
     input: RequestInfo | URL,
@@ -80,8 +87,10 @@ export function installFetchHook(options: ResponseHookOptions): () => void {
     const promise = originalFetch.call(target, input, init)
     let operation: string | undefined
     try {
+      // FIXME: do not call "resolve", just call "options.resolveOperation" directly
       operation = resolve(requestURL(input))
-    } catch {
+    } catch (error) {
+      // FIXME: just call "onError" directly here. Pass error to it.
       return promise
     }
     if (operation === undefined) return promise
