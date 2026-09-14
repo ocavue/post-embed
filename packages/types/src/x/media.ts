@@ -1,4 +1,7 @@
 import type { XPost, XPostBase, XPostMedia } from './post.js'
+
+
+// FIXME: I do not like the name "XMediaUrlPolicy". let's call it UrlResolver or UrlMapper instead.
 export type XMediaUrlPolicy = (url: string) => string | undefined
 
 export function mapXPostMediaUrls(post: XPost, map: XMediaUrlPolicy): XPost {
