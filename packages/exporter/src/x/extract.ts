@@ -23,7 +23,10 @@ export function extractTweetResults(root: unknown): GraphQLTweet[] {
 
     if (Array.isArray(node)) {
       for (let index = node.length - 1; index >= 0; index--) {
-        stack.push(node[index])
+        const child: unknown = node[index]
+        if (child) {
+          stack.push(node[index])
+        }
       }
       continue
     }
