@@ -48,6 +48,7 @@
     display: block;
     font: inherit;
     color: var(--post-embed-color, inherit);
+    text-decoration-skip-ink: none;
 
     :where([data-root]) {
       position: relative;
