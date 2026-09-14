@@ -48,11 +48,13 @@ export function useFetch<T>(
   host: HostElement,
   props: State<FetchProps<T>>,
   label: string,
+  readRevision?: () => string | number | null,
 ): FetchState<T> {
   const fetched = createSignal<T | null>(null)
   const pending = createSignal(false)
 
   useHostEffect(host, () => {
+    readRevision?.()
     const url = props.url.get()
     const resolver = props.resolver.get()
     fetched.set(null)

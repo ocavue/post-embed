@@ -10,3 +10,5 @@ declare global {
     'post-embed-x-post': XPostElement
   }
 }
+
+export type { XMediaUrlPolicy } from '@post-embed/types'

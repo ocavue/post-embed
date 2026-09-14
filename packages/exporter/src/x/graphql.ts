@@ -1,3 +1,4 @@
+import { looseItems } from '@post-embed/schema'
 import * as v from 'valibot'
 
 /**
@@ -63,7 +64,7 @@ export const GraphQLMediaSchema = v.looseObject({
       aspect_ratio: v.optional(v.array(v.number())),
       duration_millis: v.optional(v.number()),
       variants: v.optional(
-        v.array(
+        looseItems(
           v.looseObject({
             bitrate: v.optional(v.number()),
             content_type: text,
@@ -85,7 +86,7 @@ export const GraphQLEntitiesSchema = v.looseObject({
     ),
   ),
   symbols: v.optional(v.array(v.looseObject({ indices, text }))),
-  media: v.optional(v.array(GraphQLMediaSchema)),
+  media: v.optional(looseItems(GraphQLMediaSchema)),
 })
 
 export const GraphQLHighlightedLabelSchema = v.looseObject({
@@ -144,7 +145,7 @@ export const GraphQLTweetLegacySchema = v.looseObject({
   display_text_range: indices,
   entities: v.optional(GraphQLEntitiesSchema),
   extended_entities: v.optional(
-    v.looseObject({ media: v.optional(v.array(GraphQLMediaSchema)) }),
+    v.looseObject({ media: v.optional(looseItems(GraphQLMediaSchema)) }),
   ),
   favorite_count: v.optional(v.number()),
   full_text: text,

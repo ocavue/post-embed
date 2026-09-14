@@ -25,7 +25,7 @@ export interface VideoInfo {
   aspect_ratio: [number, number]
   variants: {
     bitrate?: number
-    content_type: 'video/mp4' | 'application/x-mpegURL'
+    content_type: string
     url: string
   }[]
 }

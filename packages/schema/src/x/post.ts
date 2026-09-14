@@ -4,25 +4,22 @@ import {
   BooleanSchema,
   NumberSchema,
   StringSchema,
-  looseArray,
+  looseItems,
 } from '../primitives.ts'
 
 export const XPostSegmentSchema = v.variant('type', [
-  v.object({ type: v.literal('text'), text: StringSchema }),
-  v.object({ type: v.literal('link'), text: StringSchema, url: StringSchema }),
+  v.looseObject({ type: v.literal('text'), text: StringSchema }),
+  v.looseObject({ type: v.literal('link'), text: StringSchema, url: StringSchema }),
 ])
 
-export const XPostVideoSourceSchema = v.object({
+export const XPostVideoSourceSchema = v.looseObject({
   url: StringSchema,
-  type: v.fallback(
-    v.picklist(['video/mp4', 'application/x-mpegURL']),
-    'video/mp4',
-  ),
+  type: v.picklist(['video/mp4', 'application/x-mpegURL']),
   bitrate: v.optional(NumberSchema),
 })
 
 export const XPostMediaSchema = v.variant('type', [
-  v.object({
+  v.looseObject({
     type: v.literal('photo'),
     url: StringSchema,
     width: NumberSchema,
@@ -30,17 +27,17 @@ export const XPostMediaSchema = v.variant('type', [
     alt: v.optional(StringSchema),
     unavailable: v.optional(BooleanSchema),
   }),
-  v.object({
+  v.looseObject({
     type: v.picklist(['video', 'gif']),
     poster: v.optional(StringSchema),
     width: NumberSchema,
     height: NumberSchema,
-    sources: looseArray(XPostVideoSourceSchema),
+    sources: looseItems(XPostVideoSourceSchema),
     unavailable: v.optional(BooleanSchema),
   }),
 ])
 
-export const XPostAuthorSchema = v.object({
+export const XPostAuthorSchema = v.looseObject({
   name: StringSchema,
   handle: StringSchema,
   avatar: v.optional(StringSchema),
@@ -50,19 +47,19 @@ export const XPostAuthorSchema = v.object({
   ),
 })
 
-export const XPostBaseSchema = v.object({
-  id: StringSchema,
+export const XPostBaseSchema = v.looseObject({
+  id: v.pipe(v.string(), v.regex(/^[1-9]\d{0,19}$/)),
   createdAt: StringSchema,
   lang: v.optional(StringSchema),
   author: XPostAuthorSchema,
-  body: looseArray(XPostSegmentSchema),
-  media: v.optional(looseArray(XPostMediaSchema)),
+  body: looseItems(XPostSegmentSchema),
+  media: v.optional(looseItems(XPostMediaSchema)),
   edit: v.fallback(v.optional(v.picklist(['edited', 'stale'])), undefined),
   truncated: v.optional(BooleanSchema),
 })
 
-export const XPostSchema = v.object({
+export const XPostSchema = v.looseObject({
   ...XPostBaseSchema.entries,
-  quote: v.optional(XPostBaseSchema),
-  replyTo: v.optional(v.object({ handle: StringSchema, id: StringSchema })),
+  quote: v.optional(v.fallback(XPostBaseSchema, undefined)),
+  replyTo: v.optional(v.looseObject({ handle: StringSchema, id: v.pipe(v.string(), v.regex(/^[1-9]\d{0,19}$/)) })),
 })

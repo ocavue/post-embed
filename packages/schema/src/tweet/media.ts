@@ -1,6 +1,6 @@
 import * as v from 'valibot'
 
-import { NumberSchema, StringSchema, looseArray } from '../primitives.ts'
+import { NumberSchema, StringSchema, looseArray, looseItems } from '../primitives.ts'
 
 import { IndicesSchema } from './entities.ts'
 
@@ -28,13 +28,10 @@ export const VideoInfoSchema = v.object({
     v.tuple([NumberSchema, NumberSchema]),
     () => [1, 1] satisfies [number, number],
   ),
-  variants: looseArray(
+  variants: looseItems(
     v.object({
       bitrate: v.optional(NumberSchema),
-      content_type: v.fallback(
-        v.picklist(['video/mp4', 'application/x-mpegURL']),
-        'video/mp4',
-      ),
+      content_type: v.string(),
       url: StringSchema,
     }),
   ),

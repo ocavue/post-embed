@@ -4,7 +4,7 @@ import {
   BooleanSchema,
   NumberSchema,
   StringSchema,
-  looseArray,
+  looseItems,
 } from '../primitives.ts'
 
 import { TweetEditControlSchema } from './edit.ts'
@@ -40,7 +40,7 @@ export const QuotedTweetSchema = v.object({
   reply_count: NumberSchema,
   retweet_count: NumberSchema,
   favorite_count: NumberSchema,
-  mediaDetails: v.optional(looseArray(MediaDetailsSchema)),
+  mediaDetails: v.optional(looseItems(MediaDetailsSchema)),
   self_thread: v.object({ id_str: StringSchema }),
 })
 
@@ -48,8 +48,8 @@ export const TweetSchema = v.object({
   ...TweetBaseSchema.entries,
   __typename: v.fallback(v.literal('Tweet'), 'Tweet'),
   favorite_count: NumberSchema,
-  mediaDetails: v.optional(looseArray(MediaDetailsSchema)),
-  photos: v.optional(looseArray(TweetPhotoSchema)),
+  mediaDetails: v.optional(looseItems(MediaDetailsSchema)),
+  photos: v.optional(looseItems(TweetPhotoSchema)),
   video: v.optional(TweetVideoSchema),
   conversation_count: NumberSchema,
   news_action_type: v.fallback(v.literal('conversation'), 'conversation'),
