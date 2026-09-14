@@ -1,4 +1,4 @@
-import type { XPostMedia, XMediaUrlPolicy } from '@post-embed/types'
+import type { XPostMedia, UrlMapper } from '@post-embed/types'
 import el from 'crelt'
 
 import { renderLink } from '../render-link.ts'
@@ -20,7 +20,7 @@ function renderUnavailable(permalink?: string) {
 
 function renderItem(
   media: XPostMedia,
-  policy: XMediaUrlPolicy | null,
+  policy: UrlMapper | null,
   permalink?: string,
 ) {
   const error = el(
@@ -117,7 +117,7 @@ function renderItem(
 
 export function renderMedia(
   media: XPostMedia[] | undefined,
-  policy: XMediaUrlPolicy | null,
+  policy: UrlMapper | null,
   permalink?: string,
 ) {
   if (!media?.length) return

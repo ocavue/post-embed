@@ -11,4 +11,4 @@ declare global {
   }
 }
 
-export type { XMediaUrlPolicy } from '@post-embed/types'
+export type { UrlMapper } from '@post-embed/types'

@@ -1,4 +1,4 @@
-import type { XPostAuthor, XMediaUrlPolicy } from '@post-embed/types'
+import type { XPostAuthor, UrlMapper } from '@post-embed/types'
 import el from 'crelt'
 
 import { renderLink } from '../render-link.ts'
@@ -7,7 +7,7 @@ import { getMediaUrl } from './media-url.ts'
 
 export function renderAuthor(
   author: XPostAuthor,
-  policy: XMediaUrlPolicy | null,
+  policy: UrlMapper | null,
 ) {
   if (!author.name && !author.handle) return
   const validHandle = /^\w{1,15}$/.test(author.handle)

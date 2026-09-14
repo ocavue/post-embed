@@ -1,4 +1,4 @@
-import type { XPost, XPostBase, XMediaUrlPolicy } from '@post-embed/types'
+import type { XPost, XPostBase, UrlMapper } from '@post-embed/types'
 import el from 'crelt'
 
 import { renderLink } from '../render-link.ts'
@@ -42,7 +42,7 @@ function renderEdit(post: XPostBase) {
       : undefined
 }
 
-function renderQuoted(post: XPostBase, policy: XMediaUrlPolicy | null) {
+function renderQuoted(post: XPostBase, policy: UrlMapper | null) {
   return el(
     'article',
     { 'data-quoted': '', 'aria-label': 'Quoted post' },
@@ -53,7 +53,7 @@ function renderQuoted(post: XPostBase, policy: XMediaUrlPolicy | null) {
   )
 }
 
-export function renderPost(post: XPost, policy: XMediaUrlPolicy | null = null) {
+export function renderPost(post: XPost, policy: UrlMapper | null = null) {
   const reply = post.replyTo
   const replyUrl =
     reply && /^\w{1,15}$/.test(reply.handle) && /^\d+$/.test(reply.id)

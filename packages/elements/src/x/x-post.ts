@@ -8,7 +8,7 @@ import {
 import { XPostSchema } from '@post-embed/schema'
 import {
   parseXPostId,
-  type XMediaUrlPolicy,
+  type UrlMapper,
   type XPost as XPostSnapshot,
 } from '@post-embed/types'
 import el from 'crelt'
@@ -20,7 +20,7 @@ import { assumeNotPromise } from '../utils.ts'
 import { renderPost } from './render-post.ts'
 
 export interface XPostProps extends FetchProps<XPostSnapshot> {
-  mediaUrlPolicy: XMediaUrlPolicy | null
+  mediaUrlMapper: UrlMapper | null
   revision: string | number | null
 }
 
@@ -33,7 +33,7 @@ export function useXPost(host: HostElement, props: State<XPostProps>): void {
   })
 
   let renderedUrl: string | null = null
-  let renderedPolicy: XMediaUrlPolicy | null = null
+  let renderedPolicy: UrlMapper | null = null
   let renderedResolver: XPostProps['resolver'] = null
   useHostEffect(host, () => () => {
     for (const video of getRootContainer(host).querySelectorAll('video'))
@@ -53,7 +53,7 @@ export function useXPost(host: HostElement, props: State<XPostProps>): void {
       console.error('[post-embed] Invalid X post data:', result.issues)
     }
 
-    const policy = props.mediaUrlPolicy.get()
+    const policy = props.mediaUrlMapper.get()
     const url = props.url.get()
     const value = result && !result.issues ? result.value : undefined
     const valid = value && (!url || parseXPostId(url) === value.id)
@@ -126,7 +126,7 @@ export const XPost = defineCustomElement(
     data: { default: null, attribute: false },
     url: { default: null, attribute: false },
     resolver: { default: null, attribute: false },
-    mediaUrlPolicy: { default: null, attribute: false },
+    mediaUrlMapper: { default: null, attribute: false },
     revision: { default: null, attribute: false },
   }),
 )
