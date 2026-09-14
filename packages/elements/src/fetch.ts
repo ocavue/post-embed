@@ -29,6 +29,10 @@ export interface FetchProps<T> {
   /**
    * Changes invalidate the resolved data even when the URL stays the same.
    */
+  // FIXME: `revision` exists only so a host can force a refetch of the same URL; the only host
+  // (reflect `XPostResolverHost`) is dropping that mechanism, see the FIXME at the top of
+  // reflect-open `apps/desktop/src/editor/use-x-post-resolver.ts`. Delete `revision` from
+  // `XPostProps`/`FetchProps`, the read in `useFetch`, and the matching browser test.
   revision: string | number | null
 }
 

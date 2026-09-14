@@ -17,6 +17,7 @@ import { renderPost } from './render-post.ts'
 
 export interface XPostProps extends FetchProps<XPostSnapshot> {
   mediaUrlProtocols: readonly string[] | null
+  // FIXME: goes away with `FetchProps.revision`, see fetch.ts.
   revision: string | number | null
 }
 
