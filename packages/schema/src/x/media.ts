@@ -1,5 +1,23 @@
 import type { XPost, XPostBase } from '@post-embed/types'
 
+/*
+
+
+FIXME this mapXPostMediaUrls is too complex. I want to split it into smaller internal top-level functions. for example
+
+type Mapper = (url: string) => string
+
+function mapXPostAuthor(entry: XPostAuthor, mapper: Mapper): XPostAuthor { ... }
+function mapXPostMedia(entry: XPostMedia, mapper: Mapper): XPostMedia {...}
+function mapXPostBase(entry: XPostBase, mapper: Mapper): XPostBase { ... }
+export function mapXPostMediaUrls(post: XPost, resolve: ): XPost {
+  const mapper: Mapper = (url) => resolve(url) || url
+  return ...
+}
+
+*/
+
+
 export function mapXPostMediaUrls(
   post: XPost,
   resolve: (url: string) => string | undefined,
