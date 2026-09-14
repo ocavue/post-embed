@@ -36,7 +36,7 @@ export const VideoInfoSchema = v.object({
   variants: looseItems(
     v.object({
       bitrate: v.optional(NumberSchema),
-      content_type: v.string(),
+      content_type: v.picklist(['video/mp4', 'application/x-mpegURL']),
       url: StringSchema,
     }),
   ),

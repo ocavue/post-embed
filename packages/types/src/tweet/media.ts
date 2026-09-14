@@ -25,8 +25,7 @@ export interface VideoInfo {
   aspect_ratio: [number, number]
   variants: {
     bitrate?: number
-    // Ensure that this file matches the upsteam https://github.com/vercel/react-tweet/blob/react-tweet@3.3.1/packages/react-tweet/src/api/types/media.ts. Since the upstream type here is content_type: 'video/mp4' | 'application/x-mpegURL', we should also use this FIXME
-    content_type: string
+    content_type: 'video/mp4' | 'application/x-mpegURL'
     url: string
   }[]
 }

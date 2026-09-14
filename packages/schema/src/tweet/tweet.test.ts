@@ -422,7 +422,7 @@ describe('union selection', () => {
     expect(tweet.entities?.hashtags).toEqual([])
   })
 
-  test('preserves source MIME strings for normalization', async () => {
+  test('keeps supported sources beside an unsupported MIME type', async () => {
     const tweet = await parse(TweetSchema, {
       ...minimal,
       mediaDetails: [
@@ -440,10 +440,7 @@ describe('union selection', () => {
     })
     expect(tweet.mediaDetails?.[0]).toMatchObject({
       video_info: {
-        variants: [
-          { content_type: 'application/x-mpegURL', url: 'hls' },
-          { content_type: 'unknown', url: '' },
-        ],
+        variants: [{ content_type: 'application/x-mpegURL', url: 'hls' }],
       },
     })
   })
