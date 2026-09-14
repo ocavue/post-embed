@@ -4,7 +4,7 @@ import el from 'crelt'
 import { renderLink } from '../render-link.ts'
 
 import { getMediaUrl } from './media-url.ts'
-
+// FIXME: fix the git conflict here
 <<<<<<< HEAD
 export function renderAuthor(
   author: XPostAuthor,
