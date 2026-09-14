@@ -1,8 +1,9 @@
 import { isObject } from '@ocavue/utils'
+
 import type { GraphQLTweet } from './graphql.ts'
 import { unwrapTweetResult } from './normalize.ts'
 
-const MAX_VISITED_NODES = 200_000
+const MAX_VISITED_NODES = 500_000
 
 /**
  * Every tweet object anywhere in a GraphQL response, deduplicated by
