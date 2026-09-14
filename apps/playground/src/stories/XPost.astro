@@ -11,22 +11,20 @@ const { snapshot, remote = false, dark = false, narrow = false } = Astro.props
 ---
 
 <post-embed-demo data-snapshot={snapshot} class:list={[{ dark, narrow }]}>
-  {
-    remote && (
-      <form>
-        <label>
-          Post URL or ID
-          <input
-            name="url"
-            type="text"
-            value="https://x.com/jack/status/20"
-            spellcheck="false"
-          />
-        </label>
-        <button type="submit">Load</button>
-      </form>
-    )
-  }
+  {remote && (
+    <form>
+      <label>
+        Post URL or ID
+        <input
+          name="url"
+          type="text"
+          value="https://x.com/jack/status/20"
+          spellcheck="false"
+        />
+      </label>
+      <button type="submit">Load</button>
+    </form>
+  )}
   <p data-status role="status"></p>
   <nav aria-label="Debug controls">
     <button data-action="clear">Clear</button>
@@ -36,7 +34,10 @@ const { snapshot, remote = false, dark = false, narrow = false } = Astro.props
     <button data-action="theme">Toggle dark theme</button>
   </nav>
   <div data-preview></div>
-  <details><summary>Raw snapshot</summary><pre></pre></details>
+  <details>
+    <summary>Raw snapshot</summary>
+    <pre></pre>
+  </details>
 </post-embed-demo>
 
 <script>

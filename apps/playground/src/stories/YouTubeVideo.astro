@@ -22,22 +22,20 @@ const {
   data-inline={inline ? '' : undefined}
   class:list={[{ dark, narrow }]}
 >
-  {
-    remote && (
-      <form>
-        <label>
-          Video URL
-          <input
-            name="url"
-            type="text"
-            value="https://www.youtube.com/watch?v=aqz-KE-bpKQ"
-            spellcheck="false"
-          />
-        </label>
-        <button type="submit">Load</button>
-      </form>
-    )
-  }
+  {remote && (
+    <form>
+      <label>
+        Video URL
+        <input
+          name="url"
+          type="text"
+          value="https://www.youtube.com/watch?v=aqz-KE-bpKQ"
+          spellcheck="false"
+        />
+      </label>
+      <button type="submit">Load</button>
+    </form>
+  )}
   <p data-status role="status"></p>
   <nav aria-label="Debug controls">
     <button data-action="clear">Clear</button>
@@ -47,7 +45,10 @@ const {
     <button data-action="theme">Toggle dark theme</button>
   </nav>
   <div data-preview></div>
-  <details><summary>Raw snapshot</summary><pre></pre></details>
+  <details>
+    <summary>Raw snapshot</summary>
+    <pre></pre>
+  </details>
 </post-embed-youtube-demo>
 
 <script>

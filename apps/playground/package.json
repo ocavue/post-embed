@@ -15,7 +15,7 @@
   },
   "devDependencies": {
     "@post-embed/types": "workspace:*",
-    "astro": "^7.3.1",
+    "astro": "^7.3.2",
     "astrobook": "^0.13.3",
     "typescript": "^6.0.3"
   }
