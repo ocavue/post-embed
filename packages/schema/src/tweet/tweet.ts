@@ -40,6 +40,10 @@ export const QuotedTweetSchema = v.object({
   reply_count: NumberSchema,
   retweet_count: NumberSchema,
   favorite_count: NumberSchema,
+  // FIXME: switching the legacy `TweetSchema` (and `VideoInfoSchema.content_type` in
+  // tweet/media.ts) from `looseArray`/fallback to `looseItems`/strict is unrelated to host media
+  // resolution and changes `fromSyndication` output for malformed inputs. It may well be a good
+  // fix, but it belongs in its own PR with its own changeset line.
   mediaDetails: v.optional(looseItems(MediaDetailsSchema)),
   self_thread: v.object({ id_str: StringSchema }),
 })

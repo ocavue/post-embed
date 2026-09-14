@@ -52,6 +52,10 @@ export const XPostAuthorSchema = v.object({
 })
 
 export const XPostBaseSchema = v.object({
+  // FIXME: `/^[1-9]\d{0,19}$/` is written here twice, in types/x/url.ts, in reflect core
+  // `postIdSchema` and `x-archive/schema.ts`, in the extension's `x-capture-messages.ts` and
+  // `background.ts`, and as `valid_id` in Rust. Export one `XPostIdSchema` (or the regex) from this
+  // package and reuse it.
   id: v.pipe(v.string(), v.regex(/^[1-9]\d{0,19}$/)),
   createdAt: StringSchema,
   lang: v.optional(StringSchema),

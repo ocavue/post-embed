@@ -1,4 +1,10 @@
 import type { XPostVideoSource } from '@post-embed/types'
+// FIXME: (1) the https/username/password check is new and duplicates `getSafeUrl` at render time
+// plus reflect's archive validation; the two `toSource`s it replaced validated nothing and nothing
+// needed it. (2) Passing arbitrary MIME types through (`: label`) widened `XPostVideoSource.type`
+// from a picklist to `string`, which in turn forced `createArchivedPost`/`parseArchivedPost` in
+// reflect to filter by string compare. X only serves `video/mp4` and HLS; keep the picklist and
+// drop the webm test.
 export function toSource(
   url: string,
   mime: string,

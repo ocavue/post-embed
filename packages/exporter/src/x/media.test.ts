@@ -3,6 +3,9 @@ import { expect, it } from 'vitest'
 
 import { toSource } from './media.ts'
 
+// FIXME: this test exercises `mapXPostMediaUrls` from `@post-embed/types`, not anything in the
+// exporter; move it next to that function. The webm test below goes away with the picklist (see
+// media.ts).
 it('keeps source URLs when a resolver has no replacement', () => {
   const post: XPost = {
     id: '123',

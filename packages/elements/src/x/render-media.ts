@@ -35,6 +35,8 @@ function renderItem(
     if (media.unavailable || !url) return renderUnavailable(permalink)
     const image = el('img', {
       src: url,
+      // FIXME: unrelated behaviour change (default alt was 'Post image'); revert here or move to
+      // its own PR.
       alt: media.alt ?? '',
       width: dimension(media.width),
       height: dimension(media.height),
@@ -106,6 +108,10 @@ function renderItem(
     content = video
   }
   const item = el('div', { 'data-media-item': '' }, content, error)
+  // FIXME: the 'Retry media' button and `dataset.loadFailed` exist only because reflect's protocol
+  // handler can give up (503) after 30s while the download is still running. The host already bumps
+  // `revision` when a resource changes state, so the card re-renders on its own; drop the manual
+  // retry UI.
   const retry = el('button', { type: 'button' }, 'Retry media')
   retry.addEventListener('click', () => {
     if (content instanceof HTMLVideoElement) content.pause()

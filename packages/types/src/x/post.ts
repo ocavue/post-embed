@@ -74,6 +74,8 @@ export type XPostMedia =
       unavailable?: boolean | undefined
     }
 
+// FIXME: `type: string` widening is unnecessary; X serves only `video/mp4` and
+// `application/x-mpegURL`. See exporter/src/x/media.ts.
 export interface XPostVideoSource {
   url: string
   type: string

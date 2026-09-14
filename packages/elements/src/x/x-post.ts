@@ -32,6 +32,13 @@ export function useXPost(host: HostElement, props: State<XPostProps>): void {
     return props.revision.get()
   })
 
+  // FIXME: ~35 lines (`renderedUrl`/`renderedMediaResolver`/`renderedResolver`, the early return
+  // while pending, the `previousVideos` map, `resume`, `dataset.loadFailed`) exist to keep a
+  // playing <video> alive across a refetch. A refetch only re-renders a playing video with an
+  // unchanged src when a *sibling* resource of the same post finished downloading; restarting the
+  // video in that edge case is acceptable. Delete all of it and `container.replaceChildren(next)`.
+  // If the real concern is a flash of the pending fallback during a refetch, keep the old children
+  // while `pending` (one line) instead.
   let renderedUrl: string | null = null
   let renderedMediaResolver: MediaUrlResolver | null = null
   let renderedResolver: XPostProps['resolver'] = null
@@ -56,6 +63,10 @@ export function useXPost(host: HostElement, props: State<XPostProps>): void {
     const mediaResolver = props.resolveMediaUrl.get()
     const url = props.url.get()
     const value = result && !result.issues ? result.value : undefined
+    // FIXME: this is the one id check worth keeping (the element is the trust boundary). The same
+    // check is repeated in meowdown `checkedXPostResolver`, in meowdown `defaultResolveXPost`
+    // (`post?.id === id`), in reflect `XPostHost`, `lookupCapturedPost`, `saveXPost`,
+    // `parseArchivedPost`, and Rust `read_post`/`put_capture`. Delete the duplicates.
     const valid = value && (!url || parseXPostId(url) === value.id)
     const resolver = props.resolver.get()
     const sameSource =

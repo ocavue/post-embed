@@ -48,6 +48,8 @@ export function useFetch<T>(
   host: HostElement,
   props: State<FetchProps<T>>,
   label: string,
+  // FIXME: a callback parameter just to read one signal. Add `revision?: State<...>` to
+  // `FetchProps` (YouTube can leave it null) and read `props.revision?.get()` here.
   readRevision?: () => string | number | null,
 ): FetchState<T> {
   const fetched = createSignal<T | null>(null)
