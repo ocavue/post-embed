@@ -19,11 +19,11 @@ export function looseItems<
 >(item: Item) {
   return v.pipe(
     v.fallback(v.array(v.unknown()), () => []),
-    v.transform((items): v.InferOutput<Item>[] =>
-      items.flatMap((value) => {
+    v.transform((items): v.InferOutput<Item>[] => {
+      return items.flatMap((value) => {
         const result = v.safeParse(item, value)
         return result.success ? [result.output] : []
-      }),
-    ),
+      })
+    }),
   )
 }

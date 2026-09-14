@@ -28,9 +28,9 @@ export interface XPostElement extends HTMLElement, XPostProps {}
 
 /** @internal */
 export function useXPost(host: HostElement, props: State<XPostProps>): void {
-  const { fetched, pending } = useFetch(host, props, 'X post', () =>
-    props.revision.get(),
-  )
+  const { fetched, pending } = useFetch(host, props, 'X post', () => {
+    return props.revision.get()
+  })
 
   let renderedUrl: string | null = null
   let renderedPolicy: XMediaUrlPolicy | null = null
