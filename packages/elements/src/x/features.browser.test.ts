@@ -1,5 +1,3 @@
-import './theme.css'
-
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 import { page } from 'vitest/browser'
 
@@ -31,7 +29,7 @@ describe('Full post snapshots', () => {
     const element = mount(snapshot)
     await expect.element(post.getByText('Four pictures')).toBeVisible()
     const images =
-      element.querySelectorAll<HTMLImageElement>('[data-media] img')
+      element.shadowRoot!.querySelectorAll<HTMLImageElement>('[data-media] img')
     expect(images).toHaveLength(4)
     expect(images[0].alt).toBe('Blue illustrated mountains')
     expect(images[0].closest('a')?.href).toBe(images[0].src)
@@ -45,7 +43,7 @@ describe('Full post snapshots', () => {
     await expect
       .element(post.getByText('Hello 😀', { exact: false }))
       .toBeVisible()
-    const videos = element.querySelectorAll('video')
+    const videos = element.shadowRoot!.querySelectorAll('video')
     expect(videos).toHaveLength(2)
     expect(videos[0].querySelector('source')?.src).toBe(
       'https://example.com/high.mp4',
@@ -63,7 +61,7 @@ describe('Full post snapshots', () => {
     snapshot.media = [createPhoto()]
     element.data = { ...snapshot }
     document.body.append(element)
-    expect(element.querySelector('video')).toBeNull()
+    expect(element.shadowRoot!.querySelector('video')).toBeNull()
   })
 
   it('renders quotes, reply context, and long-post links', async () => {
@@ -96,7 +94,7 @@ describe('Full post snapshots', () => {
     snapshot.author.avatarShape = 'square'
     snapshot.edit = 'edited'
     const element = mount(snapshot)
-    expect(element.querySelector('time')?.dateTime).toBe(
+    expect(element.shadowRoot!.querySelector('time')?.dateTime).toBe(
       '2026-09-10T00:00:00.000Z',
     )
     await expect
@@ -106,7 +104,9 @@ describe('Full post snapshots', () => {
     await expect
       .element(post.getByRole('link', { name: /Follow|Like|Reply|Read|on X/ }))
       .not.toBeInTheDocument()
-    expect(element.textContent).not.toMatch(/on X/)
+    expect(
+      element.shadowRoot!.querySelector('[data-root]')!.textContent,
+    ).not.toMatch(/on X/)
   })
 
   it('links an earlier version of an edited post to the latest one', async () => {
@@ -129,11 +129,16 @@ describe('Full post snapshots', () => {
       { ...createVideo(), sources: [] },
     ]
     const element = mount(snapshot)
-    expect(element.querySelector('[data-media] img, video, time')).toBeNull()
-    expect(element.querySelectorAll('[data-media-unavailable]')).toHaveLength(2)
+    expect(
+      element.shadowRoot!.querySelector('[data-media] img, video, time'),
+    ).toBeNull()
+    expect(
+      element.shadowRoot!.querySelectorAll('[data-media-unavailable]'),
+    ).toHaveLength(2)
     snapshot.media = [createPhoto()]
     element.data = { ...snapshot }
-    const image = element.querySelector<HTMLImageElement>('[data-media] img')!
+    const image =
+      element.shadowRoot!.querySelector<HTMLImageElement>('[data-media] img')!
     image.dispatchEvent(new Event('error'))
     await expect
       .element(post.getByText('Media could not be loaded.', { exact: false }))
@@ -144,8 +149,12 @@ describe('Full post snapshots', () => {
     const snapshot = createPost()
     snapshot.media = [{ ...createPhoto(), unavailable: true }, createPhoto()]
     const element = mount(snapshot)
-    expect(element.querySelectorAll('[data-media-unavailable]')).toHaveLength(1)
-    expect(element.querySelectorAll('[data-media] img')).toHaveLength(1)
+    expect(
+      element.shadowRoot!.querySelectorAll('[data-media-unavailable]'),
+    ).toHaveLength(1)
+    expect(
+      element.shadowRoot!.querySelectorAll('[data-media] img'),
+    ).toHaveLength(1)
   })
 
   it('handles video source errors', async () => {
@@ -158,13 +167,17 @@ describe('Full post snapshots', () => {
       },
     ]
     const element = mount(snapshot)
-    expect(element.querySelectorAll('[data-media-item]')).toHaveLength(2)
-    element.querySelector('source')!.dispatchEvent(new Event('error'))
+    expect(
+      element.shadowRoot!.querySelectorAll('[data-media-item]'),
+    ).toHaveLength(2)
+    element
+      .shadowRoot!.querySelector('source')!
+      .dispatchEvent(new Event('error'))
     await expect
       .element(
         post.getByText('Media could not be loaded.', { exact: false }).nth(1),
       )
       .toBeVisible()
-    expect(element.querySelector('video')?.hidden).toBe(true)
+    expect(element.shadowRoot!.querySelector('video')?.hidden).toBe(true)
   })
 })

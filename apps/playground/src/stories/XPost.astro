@@ -1,5 +1,4 @@
 ---
-import '@post-embed/elements/x/theme.css'
 import type { Snapshot } from '../snapshots.ts'
 interface Props {
   snapshot: Snapshot
@@ -159,6 +158,7 @@ const { snapshot, remote = false, dark = false, narrow = false } = Astro.props
     max-width: 20rem;
   }
   .dark {
+    color-scheme: dark;
     color: #edf4ff;
     background: #172237;
     --post-embed-background: #172237;
