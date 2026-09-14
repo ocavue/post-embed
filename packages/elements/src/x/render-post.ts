@@ -42,19 +42,21 @@ function renderEdit(post: XPostBase) {
       : undefined
 }
 
-function renderQuoted(post: XPostBase, policy: MediaUrlResolver | null) {
+function renderQuoted(post: XPostBase, resolver: MediaUrlResolver | null) {
   return el(
     'article',
     { 'data-quoted': '', 'aria-label': 'Quoted post' },
-    renderAuthor(post.author, policy),
+    renderAuthor(post.author, resolver),
     renderBody(post),
-    renderMedia(post.media, policy, getPermalink(post)),
+    renderMedia(post.media, resolver, getPermalink(post)),
     el('footer', { 'data-footer': '' }, renderDate(post), renderEdit(post)),
   )
 }
 
-// FIXME: I do not want to see the word "policy" in all your 3 PRs. just use "mapper" or "resolver". Notice that you should only pick one of "mapper" or "resolver" and use it consistently across all your 3 PRs.
-export function renderPost(post: XPost, policy: MediaUrlResolver | null = null) {
+export function renderPost(
+  post: XPost,
+  resolver: MediaUrlResolver | null = null,
+) {
   const reply = post.replyTo
   const replyUrl =
     reply && /^\w{1,15}$/.test(reply.handle) && /^\d+$/.test(reply.id)
@@ -63,7 +65,7 @@ export function renderPost(post: XPost, policy: MediaUrlResolver | null = null) 
   return el(
     'article',
     {},
-    renderAuthor(post.author, policy),
+    renderAuthor(post.author, resolver),
     reply
       ? el(
           'div',
@@ -72,8 +74,8 @@ export function renderPost(post: XPost, policy: MediaUrlResolver | null = null) 
         )
       : undefined,
     renderBody(post),
-    renderMedia(post.media, policy, getPermalink(post)),
-    post.quote ? renderQuoted(post.quote, policy) : undefined,
+    renderMedia(post.media, resolver, getPermalink(post)),
+    post.quote ? renderQuoted(post.quote, resolver) : undefined,
     el('footer', { 'data-footer': '' }, renderDate(post), renderEdit(post)),
   )
 }

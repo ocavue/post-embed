@@ -20,7 +20,7 @@ function renderUnavailable(permalink?: string) {
 
 function renderItem(
   media: XPostMedia,
-  policy: MediaUrlResolver | null,
+  resolver: MediaUrlResolver | null,
   permalink?: string,
 ) {
   const error = el(
@@ -31,7 +31,7 @@ function renderItem(
   )
   let content: HTMLAnchorElement | HTMLVideoElement
   if (media.type === 'photo') {
-    const url = getMediaUrl(media.url, policy)
+    const url = getMediaUrl(media.url, resolver)
     if (media.unavailable || !url) return renderUnavailable(permalink)
     const image = el('img', {
       src: url,
@@ -56,7 +56,7 @@ function renderItem(
   } else {
     const sources = media.sources
       .flatMap((source) => {
-        const url = getMediaUrl(source.url, policy)
+        const url = getMediaUrl(source.url, resolver)
         return url ? [{ ...source, url }] : []
       })
       .sort((a, b) => {
@@ -77,7 +77,7 @@ function renderItem(
         playsInline: true,
         preload: 'none',
         'aria-label': gif ? 'Animated GIF' : 'Post video',
-        poster: media.poster && getMediaUrl(media.poster, policy),
+        poster: media.poster && getMediaUrl(media.poster, resolver),
         width: dimension(media.width),
         height: dimension(media.height),
         loop: gif,
@@ -109,7 +109,7 @@ function renderItem(
   const retry = el('button', { type: 'button' }, 'Retry media')
   retry.addEventListener('click', () => {
     if (content instanceof HTMLVideoElement) content.pause()
-    item.replaceWith(renderItem(media, policy, permalink))
+    item.replaceWith(renderItem(media, resolver, permalink))
   })
   error.append(retry)
   return item
@@ -117,13 +117,13 @@ function renderItem(
 
 export function renderMedia(
   media: XPostMedia[] | undefined,
-  policy: MediaUrlResolver | null,
+  resolver: MediaUrlResolver | null,
   permalink?: string,
 ) {
   if (!media?.length) return
   return el(
     'div',
     { 'data-media': '', 'data-count': String(media.length) },
-    media.map((item) => renderItem(item, policy, permalink)),
+    media.map((item) => renderItem(item, resolver, permalink)),
   )
 }

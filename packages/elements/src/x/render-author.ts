@@ -4,18 +4,13 @@ import el from 'crelt'
 import { renderLink } from '../render-link.ts'
 
 import { getMediaUrl } from './media-url.ts'
-// FIXME: fix the git conflict here
-<<<<<<< HEAD
 export function renderAuthor(
   author: XPostAuthor,
-  policy: MediaUrlResolver | null,
+  resolver: MediaUrlResolver | null,
 ) {
-=======
-export function renderAuthor(author: XPostAuthor, policy: UrlMapper | null) {
->>>>>>> 04acdfebf3baab99554e77c4c20cf0ceb03413bb
   if (!author.name && !author.handle) return
   const validHandle = /^\w{1,15}$/.test(author.handle)
-  const avatar = author.avatar && getMediaUrl(author.avatar, policy)
+  const avatar = author.avatar && getMediaUrl(author.avatar, resolver)
 
   return el(
     'header',

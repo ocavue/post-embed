@@ -144,6 +144,7 @@ describe('fromSyndication', () => {
         sources: [
           { url: 'https://v.example/a.m3u8', type: 'application/x-mpegURL' },
           { url: 'https://v.example/a.mp4', type: 'video/mp4' },
+          { url: 'https://v.example/a.webm', type: 'video/webm' },
         ],
       },
     ])

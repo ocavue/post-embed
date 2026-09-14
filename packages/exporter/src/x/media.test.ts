@@ -31,9 +31,9 @@ it('keeps source URLs when a resolver has no replacement', () => {
   }
   expect(mapXPostMediaUrls(post, () => undefined)).toEqual(post)
   expect(mapXPostMediaUrls(post, () => '')).toEqual(post)
-  const mapped = mapXPostMediaUrls(post, (url) =>
-    url.endsWith('/photo.png') ? 'reflect-asset://photo' : undefined,
-  )
+  const mapped = mapXPostMediaUrls(post, (url) => {
+    return url.endsWith('/photo.png') ? 'reflect-asset://photo' : undefined
+  })
   expect(mapped.media?.[0]).toMatchObject({ url: 'reflect-asset://photo' })
   expect(mapped.media?.[1]).toEqual(post.media?.[1])
   expect(post.media?.[0]).toMatchObject({

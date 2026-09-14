@@ -33,7 +33,7 @@ export function useXPost(host: HostElement, props: State<XPostProps>): void {
   })
 
   let renderedUrl: string | null = null
-  let renderedPolicy: MediaUrlResolver | null = null
+  let renderedMediaResolver: MediaUrlResolver | null = null
   let renderedResolver: XPostProps['resolver'] = null
   useHostEffect(host, () => () => {
     for (const video of getRootContainer(host).querySelectorAll('video'))
@@ -53,21 +53,21 @@ export function useXPost(host: HostElement, props: State<XPostProps>): void {
       console.error('[post-embed] Invalid X post data:', result.issues)
     }
 
-    const policy = props.resolveMediaUrl.get()
+    const mediaResolver = props.resolveMediaUrl.get()
     const url = props.url.get()
     const value = result && !result.issues ? result.value : undefined
     const valid = value && (!url || parseXPostId(url) === value.id)
     const resolver = props.resolver.get()
     const sameSource =
       renderedUrl === url &&
-      renderedPolicy === policy &&
+      renderedMediaResolver === mediaResolver &&
       renderedResolver === resolver
     if (pending.get() && sameSource && container.querySelector('video')) return
     renderedUrl = url
-    renderedPolicy = policy
+    renderedMediaResolver = mediaResolver
     renderedResolver = resolver
     const next = valid
-      ? renderPost(value, policy)
+      ? renderPost(value, mediaResolver)
       : renderFallback(pending.get())
     const previousVideos = new Map<string, HTMLVideoElement>()
     for (const video of container.querySelectorAll('video')) {
