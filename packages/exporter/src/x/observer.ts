@@ -27,7 +27,7 @@ export interface XObserverOptions {
    */
   resolveOperation?: (url: string) => string | undefined
   /**
-   * Oldest entries are evicted past this many. Default 200.
+   * Oldest entries are evicted past this many. Default 300.
    */
   capacity?: number
   /**
@@ -60,7 +60,7 @@ export interface XObserver {
  */
 export function observeXTweets(options: XObserverOptions = {}): XObserver {
   const target = options.target ?? globalThis
-  const capacity = options.capacity ?? 200 // FIXME: set it from 200 to 300
+  const capacity = options.capacity ?? 300
   const entries = createLRU<string, XTweetEntry>({ max: capacity })
   const listeners = new Set<(entry: XTweetEntry) => void>()
 
