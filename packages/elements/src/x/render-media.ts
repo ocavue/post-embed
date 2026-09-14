@@ -34,7 +34,6 @@ function renderItem(
     if (media.unavailable || !url) return renderUnavailable(permalink)
     const image = el('img', {
       src: url,
-
       alt: media.alt || 'Post image',
       width: dimension(media.width),
       height: dimension(media.height),
