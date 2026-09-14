@@ -91,7 +91,7 @@ describe('Full post snapshots', () => {
       .toBeVisible()
   })
 
-  it('renders UTC dates and edits without engagement controls', async () => {
+  it('renders dates and edits without engagement controls', async () => {
     const snapshot = createPost()
     snapshot.author.avatarShape = 'square'
     snapshot.edit = 'edited'

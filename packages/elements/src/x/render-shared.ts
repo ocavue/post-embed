@@ -20,12 +20,10 @@ export function renderDate(
     el(
       'time',
       { datetime: date.toISOString() },
-      new Intl.DateTimeFormat('en', {
+      new Intl.DateTimeFormat(undefined, {
         dateStyle: 'medium',
         timeStyle: 'short',
-        timeZone: 'UTC',
       }).format(date),
-      ' UTC',
     ),
     getPermalink(post),
   )
