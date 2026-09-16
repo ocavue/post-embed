@@ -8,6 +8,16 @@ function dimension(value: number): number | undefined {
   return Number.isFinite(value) && value > 0 ? Math.round(value) : undefined
 }
 
+function sizeAttrs(media: { width: number; height: number }) {
+  const width = dimension(media.width)
+  const height = dimension(media.height)
+  return {
+    width,
+    height,
+    style: width && height ? `--_ratio: ${width} / ${height}` : undefined,
+  }
+}
+
 function renderUnavailable(permalink?: string) {
   return el(
     'div',
@@ -35,8 +45,7 @@ function renderItem(
     const image = el('img', {
       src: url,
       alt: media.alt || 'Post image',
-      width: dimension(media.width),
-      height: dimension(media.height),
+      ...sizeAttrs(media),
       loading: 'lazy',
       decoding: 'async',
       referrerpolicy: 'no-referrer',
@@ -76,8 +85,7 @@ function renderItem(
         preload: 'none',
         'aria-label': gif ? 'Animated GIF' : 'Post video',
         poster: media.poster && getSafeUrl(media.poster, protocols),
-        width: dimension(media.width),
-        height: dimension(media.height),
+        ...sizeAttrs(media),
         loop: gif,
       },
       sources,

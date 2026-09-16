@@ -198,6 +198,7 @@
     display: block;
     width: 100%;
     height: auto;
+    aspect-ratio: var(--_ratio, auto);
     max-height: 32rem;
     object-fit: contain;
     background: var(--_tint);
