@@ -18,6 +18,17 @@ function sizeAttrs(media: { width: number; height: number }) {
   }
 }
 
+function getOrientation(media: { width: number; height: number }) {
+  const width = dimension(media.width)
+  const height = dimension(media.height)
+  if (!width || !height) return
+  return height > width * 1.1
+    ? 'portrait'
+    : width > height * 1.1
+      ? 'landscape'
+      : 'square'
+}
+
 function renderUnavailable(permalink?: string) {
   return el(
     'div',
@@ -110,7 +121,12 @@ function renderItem(
     }
     content = video
   }
-  return el('div', { 'data-media-item': '' }, content, error)
+  return el(
+    'div',
+    { 'data-media-item': '', 'data-orientation': getOrientation(media) },
+    content,
+    error,
+  )
 }
 
 export function renderMedia(
