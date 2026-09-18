@@ -38,6 +38,20 @@ describe('Full post snapshots', () => {
     await expect.poll(() => images[0].naturalWidth).toBe(640)
   })
 
+  it('reserves the media aspect ratio before the image loads', () => {
+    const snapshot = createPost()
+    snapshot.media = [
+      { ...createPhoto(), url: 'https://example.invalid/a.jpg' },
+    ]
+    const element = mount(snapshot)
+    element.style.width = '500px'
+    const image = element.querySelector<HTMLImageElement>('[data-media] img')!
+    expect(image.complete && image.naturalWidth > 0).toBe(false)
+    const box = image.getBoundingClientRect()
+    expect(box.width).toBeGreaterThan(0)
+    expect(box.height).toBeCloseTo((box.width * 400) / 640, 0)
+  })
+
   it('uses MP4 before HLS, native controls, and opt-in GIF playback', async () => {
     const snapshot = createPost()
     snapshot.media = [createVideo(), createVideo(true)]
