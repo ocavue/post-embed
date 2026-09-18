@@ -1,5 +1,11 @@
 # @post-embed/elements
 
+## 0.6.1
+
+### Patch Changes
+
+- 0f5ab01: Size the X post card to its content, between 18rem and 28rem, instead of a fixed 28rem.
+
 ## 0.6.0
 
 ### Minor Changes
