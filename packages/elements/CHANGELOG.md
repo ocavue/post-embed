@@ -1,5 +1,15 @@
 # @post-embed/elements
 
+## 0.6.0
+
+### Minor Changes
+
+- 2a65dae: Make the X post card smaller: 28rem wide, tinted instead of bordered, short date in the header, media capped at 20rem, and quoted photos as a thumbnail.
+
+### Patch Changes
+
+- 50161c6: Reserve the aspect ratio of X post media before it loads.
+
 ## 0.5.0
 
 ### Minor Changes
