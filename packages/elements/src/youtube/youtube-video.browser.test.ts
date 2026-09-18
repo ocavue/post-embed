@@ -68,7 +68,9 @@ describe('YouTube video', () => {
       'autoplay',
     )
     expect(element.querySelector('button')).toBeNull()
-    expect(document.activeElement).toBe(element.querySelector('iframe'))
+    await expect
+      .poll(() => document.activeElement)
+      .toBe(element.querySelector('iframe'))
     await expect
       .element(video.getByRole('link', { name: 'Big Buck Bunny' }))
       .toBeVisible()
