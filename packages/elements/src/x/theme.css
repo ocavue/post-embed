@@ -62,11 +62,27 @@
   --_tint: color-mix(in srgb, currentColor 5%, transparent);
 
   display: block;
-  width: 28rem;
-  max-width: 100%;
+  /* As wide as the content, between 18rem and 28rem: a short text post stays
+   * small, while long text and media fill the full width. */
+  width: fit-content;
+  max-width: min(28rem, 100%);
   font: inherit;
   color: var(--post-embed-color, inherit);
   text-decoration-skip-ink: none;
+}
+
+/*
+ * The minimum width. A percentage `min-width` on the host resolves to nothing
+ * inside a shrink-to-fit parent (an inline-block editor wrapper), and a fixed
+ * one overflows a narrow container. A zero-height spacer instead raises the
+ * card's intrinsic width to 18rem and still yields to the host's `max-width`.
+ */
+[data-post-embed='x-post'] [data-root]::before {
+  content: '';
+  display: block;
+  width: calc(18rem - 2 * var(--post-embed-padding, 0.75rem));
+  max-width: 100%;
+  height: 0;
 }
 
 [data-post-embed='x-post'] [data-root] {
