@@ -30,26 +30,28 @@ function renderBody(post: XPostBase) {
 }
 
 function renderEdit(post: XPostBase) {
-  return post.edit === 'stale'
-    ? el(
-        'span',
-        { 'data-edited': '' },
-        'This is an earlier version. ',
-        renderLink('View latest', getPermalink(post)),
-      )
-    : post.edit === 'edited'
-      ? el('span', { 'data-edited': '' }, 'Edited')
-      : undefined
+  const edited =
+    post.edit === 'stale'
+      ? el(
+          'span',
+          { 'data-edited': '' },
+          'This is an earlier version. ',
+          renderLink('View latest', getPermalink(post)),
+        )
+      : post.edit === 'edited'
+        ? el('span', { 'data-edited': '' }, 'Edited')
+        : undefined
+  return edited ? el('footer', { 'data-footer': '' }, edited) : undefined
 }
 
 function renderQuoted(post: XPostBase, protocols: readonly string[] | null) {
   return el(
     'article',
     { 'data-quoted': '', 'aria-label': 'Quoted post' },
-    renderAuthor(post.author, protocols),
+    renderAuthor(post.author, protocols, renderDate(post)),
     renderBody(post),
     renderMedia(post.media, protocols, getPermalink(post)),
-    el('footer', { 'data-footer': '' }, renderDate(post), renderEdit(post)),
+    renderEdit(post),
   )
 }
 
@@ -65,7 +67,7 @@ export function renderPost(
   return el(
     'article',
     {},
-    renderAuthor(post.author, protocols),
+    renderAuthor(post.author, protocols, renderDate(post)),
     reply
       ? el(
           'div',
@@ -76,6 +78,6 @@ export function renderPost(
     renderBody(post),
     renderMedia(post.media, protocols, getPermalink(post)),
     post.quote ? renderQuoted(post.quote, protocols) : undefined,
-    el('footer', { 'data-footer': '' }, renderDate(post), renderEdit(post)),
+    renderEdit(post),
   )
 }

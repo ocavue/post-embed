@@ -11,18 +11,30 @@ export function getPermalink(
     : undefined
 }
 
+/**
+ * The post date as a permalink: month and day, plus the year when it is not
+ * the current one. The full date and time are the tooltip.
+ */
 export function renderDate(
   post: Pick<XPostBase, 'id' | 'author' | 'createdAt'>,
 ) {
   const date = new Date(post.createdAt)
   if (!Number.isFinite(date.getTime())) return
+  const sameYear = date.getFullYear() === new Date().getFullYear()
   return renderLink(
     el(
       'time',
-      { datetime: date.toISOString() },
+      {
+        datetime: date.toISOString(),
+        title: new Intl.DateTimeFormat(undefined, {
+          dateStyle: 'medium',
+          timeStyle: 'short',
+        }).format(date),
+      },
       new Intl.DateTimeFormat(undefined, {
-        dateStyle: 'medium',
-        timeStyle: 'short',
+        month: 'short',
+        day: 'numeric',
+        year: sameYear ? undefined : 'numeric',
       }).format(date),
     ),
     getPermalink(post),
