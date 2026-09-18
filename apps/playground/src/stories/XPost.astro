@@ -27,6 +27,10 @@ const { snapshot, remote = false, dark = false, narrow = false } = Astro.props
   )}
   <p data-status role="status"></p>
   <nav aria-label="Debug controls">
+    <label>
+      Snapshot
+      <select data-snapshot-select></select>
+    </label>
     <button data-action="clear">Clear</button>
     <button data-action="restore">Restore</button>
     <button data-action="update">Replace with plain text</button>
@@ -45,7 +49,11 @@ const { snapshot, remote = false, dark = false, narrow = false } = Astro.props
   import { fromSyndication } from '@post-embed/exporter/x/syndication'
   import type { XPost } from '@post-embed/types'
 
-  import { createSnapshot, type Snapshot } from '../snapshots.ts'
+  import {
+    createSnapshot,
+    SNAPSHOT_NAMES,
+    type Snapshot,
+  } from '../snapshots.ts'
 
   registerXPost()
 
@@ -110,6 +118,16 @@ const { snapshot, remote = false, dark = false, narrow = false } = Astro.props
         if (form) load()
         else update(this.dataset.snapshot as Snapshot)
       }
+      const select = this.querySelector<HTMLSelectElement>(
+        '[data-snapshot-select]',
+      )!
+      for (const name of SNAPSHOT_NAMES) select.append(new Option(name, name))
+      select.value = this.dataset.snapshot!
+      if (form) select.parentElement!.remove()
+      select.addEventListener('change', () => {
+        this.dataset.snapshot = select.value
+        restore()
+      })
       preview.append(element)
       restore()
       form?.addEventListener('submit', (event) => {
