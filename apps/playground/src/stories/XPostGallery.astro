@@ -1,0 +1,288 @@
+---
+import '@post-embed/elements/x/theme.css'
+---
+
+<post-embed-gallery>
+  <header class="gallery-bar">
+    <strong>X post gallery</strong>
+    <span data-total></span>
+    <button type="button" data-action="theme">
+      Light / dark
+    </button>
+    <label>
+      Note font
+      <select data-option="font">
+        <option value="14">14px</option>
+        <option value="16" selected>
+          16px
+        </option>
+        <option value="18">18px</option>
+      </select>
+    </label>
+    <label>
+      Container
+      <select data-option="container">
+        <option value="" selected>
+          wide
+        </option>
+        <option value="20rem">20rem</option>
+        <option value="16rem">16rem</option>
+      </select>
+    </label>
+  </header>
+  <div class="gallery-page" data-page>
+    <section class="gallery-note">
+      <h2>Thursday, September 17th</h2>
+      <p>
+        Saved a few posts while reading this morning. The first one is the
+        vector model everyone is talking about.
+      </p>
+      <div data-slot="note-1"></div>
+      <p>
+        Follow up with Kai about the sync engine write-up, and check whether the
+        quoted numbers hold.
+      </p>
+      <ul>
+        <li>
+          Robotics reading list
+          <div data-slot="note-2"></div>
+        </li>
+        <li>Book the ridge hike for October</li>
+      </ul>
+    </section>
+    <section class="gallery-grid" data-grid-root></section>
+  </div>
+</post-embed-gallery>
+
+<script>
+  import { registerXPost } from '@post-embed/elements/x'
+  import type { XPost } from '@post-embed/types'
+
+  import { createSnapshot, SNAPSHOT_NAMES } from '../snapshots.ts'
+  import { createXSamples } from '../x-samples.ts'
+
+  registerXPost()
+
+  // A custom wrapper initializes the story during Astro client navigation.
+  class PostEmbedGallery extends HTMLElement {
+    connectedCallback() {
+      if (this.dataset.ready) return
+      this.dataset.ready = ''
+      const page = this.querySelector<HTMLElement>('[data-page]')!
+      const grid = this.querySelector<HTMLElement>('[data-grid-root]')!
+      const total = this.querySelector<HTMLElement>('[data-total]')!
+
+      const measure = () => {
+        let sum = 0
+        for (const figure of grid.querySelectorAll('figure')) {
+          const box = figure
+            .querySelector('post-embed-x-post')!
+            .getBoundingClientRect()
+          sum += box.height
+          figure.querySelector('figcaption span')!.textContent =
+            `${Math.round(box.width)} × ${Math.round(box.height)}`
+        }
+        total.textContent = `total height ${Math.round(sum)}px`
+      }
+      const observer = new ResizeObserver(measure)
+
+      // meowdown wraps the card in an inline-block preview span.
+      const createCard = (post: XPost | null) => {
+        const wrapper = document.createElement('span')
+        wrapper.className = 'gallery-wrapper'
+        const element = document.createElement('post-embed-x-post')
+        element.data = post
+        wrapper.append(element)
+        observer.observe(element)
+        return wrapper
+      }
+      const addSection = (
+        title: string,
+        items: { name: string; post: XPost | null }[],
+      ) => {
+        const heading = document.createElement('h3')
+        heading.textContent = title
+        grid.append(heading)
+        for (const item of items) {
+          const figure = document.createElement('figure')
+          const caption = document.createElement('figcaption')
+          caption.append(item.name, ' ', document.createElement('span'))
+          figure.append(caption, createCard(item.post))
+          grid.append(figure)
+        }
+      }
+
+      const samples = createXSamples(window.location.origin)
+      addSection('Samples', samples)
+      // The samples already cover the plain media, quote, and reply shapes.
+      const covered = /^(photo|\w+-photos|video|gif|quote|reply|truncated)$/
+      const edgeCases = SNAPSHOT_NAMES.filter((name) => !covered.test(name))
+      addSection(
+        'Edge cases',
+        // The very long post goes last so it does not push the rest away.
+        [...edgeCases.filter((name) => name !== 'long'), 'long' as const].map(
+          (name) => ({ name, post: createSnapshot(name) }),
+        ),
+      )
+      const slot = (name: string) =>
+        this.querySelector(`[data-slot="${name}"]`)!
+      slot('note-1').append(createCard(samples[1].post))
+      slot('note-2').append(createCard(samples[2].post))
+
+      this.addEventListener('click', (event) => {
+        if (!(event.target instanceof HTMLButtonElement)) return
+        if (event.target.dataset.action === 'theme')
+          this.classList.toggle('dark')
+      })
+      this.addEventListener('change', (event) => {
+        if (!(event.target instanceof HTMLSelectElement)) return
+        const { option } = event.target.dataset
+        if (option === 'font') page.style.fontSize = `${event.target.value}px`
+        if (option === 'container')
+          page.style.setProperty('--gallery-container', event.target.value)
+      })
+      const params = new URLSearchParams(window.location.search)
+      if (params.get('theme') === 'dark') this.classList.add('dark')
+    }
+  }
+  if (!customElements.get('post-embed-gallery'))
+    customElements.define('post-embed-gallery', PostEmbedGallery)
+</script>
+
+<style is:global>
+  post-embed-gallery {
+    --gallery-bg: #ffffff;
+    --gallery-fg: #1f2328;
+    --gallery-soft: #6b7280;
+    --gallery-line: #e5e7eb;
+    display: block;
+    min-height: 100vh;
+    font-family:
+      Inter,
+      -apple-system,
+      BlinkMacSystemFont,
+      'Segoe UI',
+      system-ui,
+      sans-serif;
+    color: var(--gallery-fg);
+    background: var(--gallery-bg);
+    --post-embed-border-color: #d9dde3;
+    --post-embed-muted-color: #6b7280;
+  }
+  post-embed-gallery.dark {
+    --gallery-bg: #17181c;
+    --gallery-fg: #e7e9ee;
+    --gallery-soft: #9aa1ad;
+    --gallery-line: #2c2f36;
+    --post-embed-border-color: #33373f;
+    --post-embed-muted-color: #9aa1ad;
+    --post-embed-link-color: #6cb6ff;
+  }
+  post-embed-gallery .gallery-bar {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem 0.875rem;
+    align-items: center;
+    padding: 0.625rem 1.25rem;
+    font-size: 12px;
+    line-height: 1.4;
+    color: var(--gallery-soft);
+    border-bottom: 1px solid var(--gallery-line);
+    background: color-mix(in srgb, var(--gallery-bg) 92%, transparent);
+    backdrop-filter: blur(8px);
+  }
+  post-embed-gallery .gallery-bar strong {
+    font-size: 14px;
+    color: var(--gallery-fg);
+  }
+  post-embed-gallery .gallery-bar label {
+    display: inline-flex;
+    gap: 0.25rem;
+    align-items: center;
+  }
+  post-embed-gallery .gallery-bar :is(select, button) {
+    font: inherit;
+    color: var(--gallery-fg);
+    background: var(--gallery-bg);
+    border: 1px solid var(--gallery-line);
+    border-radius: 6px;
+    padding: 2px 6px;
+  }
+  post-embed-gallery .gallery-page {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2.5rem;
+    align-items: flex-start;
+    padding: 1.5rem 1.25rem 4rem;
+    font-size: 16px;
+    line-height: 1.6;
+  }
+  post-embed-gallery .gallery-note {
+    flex: none;
+    width: 36rem;
+    max-width: 100%;
+  }
+  post-embed-gallery .gallery-note h2 {
+    margin: 0 0 0.75rem;
+    font-size: 1.375em;
+    letter-spacing: -0.01em;
+  }
+  post-embed-gallery .gallery-note p,
+  post-embed-gallery .gallery-note ul {
+    margin: 0.625em 0;
+  }
+  post-embed-gallery .gallery-note ul {
+    padding-inline-start: 1.375em;
+  }
+  post-embed-gallery .gallery-note [data-slot] {
+    margin: 0.375em 0;
+  }
+  post-embed-gallery .gallery-grid {
+    flex: 1 1 32rem;
+    min-width: 0;
+    columns: 36rem;
+    column-gap: 2rem;
+  }
+  post-embed-gallery .gallery-grid h3 {
+    column-span: all;
+    margin: 0 0 1rem;
+    padding-bottom: 0.375rem;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--gallery-soft);
+    border-bottom: 1px solid var(--gallery-line);
+  }
+  post-embed-gallery .gallery-grid figure + h3 {
+    margin-top: 2rem;
+  }
+  post-embed-gallery .gallery-grid figure {
+    break-inside: avoid;
+    max-width: var(--gallery-container, none);
+    margin: 0 0 1.5rem;
+  }
+  post-embed-gallery .gallery-grid figcaption {
+    margin-bottom: 0.375rem;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--gallery-soft);
+  }
+  post-embed-gallery .gallery-grid figcaption span {
+    opacity: 0.7;
+    text-transform: none;
+  }
+  /* meowdown caps both cards at 550px. */
+  post-embed-gallery .gallery-wrapper {
+    display: inline-block;
+    max-width: 100%;
+    vertical-align: bottom;
+  }
+  post-embed-gallery .gallery-wrapper post-embed-x-post {
+    max-width: 550px;
+  }
+</style>

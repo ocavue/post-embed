@@ -16,29 +16,32 @@ function createPost(text = 'Hello 😀\nA saved post.'): XPost {
   }
 }
 
-export type Snapshot =
-  | 'plain'
-  | 'links'
-  | 'long'
-  | 'rtl'
-  | 'empty'
-  | 'missing'
-  | 'invalid'
-  | 'photo'
-  | 'two-photos'
-  | 'three-photos'
-  | 'four-photos'
-  | 'video'
-  | 'gif'
-  | 'mixed-media'
-  | 'unavailable'
-  | 'broken-media'
-  | 'quote'
-  | 'reply'
-  | 'square-avatar'
-  | 'edited'
-  | 'stale-edit'
-  | 'truncated'
+export const SNAPSHOT_NAMES = [
+  'plain',
+  'links',
+  'long',
+  'rtl',
+  'empty',
+  'missing',
+  'invalid',
+  'photo',
+  'two-photos',
+  'three-photos',
+  'four-photos',
+  'video',
+  'gif',
+  'mixed-media',
+  'unavailable',
+  'broken-media',
+  'quote',
+  'reply',
+  'square-avatar',
+  'edited',
+  'stale-edit',
+  'truncated',
+] as const
+
+export type Snapshot = (typeof SNAPSHOT_NAMES)[number]
 
 export function createSnapshot(name: Snapshot): XPost | null {
   if (name === 'missing') return null
