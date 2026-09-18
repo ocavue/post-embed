@@ -13,9 +13,25 @@ export function getPermalink(
 
 export function renderDate(
   post: Pick<XPostBase, 'id' | 'author' | 'createdAt'>,
+  short = false,
 ) {
   const date = new Date(post.createdAt)
   if (!Number.isFinite(date.getTime())) return
+  if (short) {
+    const sameYear = date.getFullYear() === new Date().getFullYear()
+    return renderLink(
+      el(
+        'time',
+        { datetime: date.toISOString() },
+        new Intl.DateTimeFormat(undefined, {
+          month: 'short',
+          day: 'numeric',
+          year: sameYear ? undefined : 'numeric',
+        }).format(date),
+      ),
+      getPermalink(post),
+    )
+  }
   return renderLink(
     el(
       'time',

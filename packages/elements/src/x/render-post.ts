@@ -46,7 +46,7 @@ function renderQuoted(post: XPostBase, protocols: readonly string[] | null) {
   return el(
     'article',
     { 'data-quoted': '', 'aria-label': 'Quoted post' },
-    renderAuthor(post.author, protocols),
+    renderAuthor(post.author, protocols, renderDate(post, true)),
     renderBody(post),
     renderMedia(post.media, protocols, getPermalink(post)),
     el('footer', { 'data-footer': '' }, renderDate(post), renderEdit(post)),
@@ -65,7 +65,7 @@ export function renderPost(
   return el(
     'article',
     {},
-    renderAuthor(post.author, protocols),
+    renderAuthor(post.author, protocols, renderDate(post, true)),
     reply
       ? el(
           'div',

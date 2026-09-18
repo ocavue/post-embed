@@ -1,0 +1,356 @@
+---
+import '@post-embed/elements/x/theme.css'
+import '../lab/lab.css'
+import type { PresetName } from '../lab/axes.ts'
+interface Props {
+  preset: PresetName
+}
+const { preset } = Astro.props
+---
+
+<post-embed-lab data-preset={preset}>
+  <header class="lab-bar">
+    <div class="lab-title">
+      <strong data-title></strong>
+      <code data-code></code>
+      <span data-total></span>
+    </div>
+    <div class="lab-controls" data-controls></div>
+    <div class="lab-actions">
+      <button type="button" data-action="theme">
+        Light / dark
+      </button>
+      <label>
+        Note font
+        <select data-note-font>
+          <option value="14">14px</option>
+          <option value="16" selected>
+            16px
+          </option>
+          <option value="18">18px</option>
+        </select>
+      </label>
+      <button type="button" data-action="reset">
+        Reset to preset
+      </button>
+      <button type="button" data-action="copy">
+        Copy link
+      </button>
+    </div>
+  </header>
+  <div class="lab-page" data-lab>
+    <section class="lab-note">
+      <h2>Thursday, September 17th</h2>
+      <p>
+        Saved a few posts while reading this morning. The first one is the
+        vector model everyone is talking about.
+      </p>
+      <div data-slot="note-1"></div>
+      <p>
+        Follow up with Kai about the sync engine write-up, and check whether the
+        quoted numbers hold.
+      </p>
+      <ul>
+        <li>
+          Robotics reading list
+          <div data-slot="note-2"></div>
+        </li>
+        <li>Book the ridge hike for October</li>
+      </ul>
+    </section>
+    <section class="lab-grid" data-grid-root></section>
+  </div>
+</post-embed-lab>
+
+<script>
+  import { registerXPost } from '@post-embed/elements/x'
+
+  import {
+    AXES,
+    AXIS_HELP,
+    PRESETS,
+    type Axis,
+    type Design,
+    type PresetName,
+  } from '../lab/axes.ts'
+  import { createLabSamples } from '../lab/samples.ts'
+
+  registerXPost()
+
+  const axes = Object.keys(AXES) as Axis[]
+
+  function readHash(base: Design): Design {
+    const design: Record<string, string> = { ...base }
+    const params = new URLSearchParams(window.location.hash.slice(1))
+    for (const axis of axes) {
+      const value = params.get(axis)
+      if (value && (AXES[axis] as readonly string[]).includes(value))
+        design[axis] = value
+    }
+    return design as Design
+  }
+
+  class PostEmbedLab extends HTMLElement {
+    connectedCallback() {
+      if (this.dataset.ready) return
+      this.dataset.ready = ''
+      const preset = this.dataset.preset as PresetName
+      const base = PRESETS[preset]
+      const page = this.querySelector<HTMLElement>('[data-lab]')!
+      const controls = this.querySelector<HTMLElement>('[data-controls]')!
+      const code = this.querySelector<HTMLElement>('[data-code]')!
+      const total = this.querySelector<HTMLElement>('[data-total]')!
+      const grid = this.querySelector<HTMLElement>('[data-grid-root]')!
+      this.querySelector('[data-title]')!.textContent = preset
+      let design = readHash(base)
+      const selects = new Map<Axis, HTMLSelectElement>()
+
+      const apply = () => {
+        for (const axis of axes) {
+          page.dataset[axis] = design[axis]
+          selects.get(axis)!.value = design[axis]
+          selects
+            .get(axis)!
+            .parentElement!.toggleAttribute(
+              'data-changed',
+              design[axis] !== base[axis],
+            )
+        }
+        const changed = axes.filter((axis) => design[axis] !== base[axis])
+        code.textContent = changed.length
+          ? changed.map((axis) => `${axis}=${design[axis]}`).join(' ')
+          : 'preset as is'
+        const hash = changed.map((axis) => `${axis}=${design[axis]}`).join('&')
+        history.replaceState(
+          null,
+          '',
+          hash ? `#${hash}` : window.location.pathname + window.location.search,
+        )
+      }
+
+      for (const axis of axes) {
+        const label = document.createElement('label')
+        label.title = AXIS_HELP[axis]
+        label.append(axis)
+        const select = document.createElement('select')
+        for (const value of AXES[axis]) select.append(new Option(value, value))
+        select.addEventListener('change', () => {
+          design = { ...design, [axis]: select.value }
+          apply()
+        })
+        selects.set(axis, select)
+        label.append(select)
+        controls.append(label)
+      }
+
+      const measure = () => {
+        let sum = 0
+        for (const figure of this.querySelectorAll<HTMLElement>(
+          'figure[data-sample]',
+        )) {
+          const card = figure.querySelector('post-embed-x-post')!
+          const box = card.getBoundingClientRect()
+          sum += box.height
+          figure.querySelector('figcaption span')!.textContent =
+            `${Math.round(box.width)} × ${Math.round(box.height)}`
+        }
+        total.textContent = `total height ${Math.round(sum)}px`
+      }
+      const observer = new ResizeObserver(measure)
+
+      const createCard = (
+        sample: ReturnType<typeof createLabSamples>[number],
+      ) => {
+        const wrapper = document.createElement('span')
+        wrapper.className = 'lab-wrapper'
+        const element = document.createElement('post-embed-x-post')
+        element.data = sample.post
+        wrapper.append(element)
+        return { wrapper, element }
+      }
+
+      const samples = createLabSamples(window.location.origin)
+      for (const sample of samples) {
+        const figure = document.createElement('figure')
+        figure.dataset.sample = sample.name
+        const caption = document.createElement('figcaption')
+        caption.append(sample.name, ' ', document.createElement('span'))
+        const { wrapper, element } = createCard(sample)
+        figure.append(caption, wrapper)
+        grid.append(figure)
+        observer.observe(element)
+      }
+      this.querySelector('[data-slot="note-1"]')!.append(
+        createCard(samples[1]).wrapper,
+      )
+      this.querySelector('[data-slot="note-2"]')!.append(
+        createCard(samples[2]).wrapper,
+      )
+
+      this.addEventListener('click', (event) => {
+        if (!(event.target instanceof HTMLButtonElement)) return
+        const action = event.target.dataset.action
+        if (action === 'theme') this.classList.toggle('dark')
+        if (action === 'reset') {
+          design = { ...base }
+          apply()
+        }
+        if (action === 'copy')
+          void navigator.clipboard.writeText(window.location.href)
+      })
+      this.querySelector<HTMLSelectElement>(
+        '[data-note-font]',
+      )!.addEventListener('change', (event) => {
+        page.style.fontSize = `${(event.target as HTMLSelectElement).value}px`
+      })
+      const params = new URLSearchParams(window.location.search)
+      if (params.get('theme') === 'dark') this.classList.add('dark')
+      if (params.has('bare')) this.classList.add('bare')
+      apply()
+    }
+  }
+  if (!customElements.get('post-embed-lab'))
+    customElements.define('post-embed-lab', PostEmbedLab)
+</script>
+
+<style is:global>
+  post-embed-lab {
+    --lab-bg: #ffffff;
+    --lab-fg: #1f2328;
+    --lab-soft: #6b7280;
+    --lab-line: #e5e7eb;
+    display: block;
+    min-height: 100vh;
+    font-family:
+      Inter,
+      -apple-system,
+      BlinkMacSystemFont,
+      'Segoe UI',
+      system-ui,
+      sans-serif;
+    color: var(--lab-fg);
+    background: var(--lab-bg);
+    --post-embed-border-color: #d9dde3;
+    --post-embed-muted-color: #6b7280;
+  }
+  post-embed-lab.dark {
+    --lab-bg: #17181c;
+    --lab-fg: #e7e9ee;
+    --lab-soft: #9aa1ad;
+    --lab-line: #2c2f36;
+    --post-embed-border-color: #33373f;
+    --post-embed-muted-color: #9aa1ad;
+    --post-embed-link-color: #6cb6ff;
+  }
+  post-embed-lab .lab-bar {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: grid;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    font-size: 12px;
+    line-height: 1.4;
+    border-bottom: 1px solid var(--lab-line);
+    background: color-mix(in srgb, var(--lab-bg) 92%, transparent);
+    backdrop-filter: blur(8px);
+  }
+  post-embed-lab.bare .lab-controls,
+  post-embed-lab.bare .lab-actions {
+    display: none;
+  }
+  post-embed-lab .lab-title {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 0.75rem;
+    align-items: baseline;
+  }
+  post-embed-lab .lab-title strong {
+    font-size: 14px;
+  }
+  post-embed-lab .lab-title code,
+  post-embed-lab .lab-title span {
+    color: var(--lab-soft);
+  }
+  post-embed-lab .lab-controls,
+  post-embed-lab .lab-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem 0.75rem;
+    align-items: center;
+  }
+  post-embed-lab .lab-bar label {
+    display: inline-flex;
+    gap: 0.25rem;
+    align-items: center;
+    color: var(--lab-soft);
+  }
+  post-embed-lab .lab-bar label[data-changed] {
+    color: #d9480f;
+    font-weight: 600;
+  }
+  post-embed-lab .lab-bar :is(select, button) {
+    font: inherit;
+    color: var(--lab-fg);
+    background: var(--lab-bg);
+    border: 1px solid var(--lab-line);
+    border-radius: 6px;
+    padding: 2px 6px;
+  }
+  post-embed-lab .lab-page {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2.5rem;
+    align-items: flex-start;
+    padding: 1.5rem 1.25rem 4rem;
+    font-size: 16px;
+    line-height: 1.6;
+  }
+  post-embed-lab .lab-note {
+    flex: none;
+    width: 36rem;
+    max-width: 100%;
+  }
+  post-embed-lab .lab-note h2 {
+    margin: 0 0 0.75rem;
+    font-size: 1.375em;
+    letter-spacing: -0.01em;
+  }
+  post-embed-lab .lab-note p {
+    margin: 0.625em 0;
+  }
+  post-embed-lab .lab-note ul {
+    margin: 0.625em 0;
+    padding-inline-start: 1.375em;
+  }
+  post-embed-lab .lab-note [data-slot] {
+    margin: 0.375em 0;
+  }
+  post-embed-lab .lab-grid {
+    flex: 1 1 32rem;
+    min-width: 0;
+    columns: 30rem;
+    column-gap: 2rem;
+  }
+  post-embed-lab .lab-grid figure {
+    break-inside: avoid;
+    margin: 0 0 1.5rem;
+  }
+  post-embed-lab .lab-grid figcaption {
+    margin-bottom: 0.375rem;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--lab-soft);
+  }
+  post-embed-lab .lab-grid figcaption span {
+    opacity: 0.7;
+    text-transform: none;
+  }
+  /* meowdown wraps the card in an inline-block preview span. */
+  post-embed-lab .lab-wrapper {
+    display: inline-block;
+    max-width: 100%;
+    vertical-align: bottom;
+  }
+</style>

@@ -153,6 +153,9 @@
   & [data-author-details] > bdi > a {
     color: inherit;
   }
+  & [data-header-date] {
+    display: none;
+  }
 
   /* Body */
   & [data-reply-to] {

@@ -1,0 +1,583 @@
+/*
+ * X card lab: every axis in `axes.ts` is one `data-*` attribute on `[data-lab]`.
+ * Each block below styles one axis on top of the shipped `theme.css`, so any
+ * combination renders. The chosen combination is folded into `theme.css` later.
+ */
+
+[data-lab] {
+  --lab-width: 34.375rem;
+  --lab-pad: 1rem;
+  --lab-fs: 1em;
+  --lab-radius: 0.75rem;
+  --lab-media-radius: 0.5rem;
+
+  &[data-width='30'] {
+    --lab-width: 30rem;
+  }
+  &[data-width='28'] {
+    --lab-width: 28rem;
+  }
+  &[data-width='26'] {
+    --lab-width: 26rem;
+  }
+  &[data-width='24'] {
+    --lab-width: 24rem;
+  }
+
+  &[data-font='94'] {
+    --lab-fs: 0.9375em;
+  }
+  &[data-font='88'] {
+    --lab-fs: 0.875em;
+  }
+
+  &[data-pad='12'] {
+    --lab-pad: 0.75rem;
+  }
+  &[data-pad='10'] {
+    --lab-pad: 0.625rem;
+  }
+}
+
+/* Width: fixed rem width, never wider than the container. */
+[data-lab] [data-post-embed='x-post'] {
+  width: var(--lab-width);
+  max-width: 100%;
+}
+/* Today: shrink-to-fit inside meowdown's inline-block wrapper, max 550px. */
+[data-lab][data-width='550'] [data-post-embed='x-post'] {
+  width: auto;
+  max-width: 550px;
+}
+
+[data-lab] [data-post-embed='x-post'] [data-root] {
+  padding: var(--lab-pad);
+  font-size: var(--lab-fs);
+  border-radius: var(--lab-radius);
+
+  & [data-quoted] {
+    padding: min(var(--lab-pad), 0.75rem);
+  }
+  /* The shipped multi-media rule only squares `img`. */
+  & [data-media]:not([data-count='1']) [data-media-item] video {
+    height: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+  }
+}
+
+/* ---------------------------------------------------------------- header */
+
+[data-lab][data-header='stacked-sm'] [data-post-embed='x-post'] [data-root] {
+  & [data-author] {
+    gap: 0.5rem;
+  }
+  & article:not([data-quoted]) > [data-author] [data-avatar] {
+    width: 2rem;
+    height: 2rem;
+  }
+  & [data-author-details] {
+    line-height: 1.25;
+  }
+  & article:not([data-quoted]) > [data-author] [data-author-details] > bdi {
+    font-size: 0.875em;
+  }
+}
+
+[data-lab][data-header='inline'] [data-post-embed='x-post'] [data-root] {
+  & [data-author] {
+    gap: 0.5rem;
+  }
+  & article:not([data-quoted]) > [data-author] [data-avatar] {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+  & [data-avatar][data-shape='square'] {
+    border-radius: 0.3125rem;
+  }
+}
+[data-lab][data-header='inline'] [data-post-embed='x-post'] [data-root],
+[data-lab] [data-post-embed='x-post'] [data-root] [data-quoted] {
+  & [data-author-details] {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: baseline;
+    gap: 0 0.35rem;
+    line-height: 1.5rem;
+  }
+  & [data-author-name] {
+    display: block;
+    flex: 0 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  & [data-author-details] > bdi {
+    flex: 0 100 auto;
+    min-width: 2.5rem;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-size: 0.9375em;
+  }
+}
+[data-lab]
+  [data-post-embed='x-post']
+  [data-root]
+  [data-quoted]
+  [data-author-details] {
+  line-height: 1.375rem;
+}
+
+/* ------------------------------------------------------------------ date */
+
+[data-lab][data-date='header'] [data-post-embed='x-post'] [data-root],
+[data-lab]:is([data-quote='compact'], [data-quote='side'], [data-quote='text'])
+  [data-post-embed='x-post']
+  [data-root]
+  [data-quoted] {
+  & [data-header-date] {
+    display: block;
+    flex: none;
+    margin-inline-start: auto;
+    padding-inline-start: 0.25rem;
+    font-size: 0.8125em;
+    white-space: nowrap;
+    color: var(--_muted);
+  }
+  & [data-header-date] a {
+    color: inherit;
+  }
+  & article:not([data-fallback]) > [data-footer]:not(:has([data-edited])),
+  &[data-quoted] > [data-footer]:not(:has([data-edited])) {
+    display: none;
+  }
+  & [data-footer]:has([data-edited]) > a:first-child {
+    display: none;
+  }
+  & [data-footer] > [data-edited]::before {
+    display: none;
+  }
+  & [data-footer] {
+    font-size: 0.8125em;
+    margin-block-start: 0.5rem;
+  }
+}
+[data-lab][data-date='header']:is(
+    [data-header='stacked'],
+    [data-header='stacked-sm']
+  )
+  [data-post-embed='x-post']
+  [data-root]
+  article:not([data-quoted])
+  > [data-author]
+  [data-header-date] {
+  align-self: flex-start;
+  line-height: 1.25rem;
+}
+
+/* ----------------------------------------------------------------- reply */
+
+[data-lab][data-reply='small']
+  [data-post-embed='x-post']
+  [data-root]
+  [data-reply-to] {
+  margin-block-start: 0.375rem;
+  font-size: 0.8125em;
+}
+[data-lab][data-reply='small']
+  [data-post-embed='x-post']
+  [data-root]
+  [data-reply-to]
+  + [data-body] {
+  margin-block-start: 0.25rem;
+}
+[data-lab][data-reply='hidden']
+  [data-post-embed='x-post']
+  [data-root]
+  [data-reply-to] {
+  display: none;
+}
+
+/* ------------------------------------------------------------------ text */
+
+[data-lab]:is([data-text='clamp8'], [data-text='clamp5'])
+  [data-post-embed='x-post']
+  [data-root]
+  article:not([data-quoted])
+  > [data-body] {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 8;
+  line-clamp: 8;
+  overflow: hidden;
+}
+[data-lab][data-text='clamp5']
+  [data-post-embed='x-post']
+  [data-root]
+  article:not([data-quoted])
+  > [data-body] {
+  -webkit-line-clamp: 5;
+  line-clamp: 5;
+}
+
+/* ---------------------------------------------------------- single media */
+
+[data-lab] [data-post-embed='x-post'] [data-root] {
+  & [data-media] {
+    border-radius: var(--lab-media-radius);
+  }
+  & [data-media-item][data-orientation='portrait'] :is(img, video) {
+    object-position: center 30%;
+  }
+  /* A hairline keeps white screenshots from dissolving into the card. */
+  & [data-media-item] {
+    position: relative;
+  }
+  & [data-media-item]::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    box-shadow: inset 0 0 0 1px
+      color-mix(in srgb, currentColor 10%, transparent);
+    pointer-events: none;
+  }
+}
+
+[data-lab][data-media='cap']
+  [data-post-embed='x-post']
+  [data-root]
+  [data-media][data-count='1']
+  :is(img, video) {
+  max-height: 20rem;
+  object-fit: cover;
+}
+
+[data-lab]:is(
+    [data-media='ratio-1'],
+    [data-media='ratio-43'],
+    [data-media='ratio-169'],
+    [data-media='ratio-21']
+  )
+  [data-post-embed='x-post']
+  [data-root]
+  [data-media][data-count='1']
+  :is(img, video) {
+  --lab-min-ratio: 1;
+  aspect-ratio: max(var(--lab-min-ratio), calc(var(--_ratio, 1.7778)));
+  max-height: none;
+  object-fit: cover;
+}
+[data-lab][data-media='ratio-43']
+  [data-post-embed='x-post']
+  [data-root]
+  [data-media][data-count='1']
+  :is(img, video) {
+  --lab-min-ratio: 1.3333;
+}
+[data-lab][data-media='ratio-169']
+  [data-post-embed='x-post']
+  [data-root]
+  [data-media][data-count='1']
+  :is(img, video) {
+  --lab-min-ratio: 1.7778;
+}
+[data-lab][data-media='ratio-21']
+  [data-post-embed='x-post']
+  [data-root]
+  [data-media][data-count='1']
+  :is(img, video) {
+  --lab-min-ratio: 2.2;
+}
+
+/* Never cropped: the box is at most 16rem tall and shrinks to the media. */
+[data-lab][data-media='fit']
+  [data-post-embed='x-post']
+  [data-root]
+  [data-media][data-count='1'] {
+  display: block;
+  overflow: visible;
+  border-radius: 0;
+  background: none;
+
+  & [data-media-item] {
+    width: min(100%, calc(16rem * (var(--_ratio, 1.7778))));
+    border-radius: var(--lab-media-radius);
+  }
+  & :is(img, video) {
+    max-height: none;
+  }
+}
+
+/* ------------------------------------------------------- media placement */
+
+[data-lab][data-place='narrow']
+  [data-post-embed='x-post']
+  [data-root]
+  article:not([data-quoted])
+  > [data-media] {
+  max-width: 75%;
+}
+
+[data-lab]:is([data-place='bleed-top'], [data-place='bleed-bottom'])
+  [data-post-embed='x-post']
+  [data-root] {
+  & > article:has(> [data-media]) {
+    display: flex;
+    flex-direction: column;
+  }
+  & > article > [data-media] {
+    --lab-inner-radius: calc(var(--lab-radius) - 1px);
+    margin-inline: calc(-1 * var(--lab-pad));
+  }
+}
+[data-lab][data-place='bleed-top']
+  [data-post-embed='x-post']
+  [data-root]
+  > article
+  > [data-media] {
+  order: -1;
+  margin-block: calc(-1 * var(--lab-pad)) var(--lab-pad);
+  border-radius: var(--lab-inner-radius) var(--lab-inner-radius) 0 0;
+}
+[data-lab][data-place='bleed-bottom']
+  [data-post-embed='x-post']
+  [data-root]
+  > article
+  > [data-media] {
+  order: 99;
+  margin-block: var(--lab-pad) calc(-1 * var(--lab-pad));
+  border-radius: 0 0 var(--lab-inner-radius) var(--lab-inner-radius);
+}
+
+/* Side thumbnail: photos only, the first one, with a count badge. Posts with
+ * a video or GIF keep the inset placement so the player stays usable. */
+[data-lab][data-place='side']
+  [data-post-embed='x-post']
+  [data-root]
+  > article:has(> [data-media]):not(:has(> [data-media] video)),
+[data-lab][data-quote='side']
+  [data-post-embed='x-post']
+  [data-root]
+  [data-quoted]:has(> [data-media]):not(:has(> [data-media] video)) {
+  --lab-thumb: 5.5rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    'head head'
+    'reply reply'
+    'body media'
+    'quote quote'
+    'foot foot';
+  column-gap: 0.75rem;
+
+  & > [data-author] {
+    grid-area: head;
+  }
+  & > [data-reply-to] {
+    grid-area: reply;
+  }
+  & > [data-body] {
+    grid-area: body;
+  }
+  & > [data-quoted] {
+    grid-area: quote;
+  }
+  & > [data-footer] {
+    grid-area: foot;
+  }
+  & > [data-media] {
+    grid-area: media;
+    position: relative;
+    display: block;
+    width: var(--lab-thumb);
+    height: var(--lab-thumb);
+    margin-block-start: 0.75rem;
+  }
+  & > [data-media] > [data-media-item] {
+    width: 100%;
+    height: 100%;
+  }
+  & > [data-media] > [data-media-item]:nth-child(n + 2) {
+    display: none;
+  }
+  & > [data-media] > [data-media-item] img {
+    width: 100%;
+    height: 100%;
+    max-height: none;
+    aspect-ratio: auto;
+    object-fit: cover;
+  }
+  & > [data-media]:not([data-count='1'])::after {
+    content: attr(data-count);
+    position: absolute;
+    inset: auto 0.25rem 0.25rem auto;
+    min-width: 1.25rem;
+    padding: 0 0.3125rem;
+    border-radius: 0.625rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    line-height: 1.25rem;
+    text-align: center;
+    color: #fff;
+    background: rgb(0 0 0 / 0.62);
+    pointer-events: none;
+  }
+}
+[data-lab][data-quote='side']
+  [data-post-embed='x-post']
+  [data-root]
+  [data-quoted]:has(> [data-media]):not(:has(> [data-media] video)) {
+  --lab-thumb: 4rem;
+
+  & > [data-media] {
+    margin-block-start: 0.375rem;
+    border-radius: 0.375rem;
+  }
+}
+
+/* ------------------------------------------------------------ media grid */
+
+[data-lab][data-grid='cells-32']
+  [data-post-embed='x-post']
+  [data-root]
+  [data-media]:not([data-count='1'])
+  :is(img, video) {
+  aspect-ratio: 3 / 2;
+}
+[data-lab][data-grid='cells-32']
+  [data-post-embed='x-post']
+  [data-root]
+  [data-media][data-count='3']
+  [data-media-item]:first-child
+  :is(img, video) {
+  aspect-ratio: auto;
+}
+
+[data-lab][data-grid='fixed']:not([data-place='side'])
+  [data-post-embed='x-post']
+  [data-root]
+  article:not([data-quoted])
+  > [data-media]:not([data-count='1']) {
+  height: 13rem;
+  grid-auto-rows: minmax(0, 1fr);
+
+  &[data-count='2'] {
+    height: 10rem;
+  }
+  & :is(img, video) {
+    height: 100%;
+    aspect-ratio: auto;
+  }
+}
+
+[data-lab][data-grid='row']:not([data-place='side'])
+  [data-post-embed='x-post']
+  [data-root]
+  article:not([data-quoted])
+  > [data-media]:not([data-count='1']) {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  &[data-count='3'] {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  &[data-count='4'] {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  & [data-media-item]:first-child {
+    grid-row: auto;
+  }
+  & :is(img, video) {
+    aspect-ratio: 1;
+  }
+  &[data-count='2'] :is(img, video) {
+    aspect-ratio: 3 / 2;
+  }
+}
+
+/* ----------------------------------------------------------------- quote */
+
+[data-lab]:is([data-quote='compact'], [data-quote='side'], [data-quote='text'])
+  [data-post-embed='x-post']
+  [data-root]
+  [data-quoted] {
+  & > [data-body] {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    overflow: hidden;
+    margin-block-start: 0.25rem;
+  }
+}
+[data-lab][data-quote='compact']
+  [data-post-embed='x-post']
+  [data-root]
+  [data-quoted]
+  > [data-media] {
+  margin-block-start: 0.5rem;
+
+  &[data-count='1'] {
+    display: grid;
+    overflow: hidden;
+    border-radius: 0.375rem;
+    background: var(--_hairline);
+  }
+  &[data-count='1'] [data-media-item] {
+    width: auto;
+    border-radius: 0;
+  }
+  &[data-count='1'] :is(img, video) {
+    aspect-ratio: max(2.6, calc(var(--_ratio, 1.7778)));
+    max-height: none;
+    object-fit: cover;
+  }
+  &:not([data-count='1']) {
+    height: 7rem;
+    grid-auto-rows: minmax(0, 1fr);
+  }
+  &:not([data-count='1']) :is(img, video) {
+    height: 100%;
+    aspect-ratio: auto;
+  }
+}
+[data-lab][data-quote='text']
+  [data-post-embed='x-post']
+  [data-root]
+  [data-quoted]
+  > [data-media] {
+  display: none;
+}
+
+/* ----------------------------------------------------------------- shell */
+
+[data-lab][data-shell='tint'] [data-post-embed='x-post'] [data-root] {
+  border-color: transparent;
+  background: color-mix(in srgb, currentColor 5%, transparent);
+
+  & [data-quoted] {
+    border-color: transparent;
+    background: color-mix(in srgb, currentColor 5%, transparent);
+  }
+}
+
+[data-lab][data-shell='rail'] [data-post-embed='x-post'] [data-root] {
+  padding: 0.125rem 0 0.125rem var(--lab-pad);
+  border: 0;
+  border-inline-start: 3px solid var(--_hairline);
+  border-radius: 0;
+}
+
+/* Bleed-bottom with a quote or an "Edited" footer: the media keeps its place
+ * in the reading order and becomes a full-width band instead. */
+[data-lab][data-place='bleed-bottom']
+  [data-post-embed='x-post']
+  [data-root]
+  > article:is(:has(> [data-quoted]), :has(> [data-footer] [data-edited]))
+  > [data-media] {
+  order: 0;
+  margin-block: var(--lab-pad) 0;
+  border-radius: 0;
+}

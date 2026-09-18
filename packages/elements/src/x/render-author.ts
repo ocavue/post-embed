@@ -6,6 +6,7 @@ import { getSafeUrl } from '../safe-url.ts'
 export function renderAuthor(
   author: XPostAuthor,
   protocols: readonly string[] | null,
+  date?: Node | string,
 ) {
   if (!author.name && !author.handle) return
   const validHandle = /^\w{1,15}$/.test(author.handle)
@@ -46,5 +47,6 @@ export function renderAuthor(
           )
         : undefined,
     ),
+    date ? el('span', { 'data-header-date': '' }, date) : undefined,
   )
 }

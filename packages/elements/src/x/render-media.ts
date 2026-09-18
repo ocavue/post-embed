@@ -18,6 +18,24 @@ function sizeAttrs(media: { width: number; height: number }) {
   }
 }
 
+function itemAttrs(media: XPostMedia) {
+  const { width, height, style } = sizeAttrs(media)
+  const orientation =
+    width && height
+      ? width > height * 1.1
+        ? 'landscape'
+        : height > width * 1.1
+          ? 'portrait'
+          : 'square'
+      : undefined
+  return {
+    'data-media-item': '',
+    'data-type': media.type,
+    'data-orientation': orientation,
+    style,
+  }
+}
+
 function renderUnavailable(permalink?: string) {
   return el(
     'div',
@@ -110,7 +128,7 @@ function renderItem(
     }
     content = video
   }
-  return el('div', { 'data-media-item': '' }, content, error)
+  return el('div', itemAttrs(media), content, error)
 }
 
 export function renderMedia(
