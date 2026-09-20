@@ -4,7 +4,9 @@ export type {
   XPostAuthor,
   XPostBase,
   XPostMedia,
+  XPostPhoto,
   XPostSegment,
+  XPostVideo,
   XPostVideoSource,
 } from './x/index.js'
 export type { YouTubeVideo } from './youtube/index.js'

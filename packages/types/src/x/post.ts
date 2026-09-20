@@ -56,23 +56,25 @@ export interface XPostAuthor {
 export type XPostSegment =
   { type: 'text'; text: string } | { type: 'link'; text: string; url: string }
 
-export type XPostMedia =
-  | {
-      type: 'photo'
-      url: string
-      width: number
-      height: number
-      alt?: string | undefined
-      unavailable?: boolean | undefined
-    }
-  | {
-      type: 'video' | 'gif'
-      poster?: string | undefined
-      width: number
-      height: number
-      sources: XPostVideoSource[]
-      unavailable?: boolean | undefined
-    }
+export type XPostMedia = XPostPhoto | XPostVideo
+
+export interface XPostPhoto {
+  type: 'photo'
+  url: string
+  width: number
+  height: number
+  alt?: string | undefined
+  unavailable?: boolean | undefined
+}
+
+export interface XPostVideo {
+  type: 'video' | 'gif'
+  poster?: string | undefined
+  width: number
+  height: number
+  sources: XPostVideoSource[]
+  unavailable?: boolean | undefined
+}
 
 export interface XPostVideoSource {
   url: string
