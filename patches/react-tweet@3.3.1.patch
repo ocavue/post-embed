@@ -1,0 +1,13 @@
+diff --git a/dist/api/types/tweet.d.ts b/dist/api/types/tweet.d.ts
+index 30af80361052fbfcff69f7c9c55f0eb033f0d4f4..33df7ccae338c075dea8aa1f4e264dda7ca0afd1 100644
+--- a/dist/api/types/tweet.d.ts
++++ b/dist/api/types/tweet.d.ts
+@@ -84,7 +84,7 @@ export interface QuotedTweet extends TweetBase {
+     retweet_count: number;
+     favorite_count: number;
+     mediaDetails?: MediaDetails[];
+-    self_thread: {
++    self_thread?: {
+         id_str: string;
+     };
+ }
