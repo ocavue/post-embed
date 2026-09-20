@@ -18,15 +18,22 @@ describe('fromSyndication', () => {
     const parsed = parseTweet(input)
     expect(parsed.issues).toBeUndefined()
     const result = fromSyndication(input)
-    expect(result).toMatchObject({ value: {
-      id: '20',
-      quote: { id: photoAndVideo.id_str, media: [{ type: 'photo' }, { type: 'video' }] },
-    } })
+    expect(result).toMatchObject({
+      value: {
+        id: '20',
+        quote: {
+          id: photoAndVideo.id_str,
+          media: [{ type: 'photo' }, { type: 'video' }],
+        },
+      },
+    })
   })
 
   it('accepts a quoted video without thread metadata', () => {
     const result = fromSyndication({ ...jack, quoted_tweet: video })
-    expect(result).toMatchObject({ value: { quote: { id: video.id_str, media: [{ type: 'video' }] } } })
+    expect(result).toMatchObject({
+      value: { quote: { id: video.id_str, media: [{ type: 'video' }] } },
+    })
   })
 
   it('returns validation issues for malformed input', () => {
