@@ -105,6 +105,9 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  react-tweet@3.3.1: 847228a7b2da7b0f0be02adfe3d362ecf34020398f269c813f4afc8682075bac
+
 importers:
 
   .:
@@ -299,7 +302,7 @@ importers:
     devDependencies:
       react-tweet:
         specifier: ^3.3.1
-        version: 3.3.1(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+        version: 3.3.1(patch_hash=847228a7b2da7b0f0be02adfe3d362ecf34020398f269c813f4afc8682075bac)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
@@ -7356,7 +7359,7 @@ snapshots:
       react: 19.2.8
       scheduler: 0.27.0
 
-  react-tweet@3.3.1(react-dom@19.2.8(react@19.2.8))(react@19.2.8):
+  react-tweet@3.3.1(patch_hash=847228a7b2da7b0f0be02adfe3d362ecf34020398f269c813f4afc8682075bac)(react-dom@19.2.8(react@19.2.8))(react@19.2.8):
     dependencies:
       '@swc/helpers': 0.5.23
       clsx: 2.1.1

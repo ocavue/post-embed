@@ -6,3 +6,5 @@ linkWorkspacePackages: deep
 ignoreWorkspaceRootCheck: true
 allowBuilds:
   esbuild: false
+patchedDependencies:
+  react-tweet@3.3.1: patches/react-tweet@3.3.1.patch
