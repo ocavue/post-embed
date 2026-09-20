@@ -3,6 +3,8 @@ export type {
   XPostAuthor,
   XPostBase,
   XPostMedia,
+  XPostPhoto,
   XPostSegment,
+  XPostVideo,
   XPostVideoSource,
 } from './post.js'

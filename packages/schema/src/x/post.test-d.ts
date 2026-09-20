@@ -3,7 +3,9 @@ import type {
   XPostAuthor,
   XPostBase,
   XPostMedia,
+  XPostPhoto,
   XPostSegment,
+  XPostVideo,
   XPostVideoSource,
 } from '@post-embed/types/internal/x/post'
 import type * as v from 'valibot'
@@ -13,8 +15,10 @@ import type {
   XPostAuthorSchema,
   XPostBaseSchema,
   XPostMediaSchema,
+  XPostPhotoSchema,
   XPostSchema,
   XPostSegmentSchema,
+  XPostVideoSchema,
   XPostVideoSourceSchema,
 } from './post.ts'
 
@@ -44,6 +48,18 @@ test('XPostMediaSchema', () => {
   expectTypeOf<
     v.InferOutput<typeof XPostMediaSchema>
   >().toEqualTypeOf<XPostMedia>()
+})
+
+test('XPostPhotoSchema', () => {
+  expectTypeOf<
+    v.InferOutput<typeof XPostPhotoSchema>
+  >().toEqualTypeOf<XPostPhoto>()
+})
+
+test('XPostVideoSchema', () => {
+  expectTypeOf<
+    v.InferOutput<typeof XPostVideoSchema>
+  >().toEqualTypeOf<XPostVideo>()
 })
 
 test('XPostVideoSourceSchema', () => {

@@ -26,23 +26,27 @@ export const XPostVideoSourceSchema = v.object({
   bitrate: v.optional(NumberSchema),
 })
 
+export const XPostPhotoSchema = v.object({
+  type: v.literal('photo'),
+  url: StringSchema,
+  width: NumberSchema,
+  height: NumberSchema,
+  alt: v.optional(StringSchema),
+  unavailable: v.optional(BooleanSchema),
+})
+
+export const XPostVideoSchema = v.object({
+  type: v.picklist(['video', 'gif']),
+  poster: v.optional(StringSchema),
+  width: NumberSchema,
+  height: NumberSchema,
+  sources: looseItems(XPostVideoSourceSchema),
+  unavailable: v.optional(BooleanSchema),
+})
+
 export const XPostMediaSchema = v.variant('type', [
-  v.object({
-    type: v.literal('photo'),
-    url: StringSchema,
-    width: NumberSchema,
-    height: NumberSchema,
-    alt: v.optional(StringSchema),
-    unavailable: v.optional(BooleanSchema),
-  }),
-  v.object({
-    type: v.picklist(['video', 'gif']),
-    poster: v.optional(StringSchema),
-    width: NumberSchema,
-    height: NumberSchema,
-    sources: looseItems(XPostVideoSourceSchema),
-    unavailable: v.optional(BooleanSchema),
-  }),
+  XPostPhotoSchema,
+  XPostVideoSchema,
 ])
 
 export const XPostAuthorSchema = v.object({
