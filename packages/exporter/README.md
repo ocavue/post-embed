@@ -11,10 +11,16 @@ import { fromSyndication } from '@post-embed/exporter/x/syndication'
 
 const response = await fetch(`https://react-tweet.vercel.app/api/tweet/${id}`)
 const { data } = await response.json()
-const post = fromSyndication(data) // XPost | undefined
+const result = fromSyndication(data)
+if (result.issues) {
+  // Validation failed; each issue contains its message and optional path.
+  console.error(result.issues)
+} else {
+  const post = result.value // XPost
+}
 ```
 
-`fromSyndication` accepts any value, returns `undefined` for anything that is not a tweet (a tombstone, an empty object), and never keeps fields the card does not render.
+`fromSyndication` accepts any value and returns a Standard Schema result: `{ value: XPost }` on success or `{ issues }` on validation failure, including tombstones and empty objects. Handle HTTP not-found responses before conversion. This replaces the earlier `XPost | undefined` return type. `fromSyndicationTweet` still converts an already validated `Tweet` directly.
 
 ## `@post-embed/exporter/x`
 

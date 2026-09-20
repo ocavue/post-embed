@@ -25,6 +25,7 @@
     "@ocavue/utils": "^1.8.0",
     "@post-embed/schema": "workspace:^",
     "@post-embed/types": "workspace:^",
+    "@standard-schema/spec": "^1.1.0",
     "birpc": "^4.2.0",
     "entities": "^8.1.0",
     "lru.min": "^1.1.5",

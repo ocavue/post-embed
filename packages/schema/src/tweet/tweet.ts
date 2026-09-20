@@ -43,7 +43,7 @@ export const QuotedTweetSchema = v.object({
   retweet_count: NumberSchema,
   favorite_count: NumberSchema,
   mediaDetails: v.optional(looseArray(MediaDetailsSchema)),
-  self_thread: v.object({ id_str: StringSchema }),
+  self_thread: v.optional(v.object({ id_str: StringSchema })),
 })
 
 export const TweetSchema = v.object({

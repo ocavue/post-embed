@@ -3,6 +3,13 @@ import { expectTypeOf, test } from 'vitest'
 
 import type { Tweet } from './index.js'
 
-test('Tweet matches react-tweet', () => {
-  expectTypeOf<Tweet>().toEqualTypeOf<UpstreamTweet>()
+test('Tweet accepts react-tweet data and optional quote thread metadata', () => {
+  expectTypeOf<UpstreamTweet>().toExtend<Tweet>()
+  expectTypeOf<Omit<Tweet, 'quoted_tweet'>>().toEqualTypeOf<
+    Omit<UpstreamTweet, 'quoted_tweet'>
+  >()
+  expectTypeOf<NonNullable<Tweet['quoted_tweet']>>().toEqualTypeOf<
+    Omit<NonNullable<UpstreamTweet['quoted_tweet']>, 'self_thread'> &
+      Partial<Pick<NonNullable<UpstreamTweet['quoted_tweet']>, 'self_thread'>>
+  >()
 })

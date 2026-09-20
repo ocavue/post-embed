@@ -32,7 +32,10 @@ const element = document.createElement('post-embed-x-post')
 element.resolver = async (url) => {
   const id = new URL(url).pathname.split('/').at(-1)
   const response = await fetch(`/api/tweet/${id}`)
-  return response.ok ? fromSyndication(await response.json()) : undefined
+  if (!response.ok) return
+  const result = fromSyndication(await response.json())
+  if (result.issues) throw new Error('Invalid post data')
+  return result.value
 }
 element.url = 'https://x.com/jack/status/20'
 ```
