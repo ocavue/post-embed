@@ -1,4 +1,4 @@
-import { parseXPost } from '@post-embed/schema'
+import { parseTweet, parseXPost } from '@post-embed/schema'
 import type { Tweet } from '@post-embed/types'
 import { describe, expect, it } from 'vitest'
 
@@ -13,6 +13,28 @@ function tweet(): Tweet {
 }
 
 describe('fromSyndication', () => {
+  it('accepts a quoted photo without thread metadata', () => {
+    const input = { ...jack, quoted_tweet: photoAndVideo }
+    const parsed = parseTweet(input)
+    expect(parsed.issues).toBeUndefined()
+    const result = fromSyndication(input)
+    expect(result).toMatchObject({ value: {
+      id: '20',
+      quote: { id: photoAndVideo.id_str, media: [{ type: 'photo' }, { type: 'video' }] },
+    } })
+  })
+
+  it('accepts a quoted video without thread metadata', () => {
+    const result = fromSyndication({ ...jack, quoted_tweet: video })
+    expect(result).toMatchObject({ value: { quote: { id: video.id_str, media: [{ type: 'video' }] } } })
+  })
+
+  it('returns validation issues for malformed input', () => {
+    expect(fromSyndication({ ...jack, user: null })).toMatchObject({
+      issues: [{ path: [{ key: 'user' }] }],
+    })
+  })
+
   it('maps a text post', () => {
     expect(fromSyndication(jack)).toEqual({
       id: '20',
