@@ -1,5 +1,11 @@
 # @post-embed/types
 
+## 0.4.1
+
+### Patch Changes
+
+- 7b896f3: Split `XPostMedia` into the named `XPostPhoto` and `XPostVideo` types.
+
 ## 0.4.0
 
 ### Minor Changes
