@@ -89,11 +89,16 @@ const { snapshot, remote = false, dark = false, narrow = false } = Astro.props
         try {
           const response = await fetch(API_URL + id)
           const json = (await response.json()) as { data?: unknown }
-          const post = response.ok ? fromSyndication(json.data) : undefined
-          if (!post) {
+          if (!response.ok || json.data == null) {
             status.textContent = `Post ${id} was not found (HTTP ${response.status}).`
             return
           }
+          const result = fromSyndication(json.data)
+          if (result.issues)
+            throw new Error(
+              `Invalid post ${id}: ${JSON.stringify(result.issues)}`,
+            )
+          const post = result.value
           status.textContent = `Loaded ${id} from ${API_URL}`
           raw.textContent = JSON.stringify(post, null, 2)
           return post

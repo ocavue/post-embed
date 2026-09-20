@@ -1,4 +1,4 @@
-import { parseXPost } from '@post-embed/schema'
+import { parseTweet, parseXPost } from '@post-embed/schema'
 import type { Tweet } from '@post-embed/types'
 import { describe, expect, it } from 'vitest'
 
@@ -13,23 +13,56 @@ function tweet(): Tweet {
 }
 
 describe('fromSyndication', () => {
+  it('accepts a quoted photo without thread metadata', () => {
+    const input = { ...jack, quoted_tweet: photoAndVideo }
+    const parsed = parseTweet(input)
+    expect(parsed.issues).toBeUndefined()
+    const result = fromSyndication(input)
+    expect(result).toMatchObject({
+      value: {
+        id: '20',
+        quote: {
+          id: photoAndVideo.id_str,
+          media: [{ type: 'photo' }, { type: 'video' }],
+        },
+      },
+    })
+  })
+
+  it('accepts a quoted video without thread metadata', () => {
+    const result = fromSyndication({ ...jack, quoted_tweet: video })
+    expect(result).toMatchObject({
+      value: { quote: { id: video.id_str, media: [{ type: 'video' }] } },
+    })
+  })
+
+  it('returns validation issues for malformed input', () => {
+    expect(fromSyndication({ ...jack, user: null })).toMatchObject({
+      issues: [{ path: [{ key: 'user' }] }],
+    })
+  })
+
   it('maps a text post', () => {
     expect(fromSyndication(jack)).toEqual({
-      id: '20',
-      createdAt: '2006-03-21T20:50:14.000Z',
-      lang: 'en',
-      author: {
-        name: 'jack',
-        handle: 'jack',
-        avatar:
-          'https://pbs.twimg.com/profile_images/1661201415899951105/azNjKOSH_normal.jpg',
+      value: {
+        id: '20',
+        createdAt: '2006-03-21T20:50:14.000Z',
+        lang: 'en',
+        author: {
+          name: 'jack',
+          handle: 'jack',
+          avatar:
+            'https://pbs.twimg.com/profile_images/1661201415899951105/azNjKOSH_normal.jpg',
+        },
+        body: [{ type: 'text', text: 'just setting up my twttr' }],
       },
-      body: [{ type: 'text', text: 'just setting up my twttr' }],
     })
   })
 
   it('maps a video post and cuts the media link off the body', () => {
-    const post = fromSyndication(video)!
+    const result = fromSyndication(video)
+    if (result.issues) throw new Error('Unexpected validation failure')
+    const post = result.value
     expect(post.body).toEqual([
       { type: 'text', text: 'This is a genius ad by Apple. 🔥🔥🔥🔥🔥' },
     ])
@@ -58,7 +91,9 @@ describe('fromSyndication', () => {
   })
 
   it('reads every item from mediaDetails', () => {
-    const post = fromSyndication(photoAndVideo)!
+    const result = fromSyndication(photoAndVideo)
+    if (result.issues) throw new Error('Unexpected validation failure')
+    const post = result.value
     expect(post.body).toEqual([
       {
         type: 'text',
@@ -74,7 +109,9 @@ describe('fromSyndication', () => {
   })
 
   it('decodes character references and keeps the link display text', () => {
-    const post = fromSyndication(vercel)!
+    const result = fromSyndication(vercel)
+    if (result.issues) throw new Error('Unexpected validation failure')
+    const post = result.value
     expect(post.body[0]).toEqual({
       type: 'text',
       text: 'Introducing `react-tweet`:\n\n◆ 35x less client-side JavaScript than the Twitter <iframe>\n◆ React Server Components for built-in data fetching\n◆ Works with Next.js, Vite, CRA, and more\n\n',
@@ -92,12 +129,12 @@ describe('fromSyndication', () => {
     expect(post.media).toBeUndefined()
   })
 
-  it('returns undefined for a tombstone and for junk', () => {
+  it('returns issues for a tombstone and for junk', () => {
     expect(
-      fromSyndication({ __typename: 'TweetTombstone', tombstone: {} }),
-    ).toBeUndefined()
-    expect(fromSyndication({})).toBeUndefined()
-    expect(fromSyndication(null)).toBeUndefined()
+      fromSyndication({ __typename: 'TweetTombstone', tombstone: {} }).issues,
+    ).toBeDefined()
+    expect(fromSyndication({}).issues).toBeDefined()
+    expect(fromSyndication(null).issues).toBeDefined()
   })
 
   it('falls back to photos and video when mediaDetails is absent', () => {
@@ -185,8 +222,17 @@ describe('fromSyndication', () => {
   })
 
   it('produces output that passes XPostSchema unchanged', () => {
-    for (const input of [jack, video, photoAndVideo, vercel]) {
-      const post = fromSyndication(input)
+    for (const input of [
+      jack,
+      video,
+      photoAndVideo,
+      vercel,
+      { ...jack, quoted_tweet: photoAndVideo },
+      { ...jack, quoted_tweet: video },
+    ]) {
+      const result = fromSyndication(input)
+      if (result.issues) throw new Error('Unexpected validation failure')
+      const post = result.value
       const validated = parseXPost(post)
       if (validated.issues) throw new Error('unexpected schema issues')
       expect(validated.value).toEqual(post)

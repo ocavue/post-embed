@@ -1,4 +1,4 @@
-import { TweetSchema } from '@post-embed/schema'
+import { parseTweet } from '@post-embed/schema'
 import type {
   Tweet,
   XPost,
@@ -11,19 +11,23 @@ import type { TweetPhoto } from '@post-embed/types/internal/tweet/photo'
 import type { QuotedTweet } from '@post-embed/types/internal/tweet/tweet'
 import type { TweetUser } from '@post-embed/types/internal/tweet/user'
 import type { TweetVideo } from '@post-embed/types/internal/tweet/video'
+import type { StandardSchemaV1 } from '@standard-schema/spec'
 import { decodeHTML } from 'entities'
-import * as v from 'valibot'
 
 import { toSource } from './media.ts'
 import { toSegments } from './segments.ts'
 
 /**
  * A syndication API response (or an older saved snapshot) to `XPost`.
- * Returns `undefined` for anything that is not a tweet, such as a tombstone.
+ * Returns validation issues for malformed input, including tombstones and missing data.
  */
-export function fromSyndication(input: unknown): XPost | undefined {
-  const parsed = v.safeParse(TweetSchema, input)
-  return parsed.success ? fromSyndicationTweet(parsed.output) : undefined
+export function fromSyndication(
+  input: unknown,
+): StandardSchemaV1.Result<XPost> {
+  const parsed = parseTweet(input)
+  return parsed.issues
+    ? { issues: parsed.issues }
+    : { value: fromSyndicationTweet(parsed.value) }
 }
 
 export function fromSyndicationTweet(tweet: Tweet): XPost {
