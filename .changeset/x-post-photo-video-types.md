@@ -1,5 +1,6 @@
 ---
 '@post-embed/types': patch
+'@post-embed/schema': patch
 ---
 
-Export the `XPostPhoto` and `XPostVideo` types that make up `XPostMedia`.
+Split `XPostMedia` into the named `XPostPhoto` and `XPostVideo` types.
