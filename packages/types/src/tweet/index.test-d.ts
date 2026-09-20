@@ -8,8 +8,9 @@ test('Tweet accepts react-tweet data and optional quote thread metadata', () => 
   expectTypeOf<Omit<Tweet, 'quoted_tweet'>>().toEqualTypeOf<
     Omit<UpstreamTweet, 'quoted_tweet'>
   >()
-  expectTypeOf<NonNullable<Tweet['quoted_tweet']>>().toEqualTypeOf<
-    Omit<NonNullable<UpstreamTweet['quoted_tweet']>, 'self_thread'> &
-      Partial<Pick<NonNullable<UpstreamTweet['quoted_tweet']>, 'self_thread'>>
+  expectTypeOf<
+    NonNullable<Tweet['quoted_tweet']>['self_thread']
+  >().toEqualTypeOf<
+    NonNullable<UpstreamTweet['quoted_tweet']>['self_thread'] | undefined
   >()
 })
