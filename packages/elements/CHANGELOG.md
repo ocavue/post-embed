@@ -1,5 +1,13 @@
 # @post-embed/elements
 
+## 0.6.2
+
+### Patch Changes
+
+- Updated dependencies [a65e845]
+  - @post-embed/schema@0.5.2
+  - @post-embed/types@0.5.0
+
 ## 0.6.1
 
 ### Patch Changes

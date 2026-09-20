@@ -1,5 +1,13 @@
 # @post-embed/schema
 
+## 0.5.2
+
+### Patch Changes
+
+- a65e845: Accept quotes without thread metadata and return `{ value }` or `{ issues }` from `fromSyndication` instead of silently returning `undefined` on invalid data.
+- Updated dependencies [a65e845]
+  - @post-embed/types@0.5.0
+
 ## 0.5.1
 
 ### Patch Changes
